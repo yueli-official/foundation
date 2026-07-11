@@ -18,11 +18,16 @@ func TraceRouteMiddleware(r *ghttp.Request) {
 	if !span.IsRecording() {
 		return
 	}
-	attributes := []attribute.KeyValue{attribute.String("http.request.method", r.Method)}
+	attributes := []attribute.KeyValue{
+		attribute.String("http.request.method", r.Method),
+		attribute.Int("http.response.status_code", r.Response.Status),
+	}
 	if handler := r.GetServeHandler(); handler != nil && handler.Handler.Router != nil {
 		if route := strings.TrimSpace(handler.Handler.Router.Uri); route != "" {
 			attributes = append(attributes, attribute.String("http.route", route))
 		}
 	}
 	span.SetAttributes(attributes...)
+	// The final sanitizing exporter uses the trusted response status to restore
+	// HTTP semantic-convention span status after GoFrame's outer middleware.
 }
