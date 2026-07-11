@@ -6,7 +6,10 @@ package ghttpx
 
 import (
 	"errors"
+	"math"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -21,15 +24,24 @@ import (
 
 const traceHeader = "X-Trace-Id"
 
+var defaultRateLimiter = rateLimiterFromEnvironment()
+
 // Middleware injects a trace id, then wraps the handler result in the platform
 // envelope with a real HTTP status.
 func Middleware(r *ghttp.Request) {
-	traceID := r.Header.Get(traceHeader)
-	if traceID == "" {
-		traceID = guid.S()
-	}
+	middleware(defaultRateLimiter, r)
+}
+
+func middleware(limiter *RateLimiter, r *ghttp.Request) {
+	traceID := ensureTraceID(r)
 	r.SetCtx(log.WithTrace(r.Context(), traceID))
-	r.Response.Header().Set(traceHeader, traceID)
+	if !applyRateLimit(limiter, r) {
+		env := response.Fail(gerrs.CommonRateLimited, "rate limit exceeded", nil)
+		env.TraceID = traceID
+		r.Response.WriteHeader(http.StatusTooManyRequests)
+		r.Response.WriteJson(env)
+		return
+	}
 
 	r.Middleware.Next()
 
@@ -62,4 +74,47 @@ func Middleware(r *ghttp.Request) {
 	env := response.OK(r.GetHandlerResponse())
 	env.TraceID = traceID
 	r.Response.WriteJson(env)
+}
+
+// RawRateLimitMiddleware protects RFC/OAuth handlers that must not use the
+// platform envelope. It returns the OAuth temporarily_unavailable shape on 429.
+func RawRateLimitMiddleware(r *ghttp.Request) {
+	rawRateLimitMiddleware(defaultRateLimiter, r)
+}
+
+func rawRateLimitMiddleware(limiter *RateLimiter, r *ghttp.Request) {
+	traceID := ensureTraceID(r)
+	if applyRateLimit(limiter, r) {
+		r.Middleware.Next()
+		return
+	}
+	r.Response.WriteHeader(http.StatusTooManyRequests)
+	r.Response.WriteJson(map[string]string{
+		"error":             "temporarily_unavailable",
+		"error_description": "rate limit exceeded",
+		"trace_id":          traceID,
+	})
+}
+
+func ensureTraceID(r *ghttp.Request) string {
+	traceID := r.Header.Get(traceHeader)
+	if traceID == "" {
+		traceID = guid.S()
+	}
+	r.Response.Header().Set(traceHeader, traceID)
+	return traceID
+}
+
+func applyRateLimit(limiter *RateLimiter, r *ghttp.Request) bool {
+	allowed, remaining, reset := limiter.Allow(r.GetClientIp())
+	resetAfter := max(1, int(math.Ceil(time.Until(reset).Seconds())))
+	if remaining >= 0 {
+		r.Response.Header().Set("RateLimit-Limit", strconv.Itoa(limiter.limit))
+		r.Response.Header().Set("RateLimit-Remaining", strconv.Itoa(remaining))
+		r.Response.Header().Set("RateLimit-Reset", strconv.Itoa(resetAfter))
+	}
+	if !allowed {
+		r.Response.Header().Set("Retry-After", strconv.Itoa(resetAfter))
+	}
+	return allowed
 }
