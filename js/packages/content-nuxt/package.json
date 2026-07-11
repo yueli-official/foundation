@@ -12,17 +12,17 @@
     "./article.css": "./app/assets/css/article.css"
   },
   "dependencies": {
-    "@nuxt/ui": "^4.9.0",
-    "@tiptap/core": "^3.27.0",
-    "@tiptap/extension-blockquote": "^3.27.0",
-    "@tiptap/extension-emoji": "^3.27.0",
-    "@tiptap/extension-mathematics": "^3.27.0",
-    "@tiptap/extension-text-align": "^3.27.0",
-    "@tiptap/pm": "^3.27.0",
-    "@tiptap/vue-3": "^3.27.0",
+    "@nuxt/ui": "catalog:",
+    "@tiptap/core": "catalog:",
+    "@tiptap/extension-blockquote": "catalog:",
+    "@tiptap/extension-emoji": "catalog:",
+    "@tiptap/extension-mathematics": "catalog:",
+    "@tiptap/extension-text-align": "catalog:",
+    "@tiptap/pm": "catalog:",
+    "@tiptap/vue-3": "catalog:",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.45",
-    "marked": "^17.0.0",
+    "marked": "catalog:",
     "marked-alert": "^2.1.2",
     "mermaid": "^11.14.0"
   }

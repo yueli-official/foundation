@@ -180,7 +180,7 @@ function onRestore() {
 // ── Word count + reading time (E7) ────────────────────────────────────────
 const charCount = computed(() =>
   (props.modelValue ?? '')
-    .replace(/[#*`\[\]()>_~\-|]/g, '')
+    .replace(/[#*`[\]()>_~\-|]/g, '')
     .replace(/\s+/g, '')
     .trim().length,
 )

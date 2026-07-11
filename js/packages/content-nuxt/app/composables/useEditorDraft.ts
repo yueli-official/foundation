@@ -55,7 +55,9 @@ export function useEditorDraft(
         }),
       )
       lastAutoSaved.value = new Date()
-    } catch {}
+    } catch {
+      // localStorage may be unavailable in restricted browser contexts.
+    }
   }
 
   const restoreDraft = () => {
@@ -76,7 +78,9 @@ export function useEditorDraft(
     hasUnsavedChanges.value = false
     try {
       localStorage.removeItem(autoSaveKey.value)
-    } catch {}
+    } catch {
+      // localStorage may be unavailable in restricted browser contexts.
+    }
   }
 
   let autoSaveTimer: ReturnType<typeof setInterval>
@@ -94,7 +98,9 @@ export function useEditorDraft(
             showDraftRestore.value = true
           }
         }
-      } catch {}
+      } catch {
+        // Ignore malformed or inaccessible local drafts.
+      }
     }
 
     autoSaveTimer = setInterval(doAutoSave, AUTO_SAVE_INTERVAL)
