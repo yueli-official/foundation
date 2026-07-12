@@ -91,19 +91,20 @@ type Capability struct {
 }
 
 type Provider struct {
-	Key            string        `json:"key"`
-	Adapter        string        `json:"adapter"`
-	Registered     bool          `json:"registered"`
-	CapabilityKeys []string      `json:"capabilityKeys"`
-	Configuration  Configuration `json:"configuration"`
-	Enablement     Enablement    `json:"enablement"`
-	Health         Health        `json:"health"`
-	Effective      bool          `json:"effective"`
-	Mode           string        `json:"mode,omitempty"`
-	Operations     []string      `json:"operations"`
-	RequiredConfig []ConfigField `json:"requiredConfig"`
-	LastCheckedAt  *time.Time    `json:"lastCheckedAt,omitempty"`
-	Links          []Link        `json:"links"`
+	Key                   string        `json:"key"`
+	Adapter               string        `json:"adapter"`
+	Registered            bool          `json:"registered"`
+	VerifiedCompatibility []string      `json:"verifiedCompatibility"`
+	CapabilityKeys        []string      `json:"capabilityKeys"`
+	Configuration         Configuration `json:"configuration"`
+	Enablement            Enablement    `json:"enablement"`
+	Health                Health        `json:"health"`
+	Effective             bool          `json:"effective"`
+	Mode                  string        `json:"mode,omitempty"`
+	Operations            []string      `json:"operations"`
+	RequiredConfig        []ConfigField `json:"requiredConfig"`
+	LastCheckedAt         *time.Time    `json:"lastCheckedAt,omitempty"`
+	Links                 []Link        `json:"links"`
 }
 
 type Manifest struct {

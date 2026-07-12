@@ -182,6 +182,9 @@ func normalizeProvider(item *Provider, capabilities map[string]Capability) error
 	if !identifierPattern.MatchString(item.Adapter) {
 		return contractError(ErrorInvalid, "adapter is required and must be canonical")
 	}
+	if err := normalizeStrings(&item.VerifiedCompatibility, "verified compatibility"); err != nil {
+		return err
+	}
 	if len(item.CapabilityKeys) == 0 {
 		return contractError(ErrorRequired, "at least one capability key is required")
 	}
@@ -394,6 +397,7 @@ func cloneCapability(value Capability) Capability {
 func cloneProvider(value Provider) Provider {
 	copy := value
 	copy.CapabilityKeys = cloneSlice(value.CapabilityKeys)
+	copy.VerifiedCompatibility = cloneSlice(value.VerifiedCompatibility)
 	copy.Operations = cloneSlice(value.Operations)
 	copy.RequiredConfig = cloneConfig(value.RequiredConfig)
 	copy.Links = cloneSlice(value.Links)

@@ -218,6 +218,7 @@
         "key",
         "adapter",
         "registered",
+        "verifiedCompatibility",
         "capabilityKeys",
         "configuration",
         "enablement",
@@ -236,6 +237,13 @@
         },
         "registered": {
           "type": "boolean"
+        },
+        "verifiedCompatibility": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
         },
         "capabilityKeys": {
           "type": "array",
