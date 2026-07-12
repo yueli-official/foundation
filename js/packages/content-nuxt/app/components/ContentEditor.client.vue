@@ -90,7 +90,6 @@ async function onFile(e: Event) {
   try {
     const url = await props.imageUploader(file)
     editor.chain().focus().setImage({ src: url, alt: file.name }).run()
-    toast.add({ title: '图片已插入', color: 'success', icon: 'i-tabler-check' })
   } catch (err: any) {
     toast.add({ title: '图片上传失败', description: err?.message || '请重试', color: 'error' })
   } finally {
