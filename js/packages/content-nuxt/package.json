@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@nuxt/ui": "catalog:",
+    "@platform/ui": "workspace:*",
     "@tiptap/core": "catalog:",
     "@tiptap/extension-blockquote": "catalog:",
     "@tiptap/extension-emoji": "catalog:",

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { createPlatformNotifier } from '@platform/ui/feedback'
 import type { Editor } from '@tiptap/vue-3'
 import { Emoji, gitHubEmojis } from '@tiptap/extension-emoji'
 import { TextAlign } from '@tiptap/extension-text-align'
@@ -39,7 +40,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
-const toast = useToast()
+const toast = createPlatformNotifier(useToast())
 
 // ── Extensions (mirror donor; starter-kit codeBlock/blockquote are replaced) ──
 const editorExtensions = [
