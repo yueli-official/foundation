@@ -2,6 +2,7 @@ package capability
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -13,6 +14,7 @@ func TestNewSnapshotNormalizesEffectiveAndSorts(t *testing.T) {
 	snapshot, err := NewSnapshot(Manifest{
 		Service:     ServiceMetadata{Name: "notification", Version: "1.2.3", BuildSHA: strings.Repeat("a", 40), Deployment: "notification-api"},
 		GeneratedAt: checkedAt,
+		Redaction:   RedactionMetadata{Policy: "presence-only", Version: "1"},
 		Capabilities: []Capability{
 			{Key: "notification.sms", ContractVersion: "1.0", Support: SupportUnsupported, Configuration: ConfigurationMissing, Enablement: EnablementDisabled, Health: HealthUnknown, Effective: true},
 			{Key: "notification.email", ContractVersion: "1.0", Support: SupportSupported, Configuration: ConfigurationComplete, Enablement: EnablementEnabled, Health: HealthHealthy},
@@ -86,8 +88,12 @@ func TestSnapshotDerivesConfigurationAndProviderBinding(t *testing.T) {
 	value.Capabilities[0].ProviderInstance = "primary-s3"
 	value.Capabilities[0].Adapter = ""
 	value.Capabilities[0].RequiredConfig[1].State = ConfigStateMissing
+	value.Capabilities[0].RequiredConfig[1].Version = ""
+	value.Capabilities[0].RequiredConfig[1].RotatedAt = nil
 	value.Providers[0].Configuration = ConfigurationComplete
 	value.Providers[0].RequiredConfig[1].State = ConfigStateMissing
+	value.Providers[0].RequiredConfig[1].Version = ""
+	value.Providers[0].RequiredConfig[1].RotatedAt = nil
 	snapshot, err := NewSnapshot(value)
 	if err != nil {
 		t.Fatal(err)
@@ -113,6 +119,7 @@ func TestNewSnapshotRejectsInvalidContracts(t *testing.T) {
 	}{
 		{"service name", func(value *Manifest) { value.Service.Name = "" }, "service.name"},
 		{"generated at", func(value *Manifest) { value.GeneratedAt = time.Time{} }, "generatedAt"},
+		{"redaction", func(value *Manifest) { value.Redaction.Version = "" }, "redaction"},
 		{"duplicate capability", func(value *Manifest) { value.Capabilities = append(value.Capabilities, value.Capabilities[0]) }, "duplicate capability"},
 		{"unknown support", func(value *Manifest) { value.Capabilities[0].Support = "maybe" }, "support"},
 		{"unknown configuration", func(value *Manifest) { value.Capabilities[0].Configuration = "maybe" }, "configuration"},
@@ -144,6 +151,28 @@ func TestNewSnapshotRejectsInvalidContracts(t *testing.T) {
 	}
 }
 
+func TestContractErrorsAreMachineClassifiable(t *testing.T) {
+	value := validManifest()
+	value.Capabilities[0].Health = "maybe"
+	_, err := NewSnapshot(value)
+	var contractErr *ContractError
+	if !errors.As(err, &contractErr) || contractErr.Code != ErrorInvalid {
+		t.Fatalf("NewSnapshot() error = %#v, want invalid ContractError", err)
+	}
+}
+
+func TestSnapshotRejectsUnsafeLinks(t *testing.T) {
+	for _, href := range []string{"https://example.com/admin", "//example.com/admin", "/admin?token=secret", "/admin#secret"} {
+		t.Run(href, func(t *testing.T) {
+			value := validManifest()
+			value.Links[0].Href = href
+			if _, err := NewSnapshot(value); err == nil || !strings.Contains(err.Error(), "queryless same-service") {
+				t.Fatalf("NewSnapshot() error = %v", err)
+			}
+		})
+	}
+}
+
 func TestManifestJSONCannotContainSecretValues(t *testing.T) {
 	snapshot, err := NewSnapshot(validManifest())
 	if err != nil {
@@ -169,17 +198,18 @@ func validManifest() Manifest {
 	return Manifest{
 		Service:     ServiceMetadata{Name: "asset", Version: "1.0.0", BuildSHA: strings.Repeat("b", 40), Deployment: "asset-api"},
 		GeneratedAt: checkedAt,
+		Redaction:   RedactionMetadata{Policy: "presence-only", Version: "1"},
 		Capabilities: []Capability{{
 			Key: "asset.object-storage", ContractVersion: "1.0", Support: SupportSupported,
 			Configuration: ConfigurationComplete, Enablement: EnablementEnabled, Health: HealthHealthy,
 			Operations:     []string{"presign_get", "presign_put"},
-			RequiredConfig: []ConfigField{{Key: "endpoint", State: ConfigStatePresent}, {Key: "secret_key", State: ConfigStatePresent, Secret: true}},
+			RequiredConfig: []ConfigField{{Key: "endpoint", State: ConfigStatePresent}, {Key: "secret_key", State: ConfigStatePresent, Secret: true, Version: "3", RotatedAt: &checkedAt}},
 		}},
 		Providers: []Provider{{
 			Key: "primary-s3", Adapter: "s3", CapabilityKeys: []string{"asset.object-storage"},
 			Configuration: ConfigurationComplete, Enablement: EnablementEnabled, Health: HealthHealthy,
 			Operations: []string{"get", "put"}, Mode: "production", LastCheckedAt: &checkedAt,
-			RequiredConfig: []ConfigField{{Key: "endpoint", State: ConfigStatePresent}, {Key: "secret_key", State: ConfigStatePresent, Secret: true}},
+			RequiredConfig: []ConfigField{{Key: "endpoint", State: ConfigStatePresent}, {Key: "secret_key", State: ConfigStatePresent, Secret: true, Version: "3", RotatedAt: &checkedAt}},
 		}},
 		Links: []Link{{Rel: "health", Href: "/healthz"}, {Rel: "ready", Href: "/readyz"}},
 	}

@@ -2,6 +2,7 @@ package capability
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -24,10 +25,10 @@ type Snapshot struct {
 func NewSnapshot(input Manifest) (*Snapshot, error) {
 	value := cloneManifest(input)
 	if value.APIVersion != "" && value.APIVersion != APIVersion {
-		return nil, fmt.Errorf("capability manifest apiVersion %q is unsupported", value.APIVersion)
+		return nil, contractError(ErrorUnsupported, "capability manifest apiVersion %q is unsupported", value.APIVersion)
 	}
 	if value.Kind != "" && value.Kind != Kind {
-		return nil, fmt.Errorf("capability manifest kind %q is unsupported", value.Kind)
+		return nil, contractError(ErrorUnsupported, "capability manifest kind %q is unsupported", value.Kind)
 	}
 	value.APIVersion = APIVersion
 	value.Kind = Kind
@@ -35,10 +36,13 @@ func NewSnapshot(input Manifest) (*Snapshot, error) {
 		return nil, err
 	}
 	if value.GeneratedAt.IsZero() {
-		return nil, fmt.Errorf("capability manifest generatedAt is required")
+		return nil, contractError(ErrorRequired, "capability manifest generatedAt is required")
+	}
+	if strings.TrimSpace(value.Redaction.Policy) == "" || strings.TrimSpace(value.Redaction.Version) == "" {
+		return nil, contractError(ErrorRequired, "capability manifest redaction policy and version are required")
 	}
 	if len(value.Capabilities) == 0 {
-		return nil, fmt.Errorf("capability manifest requires at least one capability")
+		return nil, contractError(ErrorRequired, "capability manifest requires at least one capability")
 	}
 
 	capabilities := make(map[string]Capability, len(value.Capabilities))
@@ -48,7 +52,7 @@ func NewSnapshot(input Manifest) (*Snapshot, error) {
 			return nil, fmt.Errorf("capability %q: %w", item.Key, err)
 		}
 		if _, exists := capabilities[item.Key]; exists {
-			return nil, fmt.Errorf("duplicate capability %q", item.Key)
+			return nil, contractError(ErrorDuplicate, "duplicate capability %q", item.Key)
 		}
 		capabilities[item.Key] = cloneCapability(*item)
 	}
@@ -61,7 +65,7 @@ func NewSnapshot(input Manifest) (*Snapshot, error) {
 			return nil, fmt.Errorf("provider %q: %w", item.Key, err)
 		}
 		if _, exists := providers[item.Key]; exists {
-			return nil, fmt.Errorf("duplicate provider %q", item.Key)
+			return nil, contractError(ErrorDuplicate, "duplicate provider %q", item.Key)
 		}
 		providers[item.Key] = cloneProvider(*item)
 	}
@@ -71,13 +75,13 @@ func NewSnapshot(input Manifest) (*Snapshot, error) {
 		if item.ProviderInstance != "" {
 			provider, ok := providers[item.ProviderInstance]
 			if !ok {
-				return nil, fmt.Errorf("capability %q references unknown provider instance %q", item.Key, item.ProviderInstance)
+				return nil, contractError(ErrorUnknownReference, "capability %q references unknown provider instance %q", item.Key, item.ProviderInstance)
 			}
 			if !contains(provider.CapabilityKeys, item.Key) {
-				return nil, fmt.Errorf("capability %q provider instance %q does not provide it", item.Key, item.ProviderInstance)
+				return nil, contractError(ErrorReferenceMismatch, "capability %q provider instance %q does not provide it", item.Key, item.ProviderInstance)
 			}
 			if item.Adapter != "" && item.Adapter != provider.Adapter {
-				return nil, fmt.Errorf("capability %q adapter %q does not match provider instance adapter %q", item.Key, item.Adapter, provider.Adapter)
+				return nil, contractError(ErrorReferenceMismatch, "capability %q adapter %q does not match provider instance adapter %q", item.Key, item.Adapter, provider.Adapter)
 			}
 			item.Adapter = provider.Adapter
 		}
@@ -146,59 +150,37 @@ func validateService(value ServiceMetadata) error {
 		{name: "deployment", value: value.Deployment},
 	} {
 		if strings.TrimSpace(required.value) == "" {
-			return fmt.Errorf("service.%s is required", required.name)
+			return contractError(ErrorRequired, "service.%s is required", required.name)
 		}
 	}
 	if !identifierPattern.MatchString(value.Name) {
-		return fmt.Errorf("service.name %q is not a canonical key", value.Name)
+		return contractError(ErrorInvalid, "service.name %q is not a canonical key", value.Name)
 	}
 	return nil
 }
 
 func normalizeCapability(item *Capability) error {
 	if !capabilityKeyPattern.MatchString(item.Key) {
-		return fmt.Errorf("key is not canonical")
+		return contractError(ErrorInvalid, "key is not canonical")
 	}
 	if strings.TrimSpace(item.ContractVersion) == "" {
-		return fmt.Errorf("contractVersion is required")
+		return contractError(ErrorRequired, "contractVersion is required")
 	}
 	if !validSupport(item.Support) {
-		return fmt.Errorf("support %q is invalid", item.Support)
+		return contractError(ErrorInvalid, "support %q is invalid", item.Support)
 	}
-	if !validConfiguration(item.Configuration) {
-		return fmt.Errorf("configuration %q is invalid", item.Configuration)
-	}
-	if !validEnablement(item.Enablement) {
-		return fmt.Errorf("enablement %q is invalid", item.Enablement)
-	}
-	if !validHealth(item.Health) {
-		return fmt.Errorf("health %q is invalid", item.Health)
-	}
-	if err := normalizeOperations(&item.Operations); err != nil {
-		return err
-	}
-	if err := normalizeConfig(&item.RequiredConfig); err != nil {
-		return err
-	}
-	if len(item.RequiredConfig) > 0 {
-		item.Configuration = configurationFrom(item.RequiredConfig)
-	}
-	if err := normalizeLinks(&item.Links); err != nil {
-		return err
-	}
-	item.Effective = effective(item.Support, item.Configuration, item.Enablement, item.Health)
-	return nil
+	return normalizeRuntimeState(runtimeState{support: item.Support, configuration: &item.Configuration, enablement: &item.Enablement, health: &item.Health, effective: &item.Effective, operations: &item.Operations, requiredConfig: &item.RequiredConfig, links: &item.Links})
 }
 
 func normalizeProvider(item *Provider, capabilities map[string]Capability) error {
 	if !identifierPattern.MatchString(item.Key) {
-		return fmt.Errorf("key is not canonical")
+		return contractError(ErrorInvalid, "key is not canonical")
 	}
 	if !identifierPattern.MatchString(item.Adapter) {
-		return fmt.Errorf("adapter is required and must be canonical")
+		return contractError(ErrorInvalid, "adapter is required and must be canonical")
 	}
 	if len(item.CapabilityKeys) == 0 {
-		return fmt.Errorf("at least one capability key is required")
+		return contractError(ErrorRequired, "at least one capability key is required")
 	}
 	if err := normalizeStrings(&item.CapabilityKeys, "capability key"); err != nil {
 		return err
@@ -206,34 +188,49 @@ func normalizeProvider(item *Provider, capabilities map[string]Capability) error
 	for _, key := range item.CapabilityKeys {
 		capability, ok := capabilities[key]
 		if !ok {
-			return fmt.Errorf("references unknown capability %q", key)
+			return contractError(ErrorUnknownReference, "references unknown capability %q", key)
 		}
 		if capability.Support != SupportSupported {
-			return fmt.Errorf("references unsupported capability %q", key)
+			return contractError(ErrorReferenceMismatch, "references unsupported capability %q", key)
 		}
 	}
-	if !validConfiguration(item.Configuration) {
-		return fmt.Errorf("configuration %q is invalid", item.Configuration)
+	return normalizeRuntimeState(runtimeState{support: SupportSupported, configuration: &item.Configuration, enablement: &item.Enablement, health: &item.Health, effective: &item.Effective, operations: &item.Operations, requiredConfig: &item.RequiredConfig, links: &item.Links})
+}
+
+type runtimeState struct {
+	support        Support
+	configuration  *Configuration
+	enablement     *Enablement
+	health         *Health
+	effective      *bool
+	operations     *[]string
+	requiredConfig *[]ConfigField
+	links          *[]Link
+}
+
+func normalizeRuntimeState(state runtimeState) error {
+	if !validConfiguration(*state.configuration) {
+		return contractError(ErrorInvalid, "configuration %q is invalid", *state.configuration)
 	}
-	if !validEnablement(item.Enablement) {
-		return fmt.Errorf("enablement %q is invalid", item.Enablement)
+	if !validEnablement(*state.enablement) {
+		return contractError(ErrorInvalid, "enablement %q is invalid", *state.enablement)
 	}
-	if !validHealth(item.Health) {
-		return fmt.Errorf("health %q is invalid", item.Health)
+	if !validHealth(*state.health) {
+		return contractError(ErrorInvalid, "health %q is invalid", *state.health)
 	}
-	if err := normalizeOperations(&item.Operations); err != nil {
+	if err := normalizeOperations(state.operations); err != nil {
 		return err
 	}
-	if err := normalizeConfig(&item.RequiredConfig); err != nil {
+	if err := normalizeConfig(state.requiredConfig); err != nil {
 		return err
 	}
-	if len(item.RequiredConfig) > 0 {
-		item.Configuration = configurationFrom(item.RequiredConfig)
+	if len(*state.requiredConfig) > 0 {
+		*state.configuration = configurationFrom(*state.requiredConfig)
 	}
-	if err := normalizeLinks(&item.Links); err != nil {
+	if err := normalizeLinks(state.links); err != nil {
 		return err
 	}
-	item.Effective = effective(SupportSupported, item.Configuration, item.Enablement, item.Health)
+	*state.effective = effective(state.support, *state.configuration, *state.enablement, *state.health)
 	return nil
 }
 
@@ -242,14 +239,17 @@ func normalizeOperations(values *[]string) error {
 }
 
 func normalizeStrings(values *[]string, label string) error {
+	if *values == nil {
+		*values = []string{}
+	}
 	seen := map[string]bool{}
 	for index, value := range *values {
 		value = strings.TrimSpace(value)
 		if value == "" {
-			return fmt.Errorf("%s is required", label)
+			return contractError(ErrorRequired, "%s is required", label)
 		}
 		if seen[value] {
-			return fmt.Errorf("duplicate %s %q", label, value)
+			return contractError(ErrorDuplicate, "duplicate %s %q", label, value)
 		}
 		seen[value] = true
 		(*values)[index] = value
@@ -259,17 +259,32 @@ func normalizeStrings(values *[]string, label string) error {
 }
 
 func normalizeConfig(values *[]ConfigField) error {
+	if *values == nil {
+		*values = []ConfigField{}
+	}
 	seen := map[string]bool{}
 	for _, value := range *values {
 		if !identifierPattern.MatchString(value.Key) {
-			return fmt.Errorf("required config key %q is invalid", value.Key)
+			return contractError(ErrorInvalid, "required config key %q is invalid", value.Key)
 		}
 		if seen[value.Key] {
-			return fmt.Errorf("duplicate required config %q", value.Key)
+			return contractError(ErrorDuplicate, "duplicate required config %q", value.Key)
 		}
 		seen[value.Key] = true
 		if value.State != ConfigStatePresent && value.State != ConfigStateMissing {
-			return fmt.Errorf("required config state %q is invalid", value.State)
+			return contractError(ErrorInvalid, "required config state %q is invalid", value.State)
+		}
+		if value.Version != "" && strings.TrimSpace(value.Version) == "" {
+			return contractError(ErrorInvalid, "required config %q version is invalid", value.Key)
+		}
+		if !value.Secret && (value.Version != "" || value.RotatedAt != nil) {
+			return contractError(ErrorInvalid, "required config %q has credential metadata but is not secret", value.Key)
+		}
+		if value.State == ConfigStateMissing && (value.Version != "" || value.RotatedAt != nil) {
+			return contractError(ErrorInvalid, "missing required config %q cannot have credential metadata", value.Key)
+		}
+		if value.RotatedAt != nil && value.RotatedAt.IsZero() {
+			return contractError(ErrorInvalid, "required config %q rotatedAt is invalid", value.Key)
 		}
 	}
 	sort.Slice(*values, func(i, j int) bool { return (*values)[i].Key < (*values)[j].Key })
@@ -277,13 +292,20 @@ func normalizeConfig(values *[]ConfigField) error {
 }
 
 func normalizeLinks(values *[]Link) error {
+	if *values == nil {
+		*values = []Link{}
+	}
 	seen := map[string]bool{}
 	for _, value := range *values {
 		if strings.TrimSpace(value.Rel) == "" || strings.TrimSpace(value.Href) == "" {
-			return fmt.Errorf("link rel and href are required")
+			return contractError(ErrorRequired, "link rel and href are required")
 		}
 		if seen[value.Rel] {
-			return fmt.Errorf("duplicate link rel %q", value.Rel)
+			return contractError(ErrorDuplicate, "duplicate link rel %q", value.Rel)
+		}
+		parsed, err := url.Parse(value.Href)
+		if err != nil || parsed.IsAbs() || parsed.Host != "" || parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" || !strings.HasPrefix(parsed.Path, "/") || strings.HasPrefix(parsed.Path, "//") {
+			return contractError(ErrorInvalid, "link href %q must be a queryless same-service absolute path", value.Href)
 		}
 		seen[value.Rel] = true
 	}
@@ -346,15 +368,15 @@ func cloneManifest(value Manifest) Manifest {
 	for index, item := range value.Providers {
 		copy.Providers[index] = cloneProvider(item)
 	}
-	copy.Links = append([]Link(nil), value.Links...)
+	copy.Links = cloneSlice(value.Links)
 	return copy
 }
 
 func cloneCapability(value Capability) Capability {
 	copy := value
-	copy.Operations = append([]string(nil), value.Operations...)
-	copy.RequiredConfig = append([]ConfigField(nil), value.RequiredConfig...)
-	copy.Links = append([]Link(nil), value.Links...)
+	copy.Operations = cloneSlice(value.Operations)
+	copy.RequiredConfig = cloneConfig(value.RequiredConfig)
+	copy.Links = cloneSlice(value.Links)
 	if value.LastCheckedAt != nil {
 		lastChecked := *value.LastCheckedAt
 		copy.LastCheckedAt = &lastChecked
@@ -364,13 +386,30 @@ func cloneCapability(value Capability) Capability {
 
 func cloneProvider(value Provider) Provider {
 	copy := value
-	copy.CapabilityKeys = append([]string(nil), value.CapabilityKeys...)
-	copy.Operations = append([]string(nil), value.Operations...)
-	copy.RequiredConfig = append([]ConfigField(nil), value.RequiredConfig...)
-	copy.Links = append([]Link(nil), value.Links...)
+	copy.CapabilityKeys = cloneSlice(value.CapabilityKeys)
+	copy.Operations = cloneSlice(value.Operations)
+	copy.RequiredConfig = cloneConfig(value.RequiredConfig)
+	copy.Links = cloneSlice(value.Links)
 	if value.LastCheckedAt != nil {
 		lastChecked := *value.LastCheckedAt
 		copy.LastCheckedAt = &lastChecked
 	}
 	return copy
+}
+
+func cloneConfig(values []ConfigField) []ConfigField {
+	copy := cloneSlice(values)
+	for index := range copy {
+		if copy[index].RotatedAt != nil {
+			rotatedAt := *copy[index].RotatedAt
+			copy[index].RotatedAt = &rotatedAt
+		}
+	}
+	return copy
+}
+
+func cloneSlice[T any](values []T) []T {
+	result := make([]T, len(values))
+	copy(result, values)
+	return result
 }

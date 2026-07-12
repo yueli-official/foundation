@@ -4,7 +4,7 @@
   "title": "Service Capability Manifest v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["apiVersion", "kind", "service", "generatedAt", "capabilities", "providers", "links"],
+  "required": ["apiVersion", "kind", "service", "generatedAt", "redaction", "capabilities", "providers", "links"],
   "properties": {
     "apiVersion": {
       "const": "platform.yueli.dev/service-capability-manifest/v1"
@@ -18,6 +18,9 @@
     "generatedAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "redaction": {
+      "$ref": "#/$defs/redaction"
     },
     "capabilities": {
       "type": "array",
@@ -82,6 +85,21 @@
         }
       }
     },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "version"],
+      "properties": {
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "configField": {
       "type": "object",
       "additionalProperties": false,
@@ -96,6 +114,14 @@
         },
         "secret": {
           "type": "boolean"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rotatedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -110,7 +136,7 @@
         },
         "href": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^/([^/?#][^?#]*)?$"
         }
       }
     },

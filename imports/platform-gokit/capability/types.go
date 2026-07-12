@@ -57,9 +57,16 @@ type ServiceMetadata struct {
 // ConfigField exposes presence metadata only. It deliberately has no value
 // field, so callers cannot accidentally serialize a credential.
 type ConfigField struct {
-	Key    string      `json:"key"`
-	State  ConfigState `json:"state"`
-	Secret bool        `json:"secret"`
+	Key       string      `json:"key"`
+	State     ConfigState `json:"state"`
+	Secret    bool        `json:"secret"`
+	Version   string      `json:"version,omitempty"`
+	RotatedAt *time.Time  `json:"rotatedAt,omitempty"`
+}
+
+type RedactionMetadata struct {
+	Policy  string `json:"policy"`
+	Version string `json:"version"`
 }
 
 type Link struct {
@@ -99,11 +106,12 @@ type Provider struct {
 }
 
 type Manifest struct {
-	APIVersion   string          `json:"apiVersion"`
-	Kind         string          `json:"kind"`
-	Service      ServiceMetadata `json:"service"`
-	GeneratedAt  time.Time       `json:"generatedAt"`
-	Capabilities []Capability    `json:"capabilities"`
-	Providers    []Provider      `json:"providers"`
-	Links        []Link          `json:"links"`
+	APIVersion   string            `json:"apiVersion"`
+	Kind         string            `json:"kind"`
+	Service      ServiceMetadata   `json:"service"`
+	GeneratedAt  time.Time         `json:"generatedAt"`
+	Redaction    RedactionMetadata `json:"redaction"`
+	Capabilities []Capability      `json:"capabilities"`
+	Providers    []Provider        `json:"providers"`
+	Links        []Link            `json:"links"`
 }

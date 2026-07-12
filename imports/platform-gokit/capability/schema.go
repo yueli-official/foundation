@@ -9,6 +9,8 @@ import (
 //go:embed service-capability-manifest.schema.json
 var schemaJSON []byte
 
+const SchemaID = "https://platform.yueli.dev/schemas/service-capability-manifest.v1.schema.json"
+
 // Schema returns an isolated copy of the canonical JSON Schema artifact.
 func Schema() []byte {
 	return append([]byte(nil), schemaJSON...)
@@ -23,7 +25,7 @@ func validateEmbeddedSchema() error {
 	if err := json.Unmarshal(schemaJSON, &document); err != nil {
 		return fmt.Errorf("decode embedded capability schema: %w", err)
 	}
-	if document.Schema != "https://json-schema.org/draft/2020-12/schema" || document.ID != "https://platform.yueli.dev/schemas/service-capability-manifest.v1.schema.json" || document.Type != "object" {
+	if document.Schema != "https://json-schema.org/draft/2020-12/schema" || document.ID != SchemaID || document.Type != "object" {
 		return fmt.Errorf("embedded capability schema identity is invalid")
 	}
 	return nil
