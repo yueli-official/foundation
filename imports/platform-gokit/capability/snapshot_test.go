@@ -20,8 +20,8 @@ func TestNewSnapshotNormalizesEffectiveAndSorts(t *testing.T) {
 			{Key: "notification.email", ContractVersion: "1.0", Support: SupportSupported, Configuration: ConfigurationComplete, Enablement: EnablementEnabled, Health: HealthHealthy},
 		},
 		Providers: []Provider{
-			{Key: "secondary", Adapter: "dev", CapabilityKeys: []string{"notification.email"}, Configuration: ConfigurationComplete, Enablement: EnablementDisabled, Health: HealthHealthy, Effective: true},
-			{Key: "primary", Adapter: "smtp", CapabilityKeys: []string{"notification.email"}, Configuration: ConfigurationComplete, Enablement: EnablementEnabled, Health: HealthHealthy, LastCheckedAt: &checkedAt},
+			{Key: "secondary", Adapter: "dev", Registered: true, CapabilityKeys: []string{"notification.email"}, Configuration: ConfigurationComplete, Enablement: EnablementDisabled, Health: HealthHealthy, Effective: true},
+			{Key: "primary", Adapter: "smtp", Registered: true, CapabilityKeys: []string{"notification.email"}, Configuration: ConfigurationComplete, Enablement: EnablementEnabled, Health: HealthHealthy, LastCheckedAt: &checkedAt},
 		},
 	})
 	if err != nil {
@@ -139,6 +139,10 @@ func TestNewSnapshotRejectsInvalidContracts(t *testing.T) {
 			value.Capabilities[0].ProviderInstance = "primary-s3"
 			value.Capabilities[0].Adapter = "local"
 		}, "does not match"},
+		{"provider not registered", func(value *Manifest) {
+			value.Capabilities[0].ProviderInstance = "primary-s3"
+			value.Providers[0].Registered = false
+		}, "not registered"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -206,7 +210,7 @@ func validManifest() Manifest {
 			RequiredConfig: []ConfigField{{Key: "endpoint", State: ConfigStatePresent}, {Key: "secret_key", State: ConfigStatePresent, Secret: true, Version: "3", RotatedAt: &checkedAt}},
 		}},
 		Providers: []Provider{{
-			Key: "primary-s3", Adapter: "s3", CapabilityKeys: []string{"asset.object-storage"},
+			Key: "primary-s3", Adapter: "s3", Registered: true, CapabilityKeys: []string{"asset.object-storage"},
 			Configuration: ConfigurationComplete, Enablement: EnablementEnabled, Health: HealthHealthy,
 			Operations: []string{"get", "put"}, Mode: "production", LastCheckedAt: &checkedAt,
 			RequiredConfig: []ConfigField{{Key: "endpoint", State: ConfigStatePresent}, {Key: "secret_key", State: ConfigStatePresent, Secret: true, Version: "3", RotatedAt: &checkedAt}},

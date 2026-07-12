@@ -80,6 +80,9 @@ func NewSnapshot(input Manifest) (*Snapshot, error) {
 			if !contains(provider.CapabilityKeys, item.Key) {
 				return nil, contractError(ErrorReferenceMismatch, "capability %q provider instance %q does not provide it", item.Key, item.ProviderInstance)
 			}
+			if !provider.Registered {
+				return nil, contractError(ErrorReferenceMismatch, "capability %q provider instance %q is not registered", item.Key, item.ProviderInstance)
+			}
 			if item.Adapter != "" && item.Adapter != provider.Adapter {
 				return nil, contractError(ErrorReferenceMismatch, "capability %q adapter %q does not match provider instance adapter %q", item.Key, item.Adapter, provider.Adapter)
 			}
@@ -194,7 +197,11 @@ func normalizeProvider(item *Provider, capabilities map[string]Capability) error
 			return contractError(ErrorReferenceMismatch, "references unsupported capability %q", key)
 		}
 	}
-	return normalizeRuntimeState(runtimeState{support: SupportSupported, configuration: &item.Configuration, enablement: &item.Enablement, health: &item.Health, effective: &item.Effective, operations: &item.Operations, requiredConfig: &item.RequiredConfig, links: &item.Links})
+	support := SupportUnsupported
+	if item.Registered {
+		support = SupportSupported
+	}
+	return normalizeRuntimeState(runtimeState{support: support, configuration: &item.Configuration, enablement: &item.Enablement, health: &item.Health, effective: &item.Effective, operations: &item.Operations, requiredConfig: &item.RequiredConfig, links: &item.Links})
 }
 
 type runtimeState struct {

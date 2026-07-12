@@ -217,6 +217,7 @@
       "required": [
         "key",
         "adapter",
+        "registered",
         "capabilityKeys",
         "configuration",
         "enablement",
@@ -232,6 +233,9 @@
         },
         "adapter": {
           "$ref": "#/$defs/identifier"
+        },
+        "registered": {
+          "type": "boolean"
         },
         "capabilityKeys": {
           "type": "array",

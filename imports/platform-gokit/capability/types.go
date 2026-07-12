@@ -93,6 +93,7 @@ type Capability struct {
 type Provider struct {
 	Key            string        `json:"key"`
 	Adapter        string        `json:"adapter"`
+	Registered     bool          `json:"registered"`
 	CapabilityKeys []string      `json:"capabilityKeys"`
 	Configuration  Configuration `json:"configuration"`
 	Enablement     Enablement    `json:"enablement"`
