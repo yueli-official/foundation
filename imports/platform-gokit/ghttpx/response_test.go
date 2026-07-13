@@ -14,6 +14,7 @@ import (
 
 	"platform/gokit/errs"
 	"platform/gokit/ghttpx"
+	platformresponse "platform/gokit/response"
 )
 
 // ---------------------------------------------------------------------------
@@ -45,6 +46,24 @@ func errorHandler(r *ghttp.Request) {
 	r.SetError(errs.New(emailTakenCode, "taken", map[string]any{"email": "a@b"}))
 }
 
+func codedValidationHandler(r *ghttp.Request) {
+	r.SetError(errs.New(errs.CommonValidationFailed, "validation failed", map[string]any{
+		"details": []platformresponse.ValidationDetail{{Field: "url", Code: "absolute_http_url"}},
+	}))
+}
+
+type validationReq struct {
+	g.Meta `path:"/validation" method:"post"`
+	Title  string `json:"title" v:"required"`
+}
+
+type validationRes struct{}
+type validationController struct{}
+
+func (*validationController) Validate(context.Context, *validationReq) (*validationRes, error) {
+	return &validationRes{}, nil
+}
+
 // ---------------------------------------------------------------------------
 // Helper: newServer starts a g.Server with ghttpx.Middleware and the given
 // handler(s) bound to a route group.
@@ -68,6 +87,19 @@ func newErrorServer(t *gtest.T) *ghttp.Server {
 	s.Use(ghttpx.Middleware)
 	s.Group("/", func(group *ghttp.RouterGroup) {
 		group.GET("/error", errorHandler)
+	})
+	s.SetDumpRouterMap(false)
+	s.Start()
+	return s
+}
+
+func newValidationServer(t *gtest.T) *ghttp.Server {
+	s := g.Server(t.Name() + "-validation")
+	s.SetAddr("127.0.0.1:0")
+	s.Use(ghttpx.Middleware)
+	s.Group("/", func(group *ghttp.RouterGroup) {
+		group.Bind(&validationController{})
+		group.GET("/coded-validation", codedValidationHandler)
 	})
 	s.SetDumpRouterMap(false)
 	s.Start()
@@ -124,6 +156,32 @@ func TestMiddleware_CodedErrorPath(t *testing.T) {
 
 		t.Assert(j.Get("code").String(), "identity.email_taken")
 		t.Assert(j.Get("params.email").String(), "a@b")
+	})
+}
+
+func TestMiddleware_ValidationDetailsAreTopLevel(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		s := newValidationServer(t)
+		defer s.Shutdown()
+		client := g.Client()
+		client.SetPrefix(fmt.Sprintf("http://127.0.0.1:%d", s.GetListenedPort()))
+
+		coded, err := client.Get(context.Background(), "/coded-validation")
+		t.AssertNil(err)
+		defer coded.Close()
+		codedJSON := gjson.New(coded.ReadAllString())
+		t.Assert(codedJSON.Get("code").String(), errs.CommonValidationFailed)
+		t.Assert(codedJSON.Get("details.0.field").String(), "url")
+		t.Assert(codedJSON.Get("details.0.code").String(), "absolute_http_url")
+		t.Assert(strings.Contains(codedJSON.MustToJsonString(), `"params"`), false)
+
+		builtIn, err := client.ContentJson().Post(context.Background(), "/validation", `{}`)
+		t.AssertNil(err)
+		defer builtIn.Close()
+		builtInJSON := gjson.New(builtIn.ReadAllString())
+		t.Assert(builtInJSON.Get("code").String(), errs.CommonValidationFailed)
+		t.Assert(builtInJSON.Get("details.0.field").String(), "title")
+		t.Assert(builtInJSON.Get("details.0.code").String(), "required")
 	})
 }
 

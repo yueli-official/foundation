@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/errors/gcode"
@@ -16,6 +17,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/guid"
+	"github.com/gogf/gf/v2/util/gvalid"
 
 	gerrs "platform/gokit/errs"
 	"platform/gokit/log"
@@ -57,8 +59,12 @@ func middleware(limiter *RateLimiter, r *ghttp.Request) {
 		switch {
 		case errors.As(err, &c):
 			env, status = response.Fail(c.Code, c.Message, c.Params), gerrs.Status(c.Code)
+			if c.Code == gerrs.CommonValidationFailed {
+				env.Params, env.Details = validationPayload(c.Params)
+			}
 		case gerror.Code(err) == gcode.CodeValidationFailed:
 			env, status = response.Fail(gerrs.CommonValidationFailed, err.Error(), nil), http.StatusBadRequest
+			env.Details = goFrameValidationDetails(err)
 		default:
 			// Unknown error: log server-side, return a generic message (no internal leak).
 			g.Log().Errorf(r.Context(), "unhandled error [trace=%s]: %+v", traceID, err)
@@ -74,6 +80,49 @@ func middleware(limiter *RateLimiter, r *ghttp.Request) {
 	env := response.OK(r.GetHandlerResponse())
 	env.TraceID = traceID
 	r.Response.WriteJson(env)
+}
+
+func validationPayload(params map[string]any) (map[string]any, []response.ValidationDetail) {
+	if len(params) == 0 {
+		return nil, nil
+	}
+	remaining := make(map[string]any, len(params)-1)
+	for key, value := range params {
+		if key != "details" {
+			remaining[key] = value
+		}
+	}
+	if len(remaining) == 0 {
+		remaining = nil
+	}
+	details, _ := params["details"].([]response.ValidationDetail)
+	return remaining, details
+}
+
+func goFrameValidationDetails(err error) []response.ValidationDetail {
+	var validation gvalid.Error
+	if !errors.As(err, &validation) {
+		return nil
+	}
+	details := make([]response.ValidationDetail, 0)
+	for _, item := range validation.Items() {
+		for field, rules := range item {
+			for rule := range rules {
+				details = append(details, response.ValidationDetail{
+					Field: lowerFirst(strings.SplitN(field, "@", 2)[0]),
+					Code:  rule,
+				})
+			}
+		}
+	}
+	return details
+}
+
+func lowerFirst(value string) string {
+	if value == "" {
+		return value
+	}
+	return strings.ToLower(value[:1]) + value[1:]
 }
 
 // RawRateLimitMiddleware protects RFC/OAuth handlers that must not use the
