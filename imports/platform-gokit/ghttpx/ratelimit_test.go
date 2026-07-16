@@ -3,6 +3,7 @@ package ghttpx
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -133,5 +134,30 @@ func TestRateLimiterBoundsDistinctClientState(t *testing.T) {
 	}
 	if allowed, _, _ := limiter.Allow("three"); allowed {
 		t.Fatal("third distinct client should fail closed at state cap")
+	}
+}
+
+func TestMediaMiddlewareDoesNotConsumeDefaultAPIRateBucket(t *testing.T) {
+	server := g.Server(t.Name())
+	server.SetAddr("127.0.0.1:0")
+	server.SetDumpRouterMap(false)
+	server.Group("/", func(group *ghttp.RouterGroup) {
+		group.Middleware(MediaMiddleware)
+		group.GET("/media", func(request *ghttp.Request) { request.Response.Write("image") })
+	})
+	server.Start()
+	defer server.Shutdown()
+	client := g.Client()
+	client.SetPrefix(fmt.Sprintf("http://127.0.0.1:%d", server.GetListenedPort()))
+	for request := 1; request <= defaultRateLimitPerMinute+20; request++ {
+		response, err := client.Get(context.Background(), "/media")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if response.StatusCode != http.StatusOK || response.Header.Get("RateLimit-Limit") != "" {
+			response.Close()
+			t.Fatalf("media request %d status/rate-limit = %d/%q", request, response.StatusCode, response.Header.Get("RateLimit-Limit"))
+		}
+		response.Close()
 	}
 }

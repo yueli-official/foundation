@@ -34,10 +34,19 @@ func Middleware(r *ghttp.Request) {
 	middleware(defaultRateLimiter, r)
 }
 
+// MediaMiddleware keeps the platform trace/error envelope for cacheable public
+// media responses without consuming the JSON API's per-client request bucket.
+// Media delivery must be protected by CDN/edge bandwidth and abuse controls;
+// applying the API request count to every responsive image rendition causes a
+// single image-heavy page (or many users behind one NAT) to fail mid-render.
+func MediaMiddleware(r *ghttp.Request) {
+	middleware(nil, r)
+}
+
 func middleware(limiter *RateLimiter, r *ghttp.Request) {
 	traceID := ensureTraceID(r)
 	r.SetCtx(log.WithTrace(r.Context(), traceID))
-	if !applyRateLimit(limiter, r) {
+	if limiter != nil && !applyRateLimit(limiter, r) {
 		env := response.Fail(gerrs.CommonRateLimited, "rate limit exceeded", nil)
 		env.TraceID = traceID
 		r.Response.WriteHeader(http.StatusTooManyRequests)
@@ -80,6 +89,15 @@ func middleware(limiter *RateLimiter, r *ghttp.Request) {
 	env := response.OK(r.GetHandlerResponse())
 	env.TraceID = traceID
 	r.Response.WriteJson(env)
+}
+
+// RawMediaMiddleware is the raw-byte counterpart to MediaMiddleware. It adds a
+// trace id but deliberately leaves cacheable public bytes outside the JSON API
+// request bucket. It must not be used for upload, signed grant, or control APIs.
+func RawMediaMiddleware(r *ghttp.Request) {
+	traceID := ensureTraceID(r)
+	r.SetCtx(log.WithTrace(r.Context(), traceID))
+	r.Middleware.Next()
 }
 
 func validationPayload(params map[string]any) (map[string]any, []response.ValidationDetail) {
