@@ -1,29 +1,25 @@
 # @platform/content
 
-A site-agnostic **content kit** Nuxt layer: the rich markdown editor and the
-reading-side renderer, shared across content sites (blog / resource / mall). It
-carries data contracts only (v-model body, cover props) — no site API calls; each
-consuming app feeds it data via its own `useApi`.
+与站点无关的内容工具 Nuxt layer，向 Blog、Resource、Shop 等内容站共享富 Markdown 编辑器和阅读端渲染器。它只携带数据契约（正文 `v-model`、封面属性），不调用任何站点接口；消费应用通过自己的 `useApi` 提供数据。
 
-## What it provides (auto-imported)
+## 自动导入内容
 
-| Component | Purpose | API |
-|---|---|---|
-| `<ContentEditor>` | Full rich-text markdown editor (UEditor + custom nodes: code-highlight, math, mermaid, callouts; emoji / drag-handle / draft auto-save). | `v-model` → body markdown `string`; props `image-uploader: (f: File) => Promise<string>`, `draft-entity-id: string \| number`, `has-initial-content: boolean`; ref method `markSaved()`. |
-| `<ContentProse>` | Reading-side render of the same markdown (marked + katex + highlight.js + mermaid + marked-alert, isolated `Marked` instance). | prop `content: string`. |
+| 组件 | 用途 | Interface |
+| --- | --- | --- |
+| `<ContentEditor>` | 完整富文本 Markdown 编辑器，支持代码高亮、数学公式、Mermaid、提示块、表情、拖拽手柄和草稿自动保存。 | `v-model` 为 Markdown 字符串；属性包括 `image-uploader`、`draft-entity-id`、`has-initial-content`；ref 方法为 `markSaved()`。 |
+| `<ContentProse>` | 使用 marked、KaTeX、highlight.js、Mermaid 与 marked-alert 渲染相同 Markdown，使用隔离的 `Marked` 实例。 | `content: string`。 |
 
-Both are Nuxt auto-imported — `extends` the layer and use them in templates with no
-explicit import.
+消费应用扩展该 layer 后可直接在模板使用两个组件，无需显式导入。
 
-## How to consume
+## 接入方式
 
-1. Add the workspace dep in the app's `package.json`:
+1. 在应用 `package.json` 增加工作区依赖：
 
    ```json
    { "dependencies": { "@platform/content": "workspace:*" } }
    ```
 
-2. Extend the layer in `nuxt.config.ts`:
+2. 在 `nuxt.config.ts` 扩展 layer：
 
    ```ts
    export default defineNuxtConfig({
@@ -31,41 +27,27 @@ explicit import.
    })
    ```
 
-3. Import the article stylesheet in the app's global CSS, **after** the Tailwind
-   typography plugin (ordering matters — the article styles override typography):
+3. 在应用全局 CSS 中、Tailwind typography 插件之后导入文章样式。顺序不能反，因为文章样式需要覆盖 typography：
 
    ```css
    @plugin "@tailwindcss/typography";
-   @import "@platform/content/article.css";  /* code highlight / math / callouts */
+   @import "@platform/content/article.css";  /* 代码高亮、数学公式与提示块 */
    ```
 
-That's it — `<ContentEditor>` / `<ContentProse>` are then available in templates.
+## Layer 已统一处理的事项
 
-## What the layer handles for you
+消费者不得重复声明以下配置；Nuxt `extends` 会合并本 layer 的 `nuxt.config`：
 
-Consumers do **not** re-declare any of these — the layer's `nuxt.config` is merged
-into the consumer by Nuxt `extends` (verified: the layer's `optimizeDeps.include`
-lands in the consumer's Vite dep-optimize metadata):
+- **ProseMirror 单实例去重**：`vite.optimizeDeps.include` 强制直接导入的 `@tiptap/*` 扩展与 `@nuxt/ui` 内置 Tiptap 共享同一 ProseMirror，避免 `Adding different instances of a keyed plugin`。
+- **KaTeX 样式**：全局引入 `katex/dist/katex.min.css`，同时覆盖阅读器和编辑器公式预览。
+- **隔离 marked**：`<ContentProse>` 使用私有 `new Marked()`，不会污染 `@nuxt/ui` 编辑器解析器。
 
-- **prosemirror single-instance dedup** (`vite.optimizeDeps.include`): the directly
-  imported `@tiptap/*` extensions and `@nuxt/ui`'s bundled tiptap must share one
-  prosemirror, else the editor throws `Adding different instances of a keyed plugin
-  (plugin$)`. The layer forces them into one optimized chunk.
-- **katex stylesheet** (`css: ['katex/dist/katex.min.css']`): global, covers both the
-  reader and the editor's math previews.
-- **isolated `marked`**: `<ContentProse>` uses a private `new Marked()` instance so it
-  never pollutes `@nuxt/ui`'s editor parser.
+消费者唯一需要手工完成的是上面的 `article.css` 导入，因为全局注入无法保证它与 typography 插件的相对顺序。
 
-The only thing a consumer must do by hand is the `article.css` `@import` (step 3) —
-its ordering relative to your typography plugin can't be guaranteed if injected
-globally, so it stays a consumer-side import.
+## 离线与依赖
 
-## Offline / requirements
+- 消费应用必须启用 `@nuxt/ui`；本 layer 也声明它为依赖，因为 `useEditorToolbar` 在运行时导入 `@nuxt/ui/utils/editor`。
+- 可离线使用：Tabler 图标、KaTeX 与 highlight.js 样式都随 `article.css` 提供，不依赖 CDN。
+- Tiptap 固定为与 `@nuxt/ui` 4.x 内置版本一致的 `^3.27.0`，同时携带 `@tiptap/pm`。
 
-- Requires `@nuxt/ui` in the consumer app (every content site already registers it
-  via `modules: ['@nuxt/ui']`). The layer also declares it as a dependency because
-  `useEditorToolbar` imports `@nuxt/ui/utils/editor` at runtime.
-- Offline-safe: tabler icons, and katex/highlight.js CSS ship inside `article.css` —
-  no CDN.
-- tiptap is pinned `^3.27.0` (matches `@nuxt/ui` 4.x's bundled tiptap); `@tiptap/pm`
-  is carried alongside.
+验证：`pnpm --filter @platform/content typecheck`，并运行消费产品的编辑器交互测试。
