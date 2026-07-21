@@ -223,6 +223,21 @@ func TestVerifierBoundsTokenLifetimeAndSize(t *testing.T) {
 	}
 }
 
+func TestVerifierUsesConfiguredClock(t *testing.T) {
+	private := testPrivateKey(11)
+	now := time.Date(2026, 7, 22, 6, 0, 0, 0, time.UTC)
+	verifier := newVerifier(t, private.Public(), auth.Config{
+		Algorithms: []jose.SignatureAlgorithm{jose.EdDSA},
+		Clock:      func() time.Time { return now.Add(2 * time.Minute) },
+	})
+	raw := sign(t, private, jose.EdDSA, testKeyID, "", jwt.Claims{
+		Issuer: testIssuer, Subject: "user", Expiry: jwt.NewNumericDate(now.Add(time.Minute)),
+	}, nil)
+	if _, err := verifier.Verify(context.Background(), raw); !errors.Is(err, auth.ErrExpired) {
+		t.Fatalf("configured clock error = %v", err)
+	}
+}
+
 func TestVerifierPreservesContextAndWrapsKeyFailure(t *testing.T) {
 	private := testPrivateKey(9)
 	now := time.Now().UTC()

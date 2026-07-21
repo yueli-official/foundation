@@ -42,6 +42,10 @@ type Config struct {
 	MaxLifetime time.Duration
 	// AllowActorless permits a token with neither sub nor client_id.
 	AllowActorless bool
+	// Clock supplies verification time. Nil uses time.Now. Applications should
+	// normally leave it nil; deterministic consumers and offline verification
+	// may inject an explicit trusted clock.
+	Clock func() time.Time
 }
 
 // Verifier is immutable and safe for concurrent use.
@@ -99,6 +103,10 @@ func NewVerifier(config Config) (*Verifier, error) {
 	if config.MaxLifetime < 0 {
 		return nil, errors.New("auth: MaxLifetime must not be negative")
 	}
+	clock := config.Clock
+	if clock == nil {
+		clock = time.Now
+	}
 
 	return &Verifier{
 		keys:           config.Keys,
@@ -110,7 +118,7 @@ func NewVerifier(config Config) (*Verifier, error) {
 		maxTokenBytes:  maxTokenBytes,
 		maxLifetime:    config.MaxLifetime,
 		allowActorless: config.AllowActorless,
-		now:            time.Now,
+		now:            clock,
 	}, nil
 }
 
