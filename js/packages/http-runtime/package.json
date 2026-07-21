@@ -1,0 +1,26 @@
+{
+  "name": "@yueli/http-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yueli-official/foundation.git",
+    "directory": "js/packages/http-runtime"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "ajv": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

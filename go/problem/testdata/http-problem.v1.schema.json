@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yueli.dev/foundation/contracts/http-problem.v1.schema.json",
+  "title": "Yueli HTTP Problem v1",
+  "description": "RFC 9457 profile shared by Yueli Foundation TypeScript and Go adapters.",
+  "type": "object",
+  "required": ["type", "status", "code", "traceId"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^https://[^\\s]+$",
+      "maxLength": 2048
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 400,
+      "maximum": 599
+    },
+    "code": {
+      "$ref": "#/$defs/code"
+    },
+    "params": {
+      "$ref": "#/$defs/params"
+    },
+    "violations": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/violation"
+      }
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "code": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$"
+    },
+    "scalar": {
+      "anyOf": [
+        { "type": "string", "maxLength": 1024 },
+        { "type": "number" },
+        { "type": "boolean" }
+      ]
+    },
+    "param": {
+      "anyOf": [
+        { "$ref": "#/$defs/scalar" },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/scalar" }
+        }
+      ]
+    },
+    "params": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/param"
+      }
+    },
+    "violation": {
+      "type": "object",
+      "required": ["pointer", "code"],
+      "properties": {
+        "pointer": {
+          "type": "string",
+          "maxLength": 1024,
+          "pattern": "^(?:/(?:[^~/]|~[01])*)*$"
+        },
+        "code": {
+          "$ref": "#/$defs/code"
+        },
+        "params": {
+          "$ref": "#/$defs/params"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

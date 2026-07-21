@@ -1,0 +1,19 @@
+{
+  "type": "https://docs.yueli.dev/problems/blog.slug_taken",
+  "status": 409,
+  "code": "blog.slug_taken",
+  "params": {
+    "slug": "hello"
+  },
+  "violations": [
+    {
+      "pointer": "/slug",
+      "code": "validation.unique",
+      "params": {
+        "value": "hello"
+      }
+    }
+  ],
+  "traceId": "01JABCDEF0123456789",
+  "consumerExtension": "preserved-by-wire-ignored-by-runtime"
+}

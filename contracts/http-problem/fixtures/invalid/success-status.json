@@ -1,0 +1,6 @@
+{
+  "type": "https://docs.yueli.dev/problems/common.invalid_status",
+  "status": 200,
+  "code": "common.invalid_status",
+  "traceId": "trace-success-status"
+}

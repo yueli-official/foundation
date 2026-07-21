@@ -1,0 +1,12 @@
+{
+  "type": "https://docs.yueli.dev/problems/validation.failed",
+  "status": 422,
+  "code": "validation.failed",
+  "violations": [
+    {
+      "pointer": "slug",
+      "code": "validation.required"
+    }
+  ],
+  "traceId": "trace-invalid-pointer"
+}

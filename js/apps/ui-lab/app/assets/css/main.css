@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+@import "@yueli/ui/tailwind.css";
+
+:root {
+  --ui-primary: var(--color-emerald-700);
+  --ui-success: var(--color-emerald-700);
+}
+
+.dark {
+  --ui-primary: var(--color-emerald-400);
+  --ui-success: var(--color-emerald-400);
+}

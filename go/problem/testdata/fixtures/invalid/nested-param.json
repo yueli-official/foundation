@@ -1,0 +1,11 @@
+{
+  "type": "https://docs.yueli.dev/problems/blog.slug_taken",
+  "status": 409,
+  "code": "blog.slug_taken",
+  "params": {
+    "unsafe": {
+      "nested": "value"
+    }
+  },
+  "traceId": "trace-nested-param"
+}

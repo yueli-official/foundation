@@ -1,0 +1,22 @@
+{
+  "name": "@yueli/http-runtime-conformance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "test:e2e": "playwright test",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@yueli/http-runtime": "workspace:*",
+    "@yueli/nuxt-runtime": "workspace:*",
+    "nuxt": "catalog:",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "typescript": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

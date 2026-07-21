@@ -1,0 +1,11 @@
+{
+  "type": "https://docs.yueli.dev/problems/common.rate_limited",
+  "status": 429,
+  "code": "common.rate_limited",
+  "params": {
+    "retryAfterSeconds": 30,
+    "scopes": ["read", "write"],
+    "temporary": true
+  },
+  "traceId": "trace-429-example"
+}

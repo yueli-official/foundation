@@ -1,0 +1,23 @@
+{
+  "name": "@yueli/ui-lab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@nuxt/ui": "catalog:",
+    "@yueli/ui": "workspace:*",
+    "nuxt": "catalog:",
+    "tailwindcss": "catalog:",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@iconify-json/tabler": "catalog:",
+    "typescript": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

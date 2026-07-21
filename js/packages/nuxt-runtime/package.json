@@ -1,0 +1,34 @@
+{
+  "name": "@yueli/nuxt-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yueli-official/foundation.git",
+    "directory": "js/packages/nuxt-runtime"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/module.ts",
+    "./runtime": "./src/runtime/composables.ts",
+    "./server": "./src/server/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nuxt/kit": "catalog:",
+    "@yueli/http-runtime": "workspace:*",
+    "h3": "catalog:"
+  },
+  "peerDependencies": {
+    "nuxt": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

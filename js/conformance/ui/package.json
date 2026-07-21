@@ -1,0 +1,26 @@
+{
+  "name": "@yueli/ui-foundation-conformance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "test:e2e": "nuxt build && playwright test",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@nuxt/ui": "catalog:",
+    "@yueli/ui": "workspace:*",
+    "nuxt": "catalog:",
+    "tailwindcss": "catalog:",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
+    "@iconify-json/tabler": "catalog:",
+    "@playwright/test": "catalog:",
+    "typescript": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}
