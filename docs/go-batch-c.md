@@ -54,4 +54,6 @@ The first implementation slice is Problem core plus GoFrame Problem adapter. Aut
 
 ## Current status
 
-The first slice is implemented in `go/problem` and `go/goframe/http`. Canonical valid/invalid fixtures, malformed/trailing JSON, immutable Kind construction, JSON-safe caller parameters, bounded response serialization and a real loopback GoFrame response contract pass `go test -race ./...` and `go vet ./...`. JWT/JWKS source has not been copied.
+The first slice is implemented in `go/problem` and `go/goframe/http`. Canonical valid/invalid fixtures, malformed/trailing JSON, immutable Kind construction, JSON-safe caller parameters, bounded response serialization and a real loopback GoFrame response contract pass `go test -race ./...` and `go vet ./...`.
+
+The JWKS transport slice is implemented in `go/jwks` as a redesign, not a copy. Its public Interface is a small context-aware key source; the remote implementation performs no network work while holding its state lock. Refresh work is single-flight and timeout-bounded, redirects are disabled, bodies are bounded, HTTP is restricted to an explicit loopback-only test/development option, unknown key IDs are throttled after refresh completion, and known stale keys remain available during issuer failure. Concurrent initial load, slow issuer, failed issuer, key rotation, redirect, oversized response and caller-cancellation behavior pass race tests. JWT algorithm and claims verification remains the next separate slice.

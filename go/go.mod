@@ -2,7 +2,10 @@ module github.com/yueli-official/foundation/go
 
 go 1.25.12
 
-require github.com/gogf/gf/v2 v2.10.2
+require (
+	github.com/go-jose/go-jose/v4 v4.1.4
+	github.com/gogf/gf/v2 v2.10.2
+)
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
