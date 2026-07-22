@@ -326,14 +326,18 @@ function toggle(key: TKey) {
       <article
         v-for="item in items"
         :key="itemKey(item)"
-        class="relative min-w-0 rounded-lg border border-default bg-default p-4"
-        :class="selectable ? 'pl-11' : ''"
+        class="relative min-w-0 rounded-lg border bg-default p-4 transition-colors"
+        :class="[
+          selected(itemKey(item))
+            ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
+            : 'border-default',
+        ]"
       >
         <UCheckbox
           v-if="selectable"
           :model-value="selected(itemKey(item))"
           :aria-label="messages.selectItem(itemLabel(item))"
-          class="absolute left-4 top-4"
+          class="absolute left-4 top-4 z-10 rounded-md bg-default/90 p-1 shadow-sm backdrop-blur"
           @update:model-value="
             emit('toggleItem', itemKey(item), $event === true)
           "
@@ -352,7 +356,8 @@ function toggle(key: TKey) {
       <article
         v-for="item in items"
         :key="itemKey(item)"
-        class="flex min-w-0 items-center px-3 py-3 sm:px-4"
+        class="flex min-w-0 items-center px-3 py-3 transition-colors sm:px-4"
+        :class="selected(itemKey(item)) ? 'bg-primary/5' : ''"
       >
         <div v-if="selectable" class="w-9 shrink-0">
           <UCheckbox

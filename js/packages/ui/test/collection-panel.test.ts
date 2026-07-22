@@ -123,6 +123,7 @@ describe("CollectionPanel", () => {
     expect(wrapper.emitted("search")).toEqual([["first"]]);
     expect(wrapper.text()).toContain("First");
     expect(wrapper.text()).toContain("Second");
+    expect(wrapper.findAll("article")[1]?.classes()).toContain("bg-primary/5");
 
     await wrapper.get('input[aria-label="Select First"]').setValue(true);
     expect(wrapper.emitted("toggleItem")).toEqual([["one", true]]);
