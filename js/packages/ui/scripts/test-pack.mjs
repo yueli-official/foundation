@@ -115,6 +115,9 @@ try {
     "package/src/settings/vue.ts",
     "package/src/settings/workflow.ts",
     "package/src/tailwind.css",
+    "package/src/theme.css",
+    "package/src/theme/index.d.ts",
+    "package/src/theme/index.js",
   ].sort();
   if (JSON.stringify(packedFiles) !== JSON.stringify(allowedFiles)) {
     throw new Error(`Unexpected tarball contents:\n${packedFiles.join("\n")}`);
@@ -153,7 +156,11 @@ try {
   );
   await writeFile(
     join(consumerRoot, "app", "assets", "css", "main.css"),
-    `@import "tailwindcss";\n@import "@nuxt/ui";\n@import "@yueli/ui/tailwind.css";\n`,
+    `@import "tailwindcss";\n@import "@nuxt/ui";\n@import "@yueli/ui/tailwind.css";\n@import "@yueli/ui/theme.css";\n`,
+  );
+  await writeFile(
+    join(consumerRoot, "app", "app.config.ts"),
+    `import { createUiPreset } from "@yueli/ui/theme";\n\nexport default defineAppConfig(createUiPreset({ primary: "blue" }));\n`,
   );
   await writeFile(
     join(consumerRoot, "app", "app.vue"),
@@ -245,6 +252,9 @@ const accountMessages: AccountMenuMessages = {
       "Packed consumer CSS is missing CollectionFrame Tailwind selectors.",
     );
   }
+  if (!generatedCss.some((source) => source.includes("--yueli-surface-page"))) {
+    throw new Error("Packed consumer CSS is missing public theme tokens.");
+  }
 
   const packedPackage = JSON.parse(
     await readFile(
@@ -257,6 +267,8 @@ const accountMessages: AccountMenuMessages = {
     !packedPackage.exports?.["."] ||
     !packedPackage.exports?.["./account-menu/pattern"] ||
     !packedPackage.exports?.["./tailwind.css"] ||
+    !packedPackage.exports?.["./theme"] ||
+    !packedPackage.exports?.["./theme.css"] ||
     !packedPackage.exports?.["./dashboard/pattern"] ||
     !packedPackage.exports?.["./feedback"] ||
     !packedPackage.exports?.["./feedback/pattern"] ||

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 @import "@yueli/ui/tailwind.css";
+@import "@yueli/ui/theme.css";
 
 :root {
   --ui-primary: var(--color-emerald-700);

@@ -1,0 +1,238 @@
+/* @yueli/ui/theme.css — opt-in global semantic theme for Nuxt UI consumers.
+   Component layout remains Tailwind-first. CSS is used here only for global
+   tokens, native focus/scrollbar behavior and reusable semantic surface roles. */
+@theme {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "DM Sans", system-ui, sans-serif;
+
+  --radius-xs: var(--ui-radius);
+  --radius-sm: var(--ui-radius);
+  --radius-md: var(--ui-radius);
+  --radius-lg: var(--ui-radius);
+  --radius-xl: calc(var(--ui-radius) * 1.5);
+  --radius-2xl: calc(var(--ui-radius) * 2);
+  --radius-3xl: calc(var(--ui-radius) * 3);
+}
+
+:root {
+  --ui-radius: 0.5rem;
+  --ui-primary: var(--ui-color-primary-800);
+  --ui-success: var(--ui-color-success-800);
+  --ui-text-dimmed: var(--ui-color-neutral-600);
+  --ui-text-muted: var(--ui-color-neutral-600);
+  --shadow-soft: 0 6px 18px rgb(40 30 60 / 0.06);
+
+  --yueli-radius-surface: var(--radius-lg);
+  --yueli-radius-feature: var(--radius-xl);
+  --yueli-motion-fast: 140ms;
+  --yueli-motion-standard: 200ms;
+  --yueli-motion-reveal: 420ms;
+  --yueli-ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --yueli-ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --yueli-surface-page: oklch(98.4% 0.006 78);
+  --yueli-surface-region: oklch(96.6% 0.008 78);
+  --yueli-surface-card: oklch(99.4% 0.003 78);
+  --yueli-surface-inset: oklch(94.4% 0.01 78);
+  --yueli-surface-overlay: oklch(99.8% 0.002 78);
+  --yueli-surface-hover: color-mix(
+    in oklab,
+    var(--yueli-surface-card) 88%,
+    var(--ui-primary) 12%
+  );
+  --yueli-surface-selected: color-mix(
+    in oklab,
+    var(--yueli-surface-card) 78%,
+    var(--ui-primary) 22%
+  );
+  --yueli-border-soft: color-mix(in oklab, var(--ui-border) 88%, transparent);
+  --yueli-border-strong: color-mix(
+    in oklab,
+    var(--ui-border) 72%,
+    var(--ui-text-muted) 28%
+  );
+  --yueli-border-focus: color-mix(
+    in oklab,
+    var(--ui-primary) 72%,
+    var(--yueli-border-strong) 28%
+  );
+  --yueli-accent-soft: color-mix(in oklab, var(--ui-primary) 12%, transparent);
+  --yueli-accent-muted: color-mix(
+    in oklab,
+    var(--ui-primary) 18%,
+    var(--yueli-surface-card) 82%
+  );
+  --yueli-accent-border: color-mix(
+    in oklab,
+    var(--ui-primary) 44%,
+    var(--yueli-border-soft) 56%
+  );
+  --yueli-shadow-card: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.dark {
+  --ui-bg: oklch(12.8% 0.014 262);
+  --ui-bg-muted: oklch(16.8% 0.016 262);
+  --ui-bg-elevated: oklch(21.8% 0.018 262);
+  --ui-bg-accented: oklch(27.2% 0.022 262);
+  --ui-bg-inverted: oklch(96.5% 0.009 262);
+  --ui-border: oklch(32% 0.022 262);
+  --ui-border-muted: oklch(24.5% 0.017 262);
+  --ui-border-accented: oklch(42% 0.03 262);
+  --ui-text: oklch(94.5% 0.009 262);
+  --ui-text-muted: oklch(76.5% 0.014 262);
+  --ui-text-dimmed: oklch(61% 0.016 262);
+  --ui-text-highlighted: oklch(98% 0.006 262);
+  --ui-primary: var(--ui-color-primary-500);
+  --ui-success: var(--ui-color-success-400);
+  --shadow-soft: 0 0 0 1px
+    color-mix(in oklch, var(--ui-border) 30%, transparent);
+
+  --yueli-surface-page: var(--ui-bg);
+  --yueli-surface-region: var(--ui-bg-muted);
+  --yueli-surface-card: var(--ui-bg-elevated);
+  --yueli-surface-inset: var(--ui-bg-accented);
+  --yueli-surface-overlay: oklch(31.2% 0.024 262);
+  --yueli-surface-hover: color-mix(
+    in oklab,
+    var(--yueli-surface-card) 84%,
+    var(--ui-primary) 16%
+  );
+  --yueli-surface-selected: color-mix(
+    in oklab,
+    var(--yueli-surface-card) 76%,
+    var(--ui-primary) 24%
+  );
+  --yueli-border-soft: var(--ui-border-muted);
+  --yueli-border-strong: var(--ui-border);
+  --yueli-border-focus: color-mix(
+    in oklab,
+    var(--ui-primary) 62%,
+    var(--yueli-border-strong) 38%
+  );
+  --yueli-accent-soft: color-mix(in oklab, var(--ui-primary) 14%, transparent);
+  --yueli-accent-muted: color-mix(
+    in oklab,
+    var(--yueli-surface-card) 82%,
+    var(--ui-primary) 18%
+  );
+  --yueli-accent-border: color-mix(
+    in oklab,
+    var(--ui-primary) 50%,
+    var(--yueli-border-strong) 50%
+  );
+  --yueli-shadow-card:
+    inset 0 1px 0 rgb(255 255 255 / 0.03), 0 14px 34px rgb(0 0 0 / 0.18);
+}
+
+@layer base {
+  :where(
+    a[href],
+    button,
+    input,
+    select,
+    textarea,
+    [role="button"],
+    [role="link"],
+    [role="combobox"],
+    [tabindex]:not([tabindex="-1"])
+  ):focus-visible {
+    outline: 2px solid var(--ui-primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .yueli-app-shell {
+    background: var(--yueli-surface-page);
+  }
+
+  .yueli-topbar {
+    border-color: var(--yueli-border-soft);
+    background: color-mix(in oklab, var(--yueli-surface-card) 86%, transparent);
+  }
+
+  .yueli-region {
+    border: 1px solid var(--yueli-border-soft);
+    border-radius: var(--yueli-radius-surface);
+    background: var(--yueli-surface-region);
+  }
+
+  .yueli-card {
+    border: 1px solid var(--yueli-border-soft);
+    border-radius: var(--yueli-radius-surface);
+    background: var(--yueli-surface-card);
+    box-shadow: var(--yueli-shadow-card);
+  }
+
+  .yueli-inset {
+    border: 1px solid var(--yueli-border-strong);
+    border-radius: var(--yueli-radius-surface);
+    background: var(--yueli-surface-inset);
+  }
+
+  .yueli-overlay {
+    border: 1px solid var(--yueli-border-strong);
+    border-radius: var(--yueli-radius-surface);
+    background: var(--yueli-surface-overlay);
+    box-shadow: var(--yueli-shadow-card);
+  }
+
+  .yueli-interactive {
+    position: relative;
+    transition:
+      border-color var(--yueli-motion-standard) var(--yueli-ease-out),
+      background-color var(--yueli-motion-standard) var(--yueli-ease-out),
+      transform var(--yueli-motion-standard) var(--yueli-ease-out),
+      box-shadow var(--yueli-motion-standard) var(--yueli-ease-out);
+  }
+
+  .yueli-interactive::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 2px;
+    background: var(--ui-primary);
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--yueli-motion-standard) var(--yueli-ease-out);
+  }
+
+  .yueli-interactive:hover {
+    border-color: var(--yueli-accent-border);
+    background: var(--yueli-surface-hover);
+  }
+
+  .yueli-interactive:hover::before,
+  .yueli-interactive:focus-visible::before {
+    opacity: 1;
+  }
+}
+
+* {
+  scrollbar-color: var(--ui-text-dimmed) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background-color: var(--ui-text-dimmed);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ui-text-muted);
+}

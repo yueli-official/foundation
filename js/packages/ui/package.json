@@ -16,6 +16,11 @@
   "exports": {
     ".": "./src/module.ts",
     "./tailwind.css": "./src/tailwind.css",
+    "./theme": {
+      "types": "./src/theme/index.d.ts",
+      "import": "./src/theme/index.js"
+    },
+    "./theme.css": "./src/theme.css",
     "./manifest": "./src/manifest.ts",
     "./messages": "./src/messages.ts",
     "./account-menu/pattern": "./src/account-menu/pattern.ts",

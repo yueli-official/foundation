@@ -22,6 +22,28 @@ export interface PublicUiManifestEntry {
 
 export const publicUiManifest = [
   {
+    id: "theme",
+    kind: "contract",
+    status: "experimental",
+    entrypoint: "@yueli/ui/theme",
+    owner: "foundation",
+    responsibility:
+      "Own a provider-neutral Nuxt UI preset, one icon-family contract and opt-in semantic light/dark surface tokens.",
+    nonResponsibilities: [
+      "application theme names",
+      "product color registration",
+      "runtime theme persistence",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["@nuxt/ui", "tailwindcss"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/theme.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/conformance/ui"],
+      accessibility: ["test/theme.test.ts"],
+    },
+  },
+  {
     id: "messages",
     kind: "contract",
     status: "experimental",

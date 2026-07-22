@@ -12,6 +12,8 @@ Current public surface:
 
 - `@yueli/ui` — Nuxt module registering experimental public components with a configurable `Y` prefix.
 - `@yueli/ui/tailwind.css` — explicit Tailwind source declaration for raw package SFCs; import it from the consumer's Tailwind entry stylesheet.
+- `@yueli/ui/theme` — provider-neutral Nuxt UI preset and complete Tabler icon contract.
+- `@yueli/ui/theme.css` — opt-in light/dark semantic surfaces, motion/radius tokens, focus fallback and native scrollbar treatment.
 - `@yueli/ui/manifest` — machine-readable maturity and ownership metadata.
 - `@yueli/ui/messages` — caller-owned message key/parameter contract; no locale catalogs.
 - `@yueli/ui/account-menu/pattern` — provider-neutral account action grouping, identity fallback and accessible menu trigger.
@@ -40,7 +42,23 @@ export default defineNuxtConfig({
 @import "tailwindcss";
 @import "@nuxt/ui";
 @import "@yueli/ui/tailwind.css";
+@import "@yueli/ui/theme.css";
 ```
+
+Build the app config from a caller-owned color name. Foundation knows neither
+the product name nor how its Tailwind palette is registered:
+
+```ts
+import { createUiPreset } from "@yueli/ui/theme";
+
+export default defineAppConfig(createUiPreset({ primary: "brand" }));
+```
+
+The CSS surface API uses the `--yueli-*` and `.yueli-*` namespaces. Prefer
+Tailwind utilities inside components; the stylesheet exists for cross-tree
+tokens and browser-level behavior that cannot be expressed reliably by local
+component utilities. It is opt-in so a consumer may use only the workflow
+packages without adopting the visual theme.
 
 The module auto-imports public Patterns with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. PageHeader and DashboardLayout own responsive heading/action anatomy, region order and accessible section labelling without owning metrics or business actions. AccountMenu owns identity fallback, action grouping and the async logout command boundary without reading an auth provider. Visible copy remains caller-owned: pass translated props or messages; Foundation ships no locale catalogs.
 
