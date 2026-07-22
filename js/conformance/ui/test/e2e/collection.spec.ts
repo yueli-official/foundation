@@ -59,6 +59,20 @@ test("mobile search remains one row and filters update the controlled URL", asyn
   });
 });
 
+test("public dashboard chrome exposes caller-owned labelled regions", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await settle(page);
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "内容集合" }),
+  ).toBeVisible();
+  const metrics = page.getByRole("region", { name: "关键指标" });
+  await expect(metrics).toContainText("64");
+  await expect(metrics).toContainText("已发布");
+});
+
 test("route history restores the query and rendered result", async ({
   page,
 }) => {

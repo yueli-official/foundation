@@ -18,6 +18,7 @@ export default defineNuxtModule<YueliUiModuleOptions>({
 
     for (const directory of [
       "collection",
+      "dashboard",
       "feedback",
       "navigation",
       "settings",

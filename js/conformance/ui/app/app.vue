@@ -8,6 +8,7 @@ import {
 } from "@yueli/ui/collection";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
+import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import { useActionFeedback } from "@yueli/ui/feedback";
 import { bindSettingsBeforeUnload } from "@yueli/ui/settings/browser";
 import type { SettingsSaveDockMessages } from "@yueli/ui/settings/pattern";
@@ -140,6 +141,13 @@ const settingsMessages: SettingsSaveDockMessages = {
   save: "保存",
   savePending: "保存中",
   saveSuccess: "已保存",
+};
+const dashboardMessages: DashboardMessages = {
+  metrics: "关键指标",
+  pending: { title: "待处理", description: "优先处理阻塞工作。" },
+  recent: { title: "最近工作", description: "继续最近更新的内容。" },
+  health: { title: "运行状态", description: "当前服务状态。" },
+  quickActions: { title: "快捷动作", description: "常用的下一步。" },
 };
 let unbindBeforeUnload: (() => void) | undefined;
 onMounted(() => {
@@ -363,37 +371,43 @@ function saveSettings() {
         tabindex="-1"
         class="mx-auto w-full max-w-7xl px-4 py-8 outline-none sm:px-6 lg:px-8 lg:py-12"
       >
-        <div
-          class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+        <YDashboardLayout
+          class="mb-6"
+          title="内容集合"
+          description="搜索、筛选、批量选择、状态、数据区与分页均来自公共 Pattern。"
+          :messages="dashboardMessages"
         >
-          <div>
-            <p
-              class="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-primary"
-            >
-              Experimental workflow
-            </p>
-            <h1
-              class="text-2xl font-semibold tracking-tight text-highlighted sm:text-3xl"
-            >
-              内容集合
-            </h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              搜索、筛选、批量选择、状态、数据区与分页均来自公共 Pattern。
-            </p>
-          </div>
-          <div class="flex items-center gap-2">
-            <YActionFeedbackButton
-              :status="actionFeedback.status.value"
-              idle-label="保存更改"
-              pending-label="保存中"
-              success-label="已保存"
-              error-label="保存失败"
-              size="sm"
-              @click="simulateAction"
-            />
-            <UButton icon="i-tabler-plus" label="新建内容" size="sm" />
-          </div>
-        </div>
+          <template #actions>
+            <div class="flex items-center gap-2">
+              <YActionFeedbackButton
+                :status="actionFeedback.status.value"
+                idle-label="保存更改"
+                pending-label="保存中"
+                success-label="已保存"
+                error-label="保存失败"
+                size="sm"
+                @click="simulateAction"
+              />
+              <UButton icon="i-tabler-plus" label="新建内容" size="sm" />
+            </div>
+          </template>
+          <template #metrics>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div class="rounded-xl border border-default bg-default p-4">
+                <p class="text-xl font-semibold tabular-nums text-highlighted">
+                  64
+                </p>
+                <p class="text-xs text-muted">内容</p>
+              </div>
+              <div class="rounded-xl border border-default bg-default p-4">
+                <p class="text-xl font-semibold tabular-nums text-highlighted">
+                  48
+                </p>
+                <p class="text-xs text-muted">已发布</p>
+              </div>
+            </div>
+          </template>
+        </YDashboardLayout>
 
         <YCollectionPanel
           v-model:search="searchInput"

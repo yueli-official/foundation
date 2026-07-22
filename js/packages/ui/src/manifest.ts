@@ -141,6 +141,28 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "dashboard-patterns",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/dashboard/pattern",
+    owner: "foundation",
+    responsibility:
+      "Own responsive page-heading anatomy and the accessible decision order for caller-provided dashboard regions.",
+    nonResponsibilities: [
+      "business metrics",
+      "business actions",
+      "locale catalogs",
+      "application navigation",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/dashboard-patterns.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/conformance/ui"],
+      accessibility: ["test/dashboard-patterns.test.ts"],
+    },
+  },
+  {
     id: "settings-workflow",
     kind: "headless-workflow",
     status: "experimental",

@@ -89,6 +89,9 @@ try {
     "package/src/collection/vue.ts",
     "package/src/collection/vue-router.ts",
     "package/src/collection/workflow.ts",
+    "package/src/dashboard/components/DashboardLayout.vue",
+    "package/src/dashboard/components/PageHeader.vue",
+    "package/src/dashboard/pattern.ts",
     "package/src/feedback/action.ts",
     "package/src/feedback/components/ActionFeedbackButton.vue",
     "package/src/feedback/index.ts",
@@ -157,6 +160,7 @@ import { createCollectionRouteQueryCodec, createJsonCollectionQueryPolicy } from
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
 import { useActionFeedback } from "@yueli/ui/feedback";
+import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import { publicUiManifest } from "@yueli/ui/manifest";
 import { useVueSettingsWorkflow } from "@yueli/ui/settings/vue";
 
@@ -186,10 +190,20 @@ const settings = useVueSettingsWorkflow({
   snapshot: () => settingsForm,
   restore: (snapshot) => Object.assign(settingsForm, snapshot),
 });
+const dashboardMessages: DashboardMessages = {
+  metrics: "Metrics",
+  pending: { title: "Pending", description: "Needs attention" },
+  recent: { title: "Recent", description: "Continue working" },
+  health: { title: "Health", description: "Service status" },
+  quickActions: { title: "Actions", description: "Next steps" },
+};
 </script>
 
 <template>
   <main id="main-content" tabindex="-1">
+    <YDashboardLayout title="Dashboard" :messages="dashboardMessages">
+      <template #recent><span>Recent work</span></template>
+    </YDashboardLayout>
     <YActionFeedbackButton :status="feedback.status.value" idle-label="Save" />
     <YCollectionFrame label="Packed collection" bulk-label="Bulk actions" :bulk-visible="true">
       <template #search="{ controlsId, controlsOpen, toggleControls }">
@@ -233,6 +247,7 @@ const settings = useVueSettingsWorkflow({
     packedPackage.name !== "@yueli/ui" ||
     !packedPackage.exports?.["."] ||
     !packedPackage.exports?.["./tailwind.css"] ||
+    !packedPackage.exports?.["./dashboard/pattern"] ||
     !packedPackage.exports?.["./feedback"] ||
     !packedPackage.exports?.["./feedback/pattern"] ||
     !packedPackage.exports?.["./navigation/back-to-top"] ||

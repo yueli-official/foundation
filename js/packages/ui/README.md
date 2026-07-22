@@ -14,6 +14,7 @@ Current public surface:
 - `@yueli/ui/tailwind.css` — explicit Tailwind source declaration for raw package SFCs; import it from the consumer's Tailwind entry stylesheet.
 - `@yueli/ui/manifest` — machine-readable maturity and ownership metadata.
 - `@yueli/ui/messages` — caller-owned message key/parameter contract; no locale catalogs.
+- `@yueli/ui/dashboard/pattern` — PageHeader and slots-driven DashboardLayout with caller-owned section messages.
 - `@yueli/ui/feedback` — latest-wins action lifecycle, minimum loading visibility and transport-neutral notice normalization.
 - `@yueli/ui/feedback/pattern` — explicit `ActionFeedbackButton` import.
 - `@yueli/ui/navigation/back-to-top` — explicit accessible BackToTop Pattern import.
@@ -40,7 +41,7 @@ export default defineNuxtConfig({
 @import "@yueli/ui/tailwind.css";
 ```
 
-The module auto-imports `CollectionFrame`, `ActionFeedbackButton` and `BackToTop` with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. Visible copy remains caller-owned: pass a translated prop or a message resolver; Foundation ships keys, not locale catalogs.
+The module auto-imports public Patterns with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. PageHeader and DashboardLayout own responsive heading/action anatomy, region order and accessible section labelling without owning metrics or business actions. Visible copy remains caller-owned: pass translated props or messages; Foundation ships no locale catalogs.
 
 Settings keeps persistence and translation outside the library. The pure workflow owns a cloned baseline and dirty/capture/discard semantics; Vue, browser unload and Router leave protection are separate opt-in Adapters. Route confirmation is a caller function, so Foundation never hard-codes a language or calls `window.confirm` on behalf of every product. The visible Patterns accept caller-owned labels and slots while standardizing responsive section navigation and the safe-area-aware save dock.
 
@@ -65,7 +66,7 @@ const save = useActionFeedback();
 
 `CollectionPanel` is the default complete Pattern: it owns responsive search, configured select/direction controls, page and result selection, sticky bulk actions, loading/error/empty states, row/grid containers and pagination. Callers provide translated `CollectionPanelMessages`, query control values, items and domain slots; business HTTP and mutations remain outside the Module. `CollectionFrame` remains available as the lower-level anatomy seam.
 
-Nuxt UI owns primitives. This package does not re-export or wrap buttons, tables, pagination, cards, tabs, or dashboards.
+Nuxt UI owns primitives. This package does not re-export or wrap buttons, tables, pagination, cards or tabs. DashboardLayout is a workflow-level composition of caller-owned regions, not a generic card/dashboard primitive.
 
 Route query semantics stay caller-owned, while the shared codec applies the same normalization rules in every consumer:
 

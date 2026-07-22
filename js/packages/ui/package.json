@@ -18,6 +18,7 @@
     "./tailwind.css": "./src/tailwind.css",
     "./manifest": "./src/manifest.ts",
     "./messages": "./src/messages.ts",
+    "./dashboard/pattern": "./src/dashboard/pattern.ts",
     "./feedback": "./src/feedback/index.ts",
     "./feedback/pattern": "./src/feedback/pattern.ts",
     "./navigation/back-to-top": "./src/navigation/back-to-top.ts",
