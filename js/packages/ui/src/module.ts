@@ -16,10 +16,12 @@ export default defineNuxtModule<YueliUiModuleOptions>({
   setup(options) {
     const resolver = createResolver(import.meta.url);
 
-    addComponentsDir({
-      path: resolver.resolve("./collection/components"),
-      pathPrefix: false,
-      prefix: options.prefix,
-    });
+    for (const directory of ["collection", "feedback", "navigation"]) {
+      addComponentsDir({
+        path: resolver.resolve(`./${directory}/components`),
+        pathPrefix: false,
+        prefix: options.prefix,
+      });
+    }
   },
 });

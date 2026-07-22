@@ -74,6 +74,73 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "action-feedback",
+    kind: "headless-workflow",
+    status: "experimental",
+    entrypoint: "@yueli/ui/feedback",
+    owner: "foundation",
+    responsibility:
+      "Own latest-wins async action state, terminal reset timing, stable loading visibility and transport-neutral notice normalization.",
+    nonResponsibilities: [
+      "business mutations",
+      "locale catalogs",
+      "global toast installation",
+    ],
+    runtimeDependencies: ["vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: [
+        "test/action-feedback.test.ts",
+        "test/minimum-loading.test.ts",
+        "test/feedback-notice.test.ts",
+      ],
+      consumers: ["js/conformance/ui"],
+      accessibility: [],
+    },
+  },
+  {
+    id: "action-feedback-button",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/feedback/pattern",
+    owner: "foundation",
+    responsibility:
+      "Render a Nuxt UI action control whose label, icon, tone and live state remain coherent across idle, pending, success and error.",
+    nonResponsibilities: [
+      "executing mutations",
+      "locale catalogs",
+      "toast feedback",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/action-feedback-button.test.ts"],
+      consumers: ["js/conformance/ui"],
+      accessibility: ["test/action-feedback-button.test.ts"],
+    },
+  },
+  {
+    id: "back-to-top",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/navigation/back-to-top",
+    owner: "foundation",
+    responsibility:
+      "Own scroll threshold, window or container scrolling, focus return, reduced motion and overlay/dock avoidance for one accessible floating control.",
+    nonResponsibilities: [
+      "page layout",
+      "locale catalogs",
+      "overlay state management",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/back-to-top.test.ts"],
+      consumers: ["js/conformance/ui"],
+      accessibility: ["test/back-to-top.test.ts"],
+    },
+  },
+  {
     id: "collection-frame",
     kind: "pattern",
     status: "experimental",

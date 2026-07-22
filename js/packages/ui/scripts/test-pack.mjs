@@ -87,9 +87,17 @@ try {
     "package/src/collection/vue.ts",
     "package/src/collection/vue-router.ts",
     "package/src/collection/workflow.ts",
+    "package/src/feedback/action.ts",
+    "package/src/feedback/components/ActionFeedbackButton.vue",
+    "package/src/feedback/index.ts",
+    "package/src/feedback/minimum-loading.ts",
+    "package/src/feedback/notice.ts",
+    "package/src/feedback/pattern.ts",
     "package/src/manifest.ts",
     "package/src/messages.ts",
     "package/src/module.ts",
+    "package/src/navigation/back-to-top.ts",
+    "package/src/navigation/components/BackToTop.vue",
     "package/src/tailwind.css",
   ].sort();
   if (JSON.stringify(packedFiles) !== JSON.stringify(allowedFiles)) {
@@ -137,6 +145,7 @@ try {
 import { createCollectionRouteQueryCodec, createJsonCollectionQueryPolicy } from "@yueli/ui/collection";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
+import { useActionFeedback } from "@yueli/ui/feedback";
 import { publicUiManifest } from "@yueli/ui/manifest";
 
 interface Query { q: string }
@@ -159,10 +168,12 @@ useVueCollectionWorkflow({
     workflow.resolveLoad(token, { items: [], total: 0 });
   },
 });
+const feedback = useActionFeedback({ resetMs: 0 });
 </script>
 
 <template>
-  <main>
+  <main id="main-content" tabindex="-1">
+    <YActionFeedbackButton :status="feedback.status.value" idle-label="Save" />
     <YCollectionFrame label="Packed collection" bulk-label="Bulk actions" :bulk-visible="true">
       <template #search="{ controlsId, controlsOpen, toggleControls }">
         <button type="button" :aria-controls="controlsId" :aria-expanded="controlsOpen" @click="toggleControls">Filters</button>
@@ -173,6 +184,7 @@ useVueCollectionWorkflow({
       <span>packed {{ publicUiManifest.length }}</span>
       <template #footer><span>Footer</span></template>
     </YCollectionFrame>
+    <YBackToTop label="Back to top" :threshold="0" />
   </main>
 </template>
 `,
@@ -203,6 +215,9 @@ useVueCollectionWorkflow({
     packedPackage.name !== "@yueli/ui" ||
     !packedPackage.exports?.["."] ||
     !packedPackage.exports?.["./tailwind.css"] ||
+    !packedPackage.exports?.["./feedback"] ||
+    !packedPackage.exports?.["./feedback/pattern"] ||
+    !packedPackage.exports?.["./navigation/back-to-top"] ||
     !packedPackage.exports?.["./collection/pattern"] ||
     !packedPackage.exports?.["./collection/vue"] ||
     !packedPackage.exports?.["./collection/vue-router"]

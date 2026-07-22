@@ -18,6 +18,9 @@
     "./tailwind.css": "./src/tailwind.css",
     "./manifest": "./src/manifest.ts",
     "./messages": "./src/messages.ts",
+    "./feedback": "./src/feedback/index.ts",
+    "./feedback/pattern": "./src/feedback/pattern.ts",
+    "./navigation/back-to-top": "./src/navigation/back-to-top.ts",
     "./collection": "./src/collection/index.ts",
     "./collection/pattern": "./src/collection/pattern.ts",
     "./collection/vue": "./src/collection/vue.ts",
@@ -46,6 +49,7 @@
   "devDependencies": {
     "@nuxt/ui": "catalog:",
     "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
     "@vue/test-utils": "catalog:",
     "happy-dom": "catalog:",
     "nuxt": "catalog:",

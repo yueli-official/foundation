@@ -14,6 +14,9 @@ Current public surface:
 - `@yueli/ui/tailwind.css` — explicit Tailwind source declaration for raw package SFCs; import it from the consumer's Tailwind entry stylesheet.
 - `@yueli/ui/manifest` — machine-readable maturity and ownership metadata.
 - `@yueli/ui/messages` — caller-owned message key/parameter contract; no locale catalogs.
+- `@yueli/ui/feedback` — latest-wins action lifecycle, minimum loading visibility and transport-neutral notice normalization.
+- `@yueli/ui/feedback/pattern` — explicit `ActionFeedbackButton` import.
+- `@yueli/ui/navigation/back-to-top` — explicit accessible BackToTop Pattern import.
 - `@yueli/ui/collection` — framework-independent remote collection workflow, schema-driven route query codec and memory query Adapter.
 - `@yueli/ui/collection/vue` — Vue setup lifecycle, reactive snapshot and data-query invalidation Adapter.
 - `@yueli/ui/collection/vue-router` — optional Vue Router query Adapter.
@@ -33,7 +36,28 @@ export default defineNuxtConfig({
 @import "@yueli/ui/tailwind.css";
 ```
 
-The module auto-imports `CollectionFrame` as `YCollectionFrame` by default. The experimental pattern owns only the integrated frame, responsive controls disclosure, sticky bulk region and accessible regions. Search/filter controls, domain columns/items, pagination, actions and all translated copy remain caller-owned slots.
+The module auto-imports `CollectionFrame`, `ActionFeedbackButton` and `BackToTop` with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. Visible copy remains caller-owned: pass a translated prop or a message resolver; Foundation ships keys, not locale catalogs.
+
+```vue
+<script setup lang="ts">
+import { useActionFeedback } from "@yueli/ui/feedback";
+
+const save = useActionFeedback();
+</script>
+
+<template>
+  <YActionFeedbackButton
+    :status="save.status.value"
+    idle-label="Save"
+    pending-label="Saving"
+    success-label="Saved"
+    @click="save.run(persist)"
+  />
+  <YBackToTop label="Back to top" />
+</template>
+```
+
+The experimental Collection pattern currently owns only the integrated frame, responsive controls disclosure, sticky bulk region and accessible regions. Search/filter controls, domain columns/items, pagination and business actions remain caller-owned slots until the full composite milestone lands.
 
 Nuxt UI owns primitives. This package does not re-export or wrap buttons, tables, pagination, cards, tabs, or dashboards.
 

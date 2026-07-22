@@ -185,3 +185,24 @@ test("light and dark collection states have no detectable axe violations", async
     fullPage: true,
   });
 });
+
+test("public feedback and back-to-top patterns own their runtime behavior", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1100, height: 560 });
+  await page.goto("/");
+  await settle(page);
+
+  await page.getByRole("button", { name: "保存更改" }).click();
+  await expect(page.getByRole("button", { name: "保存中" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "已保存" })).toBeVisible();
+
+  await page.evaluate(() => window.scrollTo({ top: 700, behavior: "instant" }));
+  const backToTop = page.getByRole("button", { name: "返回顶部" });
+  await expect(backToTop).toBeVisible();
+  await backToTop.click();
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeLessThanOrEqual(2);
+  await expect(page.locator("#main-content")).toBeFocused();
+});

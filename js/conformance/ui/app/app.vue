@@ -6,6 +6,7 @@ import {
 } from "@yueli/ui/collection";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
+import { useActionFeedback } from "@yueli/ui/feedback";
 
 type Status = "all" | "draft" | "published";
 type Sort = "updated" | "title";
@@ -94,6 +95,7 @@ const fixture: readonly ContentItem[] = Array.from(
 const policy = createJsonCollectionQueryPolicy<CollectionQuery>();
 const searchInput = ref("");
 const filtersOpen = ref(false);
+const actionFeedback = useActionFeedback({ resetMs: 1_500 });
 const router = useRouter();
 
 const sync = createVueRouterCollectionQuerySync({
@@ -219,6 +221,11 @@ function applySearch() {
 function clearFilters() {
   updateQuery({ category: "all", tag: "all", status: "all" });
 }
+function simulateAction() {
+  void actionFeedback.run(
+    () => new Promise<void>((resolve) => window.setTimeout(resolve, 250)),
+  );
+}
 </script>
 
 <template>
@@ -247,7 +254,11 @@ function clearFilters() {
         </div>
       </header>
 
-      <main class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <main
+        id="main-content"
+        tabindex="-1"
+        class="mx-auto w-full max-w-7xl px-4 py-8 outline-none sm:px-6 lg:px-8 lg:py-12"
+      >
         <div
           class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
         >
@@ -266,7 +277,18 @@ function clearFilters() {
               同一个大框架容纳搜索、筛选、批量选择、数据区与分页；业务数据仍由调用方拥有。
             </p>
           </div>
-          <UButton icon="i-tabler-plus" label="新建内容" size="sm" />
+          <div class="flex items-center gap-2">
+            <YActionFeedbackButton
+              :status="actionFeedback.status.value"
+              idle-label="保存更改"
+              pending-label="保存中"
+              success-label="已保存"
+              error-label="保存失败"
+              size="sm"
+              @click="simulateAction"
+            />
+            <UButton icon="i-tabler-plus" label="新建内容" size="sm" />
+          </div>
         </div>
 
         <YCollectionFrame
@@ -549,6 +571,7 @@ function clearFilters() {
           `@yueli/ui/collection`。
         </p>
       </main>
+      <YBackToTop label="返回顶部" :threshold="0.5" />
     </div>
   </UApp>
 </template>
