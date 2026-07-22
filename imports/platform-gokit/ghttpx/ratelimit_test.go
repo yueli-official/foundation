@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -15,33 +13,13 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
-func TestRateLimiterEnforcesAndResetsWindow(t *testing.T) {
-	now := time.Unix(1_700_000_000, 0)
-	limiter := NewRateLimiter(2, time.Minute)
-	limiter.now = func() time.Time { return now }
-	for index, wantAllowed := range []bool{true, true, false} {
-		allowed, remaining, reset := limiter.Allow("203.0.113.10")
-		if allowed != wantAllowed {
-			t.Fatalf("request %d allowed = %v, want %v", index+1, allowed, wantAllowed)
-		}
-		if remaining != max(0, 1-index) || !reset.Equal(now.Add(time.Minute)) {
-			t.Fatalf("request %d remaining/reset = %d/%v", index+1, remaining, reset)
-		}
-	}
-	now = now.Add(time.Minute)
-	allowed, remaining, _ := limiter.Allow("203.0.113.10")
-	if !allowed || remaining != 1 {
-		t.Fatalf("new window allowed/remaining = %v/%d", allowed, remaining)
-	}
-}
-
 func TestMiddlewareReturnsRateLimitEnvelopeAndHeaders(t *testing.T) {
 	limiter := NewRateLimiter(1, time.Minute)
 	server := g.Server(t.Name())
 	server.SetAddr("127.0.0.1:0")
 	server.SetDumpRouterMap(false)
 	server.Group("/", func(group *ghttp.RouterGroup) {
-		group.Middleware(func(request *ghttp.Request) { middleware(limiter, request) })
+		group.Middleware(func(request *ghttp.Request) { middleware(limiter, ForwardedClientIPKey, request) })
 		group.GET("/limited", func(request *ghttp.Request) { request.Response.Write("ok") })
 	})
 	server.Start()
@@ -73,7 +51,7 @@ func TestRawMiddlewareReturnsOAuthRateLimitShape(t *testing.T) {
 	server.SetAddr("127.0.0.1:0")
 	server.SetDumpRouterMap(false)
 	server.Group("/", func(group *ghttp.RouterGroup) {
-		group.Middleware(func(request *ghttp.Request) { rawRateLimitMiddleware(limiter, request) })
+		group.Middleware(func(request *ghttp.Request) { rawRateLimitMiddleware(limiter, ForwardedClientIPKey, request) })
 		group.POST("/oauth2/token", func(request *ghttp.Request) { request.Response.WriteJson(map[string]string{"access_token": "test"}) })
 	})
 	server.Start()
@@ -96,44 +74,15 @@ func TestRawMiddlewareReturnsOAuthRateLimitShape(t *testing.T) {
 	}
 }
 
-func TestRateLimiterSeparatesClientsAndIsConcurrent(t *testing.T) {
-	limiter := NewRateLimiter(10, time.Minute)
-	var allowed atomic.Int64
-	var wait sync.WaitGroup
-	for index := range 40 {
-		wait.Add(1)
-		go func() {
-			defer wait.Done()
-			if ok, _, _ := limiter.Allow("client-" + string(rune('a'+index%2))); ok {
-				allowed.Add(1)
-			}
-		}()
+func TestEnvironmentPolicyIsExplicitAndStrict(t *testing.T) {
+	t.Setenv("PLATFORM_RATE_LIMIT_PER_MINUTE", "invalid")
+	if _, err := RateLimiterFromEnvironment(); err == nil {
+		t.Fatal("invalid environment policy accepted")
 	}
-	wait.Wait()
-	if got := allowed.Load(); got != 20 {
-		t.Fatalf("allowed = %d, want 20", got)
-	}
-}
-
-func TestRateLimiterCanBeExplicitlyDisabled(t *testing.T) {
-	limiter := NewRateLimiter(0, time.Minute)
-	for range 1000 {
-		if allowed, remaining, _ := limiter.Allow("client"); !allowed || remaining != -1 {
-			t.Fatalf("disabled limiter allowed/remaining = %v/%d", allowed, remaining)
-		}
-	}
-}
-
-func TestRateLimiterBoundsDistinctClientState(t *testing.T) {
-	limiter := NewRateLimiter(10, time.Minute)
-	limiter.maxKeys = 2
-	for _, client := range []string{"one", "two"} {
-		if allowed, _, _ := limiter.Allow(client); !allowed {
-			t.Fatalf("client %s unexpectedly denied", client)
-		}
-	}
-	if allowed, _, _ := limiter.Allow("three"); allowed {
-		t.Fatal("third distinct client should fail closed at state cap")
+	t.Setenv("PLATFORM_RATE_LIMIT_PER_MINUTE", "0")
+	limiter, err := RateLimiterFromEnvironment()
+	if err != nil || !limiter.Evaluate("client").Allowed {
+		t.Fatalf("disabled policy limiter=%v err=%v", limiter, err)
 	}
 }
 

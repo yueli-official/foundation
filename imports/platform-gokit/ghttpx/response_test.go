@@ -11,10 +11,10 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/test/gtest"
+	"github.com/yueli-official/foundation/go/problem"
 
 	"platform/gokit/errs"
 	"platform/gokit/ghttpx"
-	platformresponse "platform/gokit/response"
 )
 
 // ---------------------------------------------------------------------------
@@ -48,7 +48,7 @@ func errorHandler(r *ghttp.Request) {
 
 func codedValidationHandler(r *ghttp.Request) {
 	r.SetError(errs.New(errs.CommonValidationFailed, "validation failed", map[string]any{
-		"details": []platformresponse.ValidationDetail{{Field: "url", Code: "absolute_http_url"}},
+		"details": []problem.Violation{{Pointer: "/url", Code: "validation.absolute_http_url"}},
 	}))
 }
 
@@ -110,9 +110,8 @@ func newValidationServer(t *gtest.T) *ghttp.Server {
 // Tests
 // ---------------------------------------------------------------------------
 
-// TestMiddleware_SuccessPath verifies that a struct handler returning data gets
-// wrapped in the platform OK envelope with code=="ok", data.x==1, and a
-// non-empty traceId.
+// TestMiddleware_SuccessPath verifies that success is the raw DTO and tracing
+// remains in the response header rather than a Data-any envelope.
 func TestMiddleware_SuccessPath(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		s := newSuccessServer(t)
@@ -128,9 +127,9 @@ func TestMiddleware_SuccessPath(t *testing.T) {
 		body := resp.ReadAllString()
 		j := gjson.New(body)
 
-		t.Assert(j.Get("code").String(), "ok")
-		t.Assert(j.Get("data.x").Int(), 1)
-		traceID := j.Get("traceId").String()
+		t.Assert(j.Get("x").Int(), 1)
+		t.Assert(j.Contains("data"), false)
+		traceID := resp.Header.Get("X-Trace-Id")
 		t.AssertNE(traceID, "")
 	})
 }
@@ -171,8 +170,8 @@ func TestMiddleware_ValidationDetailsAreTopLevel(t *testing.T) {
 		defer coded.Close()
 		codedJSON := gjson.New(coded.ReadAllString())
 		t.Assert(codedJSON.Get("code").String(), errs.CommonValidationFailed)
-		t.Assert(codedJSON.Get("details.0.field").String(), "url")
-		t.Assert(codedJSON.Get("details.0.code").String(), "absolute_http_url")
+		t.Assert(codedJSON.Get("violations.0.pointer").String(), "/url")
+		t.Assert(codedJSON.Get("violations.0.code").String(), "validation.absolute_http_url")
 		t.Assert(strings.Contains(codedJSON.MustToJsonString(), `"params"`), false)
 
 		builtIn, err := client.ContentJson().Post(context.Background(), "/validation", `{}`)
@@ -180,8 +179,8 @@ func TestMiddleware_ValidationDetailsAreTopLevel(t *testing.T) {
 		defer builtIn.Close()
 		builtInJSON := gjson.New(builtIn.ReadAllString())
 		t.Assert(builtInJSON.Get("code").String(), errs.CommonValidationFailed)
-		t.Assert(builtInJSON.Get("details.0.field").String(), "title")
-		t.Assert(builtInJSON.Get("details.0.code").String(), "required")
+		t.Assert(builtInJSON.Get("violations.0.pointer").String(), "/title")
+		t.Assert(builtInJSON.Get("violations.0.code").String(), "validation.required")
 	})
 }
 
@@ -228,7 +227,8 @@ func TestMiddleware_InternalErrorNotLeaked(t *testing.T) {
 		j := gjson.New(body)
 
 		t.Assert(j.Get("code").String(), "common.internal")
-		t.Assert(j.Get("message").String(), "internal error")
+		t.Assert(resp.Header.Get("Content-Type"), "application/problem+json")
+		t.Assert(j.Get("type").String(), "https://errors.yueli.dev/problems/common.internal")
 		// The raw internal error detail must never be sent to the client.
 		t.Assert(strings.Contains(body, "secret db detail"), false)
 	})
