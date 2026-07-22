@@ -17,7 +17,7 @@ JS package 与 Go module 共用仓库和跨语言 contract，但拥有独立依�
 
 ## Current status
 
-Repository bootstrap is active. The HTTP/Nuxt runtimes, Collection workflow and experimental `CollectionFrame` have independent unit, type, production-build and browser conformance. `@yueli/ui` also passes a real packed-tarball standalone Nuxt build with package-owned Tailwind scanning. The Go Problem core, hardened JWKS source, strict JWT access-token verifier and GoFrame Problem/auth adapters pass canonical/real-server/concurrency tests, race tests and vet.
+Repository bootstrap is active. The HTTP/Nuxt runtimes and public UI workflow/Pattern modules have independent unit, type, production-build and browser conformance. `@yueli/ui` also passes a real packed-tarball standalone Nuxt build with package-owned Tailwind scanning. Go Foundation now includes Problem/errors, bounded HTTP decoding, health, hardened JWKS/JWT auth, privacy-bounded telemetry, explicit rate-limit/OpenAPI policy and their GoFrame adapters; the complete module passes real-server/concurrency tests, race tests and vet.
 
 No prerelease has been published. Package names and compatibility remain experimental; do not consume repository source paths directly.
 

@@ -54,7 +54,9 @@ The first implementation slice is Problem core plus GoFrame Problem adapter. Aut
 
 ## Current status
 
-The first slice is implemented in `go/problem` and `go/goframe/http`. Canonical valid/invalid fixtures, malformed/trailing JSON, immutable Kind construction, JSON-safe caller parameters, bounded response serialization and a real loopback GoFrame response contract pass `go test -race ./...` and `go vet ./...`.
+The response, health, telemetry and explicit HTTP-policy slices are now implemented. `go/problem` and `go/goframe/http` own immutable public failures and bounded Problem rendering while success remains a raw endpoint DTO; `go/httpclient` enforces the same contract on consumers. `go/health` and `go/goframe/health` separate concurrent probe execution from HTTP representation. `go/telemetry` owns the mandatory privacy boundary while exporter transport, environment parsing and global installation remain application decisions. `go/goframe/ratelimit` and `go/goframe/openapi` require explicit configuration and contain no import-time environment/global policy.
+
+Canonical valid/invalid fixtures, malformed/trailing/oversized bodies, real loopback GoFrame servers, non-cooperative checks, panic isolation, concurrent rate-limit state and telemetry redaction pass `go test -race ./...` and `go vet ./...`.
 
 The JWKS transport slice is implemented in `go/jwks` as a redesign, not a copy. Its public Interface is a small context-aware key source; the remote implementation performs no network work while holding its state lock. Refresh work is single-flight and timeout-bounded, redirects are disabled, bodies are bounded, HTTP is restricted to an explicit loopback-only test/development option, unknown key IDs are throttled after refresh completion, and known stale keys remain available during issuer failure. Concurrent initial load, slow issuer, failed issuer, key rotation, redirect, oversized response and caller-cancellation behavior pass race tests.
 
