@@ -27,6 +27,17 @@ export type {
 
 export { createCollectionRouteQueryCodec } from "./route-query";
 export type {
+  CollectionControl,
+  CollectionControlOption,
+  CollectionControlValue,
+  CollectionDirectionControl,
+  CollectionItemSlotProps,
+  CollectionPanelLayout,
+  CollectionPanelMessages,
+  CollectionPanelState,
+  CollectionSelectControl,
+} from "./panel";
+export type {
   CollectionRouteEnumField,
   CollectionRouteField,
   CollectionRoutePositiveIntegerField,

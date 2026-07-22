@@ -20,7 +20,7 @@ Current public surface:
 - `@yueli/ui/collection` — framework-independent remote collection workflow, schema-driven route query codec and memory query Adapter.
 - `@yueli/ui/collection/vue` — Vue setup lifecycle, reactive snapshot and data-query invalidation Adapter.
 - `@yueli/ui/collection/vue-router` — optional Vue Router query Adapter.
-- `@yueli/ui/collection/pattern` — explicit `CollectionFrame` import for consumers that do not use Nuxt component auto-import.
+- `@yueli/ui/collection/pattern` — explicit `CollectionFrame` and full `CollectionPanel` imports for consumers that do not use Nuxt component auto-import.
 
 Enable the Nuxt module and package Tailwind source:
 
@@ -57,7 +57,7 @@ const save = useActionFeedback();
 </template>
 ```
 
-The experimental Collection pattern currently owns only the integrated frame, responsive controls disclosure, sticky bulk region and accessible regions. Search/filter controls, domain columns/items, pagination and business actions remain caller-owned slots until the full composite milestone lands.
+`CollectionPanel` is the default complete Pattern: it owns responsive search, configured select/direction controls, page and result selection, sticky bulk actions, loading/error/empty states, row/grid containers and pagination. Callers provide translated `CollectionPanelMessages`, query control values, items and domain slots; business HTTP and mutations remain outside the Module. `CollectionFrame` remains available as the lower-level anatomy seam.
 
 Nuxt UI owns primitives. This package does not re-export or wrap buttons, tables, pagination, cards, tabs, or dashboards.
 

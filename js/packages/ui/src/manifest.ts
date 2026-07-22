@@ -167,6 +167,32 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "collection-panel",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/collection/pattern",
+    owner: "foundation",
+    responsibility:
+      "Own the complete responsive search, configured controls, selection, bulk, loading/error/empty, row/grid and pagination anatomy for remote collections.",
+    nonResponsibilities: [
+      "business HTTP",
+      "domain item fields",
+      "business bulk actions",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: [
+        "test/collection-panel.test.ts",
+        "js/conformance/ui/test/e2e/collection.spec.ts",
+        "scripts/test-pack.mjs",
+      ],
+      consumers: ["js/conformance/ui", "js/apps/ui-lab"],
+      accessibility: ["js/conformance/ui/test/e2e/collection.spec.ts"],
+    },
+  },
+  {
     id: "collection-vue-adapter",
     kind: "adapter",
     status: "experimental",
