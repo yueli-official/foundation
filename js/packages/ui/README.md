@@ -14,6 +14,7 @@ Current public surface:
 - `@yueli/ui/tailwind.css` — explicit Tailwind source declaration for raw package SFCs; import it from the consumer's Tailwind entry stylesheet.
 - `@yueli/ui/manifest` — machine-readable maturity and ownership metadata.
 - `@yueli/ui/messages` — caller-owned message key/parameter contract; no locale catalogs.
+- `@yueli/ui/account-menu/pattern` — provider-neutral account action grouping, identity fallback and accessible menu trigger.
 - `@yueli/ui/dashboard/pattern` — PageHeader and slots-driven DashboardLayout with caller-owned section messages.
 - `@yueli/ui/feedback` — latest-wins action lifecycle, minimum loading visibility and transport-neutral notice normalization.
 - `@yueli/ui/feedback/pattern` — explicit `ActionFeedbackButton` import.
@@ -41,7 +42,7 @@ export default defineNuxtConfig({
 @import "@yueli/ui/tailwind.css";
 ```
 
-The module auto-imports public Patterns with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. PageHeader and DashboardLayout own responsive heading/action anatomy, region order and accessible section labelling without owning metrics or business actions. Visible copy remains caller-owned: pass translated props or messages; Foundation ships no locale catalogs.
+The module auto-imports public Patterns with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. PageHeader and DashboardLayout own responsive heading/action anatomy, region order and accessible section labelling without owning metrics or business actions. AccountMenu owns identity fallback, action grouping and the async logout command boundary without reading an auth provider. Visible copy remains caller-owned: pass translated props or messages; Foundation ships no locale catalogs.
 
 Settings keeps persistence and translation outside the library. The pure workflow owns a cloned baseline and dirty/capture/discard semantics; Vue, browser unload and Router leave protection are separate opt-in Adapters. Route confirmation is a caller function, so Foundation never hard-codes a language or calls `window.confirm` on behalf of every product. The visible Patterns accept caller-owned labels and slots while standardizing responsive section navigation and the safe-area-aware save dock.
 

@@ -73,6 +73,21 @@ test("public dashboard chrome exposes caller-owned labelled regions", async ({
   await expect(metrics).toContainText("已发布");
 });
 
+test("public account menu exposes grouped actions from an accessible trigger", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await settle(page);
+
+  const trigger = page.getByRole("button", {
+    name: "打开 Lin 的用户菜单",
+  });
+  await trigger.focus();
+  await trigger.press("Enter");
+  await expect(page.getByRole("menuitem", { name: "工作区" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "退出登录" })).toBeVisible();
+});
+
 test("route history restores the query and rendered result", async ({
   page,
 }) => {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
 import {
   createCollectionRouteQueryCodec,
   createJsonCollectionQueryPolicy,
@@ -148,6 +149,11 @@ const dashboardMessages: DashboardMessages = {
   recent: { title: "最近工作", description: "继续最近更新的内容。" },
   health: { title: "运行状态", description: "当前服务状态。" },
   quickActions: { title: "快捷动作", description: "常用的下一步。" },
+};
+const accountMessages: AccountMenuMessages = {
+  currentUser: "当前用户",
+  logout: "退出登录",
+  openMenu: (name) => `打开 ${name} 的用户菜单`,
 };
 let unbindBeforeUnload: (() => void) | undefined;
 onMounted(() => {
@@ -362,7 +368,18 @@ function saveSettings() {
               </p>
             </div>
           </div>
-          <UColorModeButton size="sm" aria-label="切换颜色模式" />
+          <div class="flex items-center gap-2">
+            <YAccountMenu
+              name="Lin"
+              email="lin@example.test"
+              :messages="accountMessages"
+              :context-actions="[
+                { label: '工作区', icon: 'i-tabler-layout-dashboard' },
+              ]"
+              :logout="() => undefined"
+            />
+            <UColorModeButton size="sm" aria-label="切换颜色模式" />
+          </div>
         </div>
       </header>
 

@@ -141,6 +141,28 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "account-menu-pattern",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/account-menu/pattern",
+    owner: "foundation",
+    responsibility:
+      "Own provider-neutral identity fallback, account action grouping, accessible trigger anatomy and the async logout command boundary.",
+    nonResponsibilities: [
+      "identity providers",
+      "session state",
+      "application navigation",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/account-menu.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/conformance/ui"],
+      accessibility: ["test/account-menu.test.ts"],
+    },
+  },
+  {
     id: "dashboard-patterns",
     kind: "pattern",
     status: "experimental",

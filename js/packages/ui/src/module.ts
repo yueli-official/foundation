@@ -17,6 +17,7 @@ export default defineNuxtModule<YueliUiModuleOptions>({
     const resolver = createResolver(import.meta.url);
 
     for (const directory of [
+      "account-menu",
       "collection",
       "dashboard",
       "feedback",

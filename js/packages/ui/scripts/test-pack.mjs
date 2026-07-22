@@ -80,6 +80,8 @@ try {
     "package/LICENSE",
     "package/README.md",
     "package/package.json",
+    "package/src/account-menu/components/AccountMenu.vue",
+    "package/src/account-menu/pattern.ts",
     "package/src/collection/components/CollectionFrame.vue",
     "package/src/collection/components/CollectionPanel.vue",
     "package/src/collection/index.ts",
@@ -157,6 +159,7 @@ try {
     join(consumerRoot, "app", "app.vue"),
     `<script setup lang="ts">
 import { createCollectionRouteQueryCodec, createJsonCollectionQueryPolicy } from "@yueli/ui/collection";
+import type { AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
 import { useActionFeedback } from "@yueli/ui/feedback";
@@ -197,10 +200,16 @@ const dashboardMessages: DashboardMessages = {
   health: { title: "Health", description: "Service status" },
   quickActions: { title: "Actions", description: "Next steps" },
 };
+const accountMessages: AccountMenuMessages = {
+  currentUser: "Current user",
+  logout: "Sign out",
+  openMenu: (name) => "Open " + name + " menu",
+};
 </script>
 
 <template>
   <main id="main-content" tabindex="-1">
+    <YAccountMenu name="Packed user" :messages="accountMessages" :logout="() => undefined" />
     <YDashboardLayout title="Dashboard" :messages="dashboardMessages">
       <template #recent><span>Recent work</span></template>
     </YDashboardLayout>
@@ -246,6 +255,7 @@ const dashboardMessages: DashboardMessages = {
   if (
     packedPackage.name !== "@yueli/ui" ||
     !packedPackage.exports?.["."] ||
+    !packedPackage.exports?.["./account-menu/pattern"] ||
     !packedPackage.exports?.["./tailwind.css"] ||
     !packedPackage.exports?.["./dashboard/pattern"] ||
     !packedPackage.exports?.["./feedback"] ||
