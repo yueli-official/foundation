@@ -174,8 +174,20 @@ function toggle(item: TItem, key: TKey) {
 
     <template #controls>
       <template v-for="control in controls" :key="control.id">
+        <USelectMenu
+          v-if="control.kind === 'select' && control.searchPlaceholder"
+          :model-value="control.value"
+          :items="control.options.slice()"
+          value-key="value"
+          :icon="control.icon"
+          size="xs"
+          :class="control.class ?? 'w-32'"
+          :search-input="{ placeholder: control.searchPlaceholder }"
+          :aria-label="control.label"
+          @update:model-value="changeControl(control.id, $event)"
+        />
         <USelect
-          v-if="control.kind === 'select'"
+          v-else-if="control.kind === 'select'"
           :model-value="control.value"
           :items="control.options.slice()"
           value-key="value"

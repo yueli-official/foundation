@@ -16,6 +16,7 @@ export interface CollectionSelectControl {
   readonly options: readonly CollectionControlOption[];
   readonly icon?: string;
   readonly class?: string;
+  readonly searchPlaceholder?: string;
 }
 
 export interface CollectionDirectionControl {

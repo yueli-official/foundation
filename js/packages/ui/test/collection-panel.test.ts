@@ -112,6 +112,7 @@ describe("CollectionPanel", () => {
           UButton,
           UCheckbox,
           USelect: passiveStub,
+          USelectMenu: passiveStub,
           UPagination: passiveStub,
           USkeleton: passiveStub,
           UIcon: passiveStub,
@@ -136,5 +137,56 @@ describe("CollectionPanel", () => {
     await wrapper.get('input[aria-label="Select First"]').setValue(true);
     expect(wrapper.emitted("toggleItem")).toEqual([["one", true]]);
     expect(wrapper.text()).toContain("1-2/2");
+  });
+
+  it("uses a searchable Nuxt UI control only when caller text is supplied", () => {
+    const wrapper = mount(CollectionPanel, {
+      props: {
+        label: "Records",
+        items: [],
+        itemKey: () => "record",
+        itemLabel: () => "Record",
+        messages,
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        controls: [
+          {
+            kind: "select",
+            id: "category",
+            label: "Category",
+            value: "",
+            options: [{ label: "All", value: "" }],
+            searchPlaceholder: "Search categories",
+          },
+        ],
+      },
+      global: {
+        components: {
+          UInput,
+          UButton,
+          UCheckbox,
+          USelect: passiveStub,
+          USelectMenu: defineComponent({
+            name: "USelectMenu",
+            inheritAttrs: false,
+            props: ["searchInput"],
+            setup: (props) => () =>
+              h("div", {
+                "data-search-placeholder": (
+                  props.searchInput as { placeholder?: string }
+                )?.placeholder,
+              }),
+          }),
+          UPagination: passiveStub,
+          USkeleton: passiveStub,
+          UIcon: passiveStub,
+        },
+      },
+    });
+
+    expect(
+      wrapper.get('[data-search-placeholder="Search categories"]'),
+    ).toBeTruthy();
   });
 });
