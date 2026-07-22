@@ -499,4 +499,4 @@ export {
   type RemoteFailure,
   type Violation,
 } from "./failure";
-export { readTextWithinLimit } from "./problem";
+export { failureFromProblemResponse, readTextWithinLimit } from "./problem";
