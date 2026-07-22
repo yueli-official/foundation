@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -115,5 +116,47 @@ func TestWriterRejectsInvalidConfigurationAndOversizedBodies(t *testing.T) {
 	body := response.ReadAllString()
 	if response.StatusCode != 500 || response.Header.Get("X-Trace-Id") != "" || response.Header.Get("Content-Type") == "application/problem+json" {
 		t.Fatalf("response mutated before validation: status=%d content-type=%q trace=%q body=%q", response.StatusCode, response.Header.Get("Content-Type"), response.Header.Get("X-Trace-Id"), body)
+	}
+}
+
+func TestWriterWritesImmutableMappedError(t *testing.T) {
+	descriptor := problem.MustDescriptor(
+		problem.MustKind("catalog.not_found", http.StatusNotFound),
+		"https://errors.example.test/problems/catalog.not_found",
+	)
+	mapped, err := problem.NewError(descriptor, problem.Parameters{"id": "item-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer := goframehttp.MustWriter(goframehttp.WriterOptions{})
+
+	server := g.Server("foundation-mapped-error-writer")
+	server.SetAddr("127.0.0.1:0")
+	server.SetDumpRouterMap(false)
+	server.Group("/", func(group *ghttp.RouterGroup) {
+		group.GET("/problem", func(request *ghttp.Request) {
+			ok, writeErr := writer.WriteError(request, mapped, "trace-mapped")
+			if writeErr != nil || !ok {
+				t.Errorf("WriteError() = %v, %v", ok, writeErr)
+			}
+		})
+	})
+	server.Start()
+	defer server.Shutdown()
+
+	response, err := g.Client().Get(
+		context.Background(),
+		fmt.Sprintf("http://127.0.0.1:%d/problem", server.GetListenedPort()),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Close()
+	value, err := problem.Decode(response.ReadAll())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != http.StatusNotFound || value.Code != "catalog.not_found" || value.TraceID != "trace-mapped" {
+		t.Fatalf("status/value = %d/%#v", response.StatusCode, value)
 	}
 }

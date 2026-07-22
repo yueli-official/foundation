@@ -86,3 +86,13 @@ func (writer Writer) Write(request *ghttp.Request, value problem.Problem) error 
 	request.Response.Write(body)
 	return nil
 }
+
+// WriteError resolves a public problem.Error and writes it. ok=false means the
+// application must log/map the unknown error to its own internal descriptor.
+func (writer Writer) WriteError(request *ghttp.Request, err error, traceID string) (ok bool, writeErr error) {
+	value, ok, resolveErr := problem.FromError(err, traceID)
+	if resolveErr != nil || !ok {
+		return ok, resolveErr
+	}
+	return true, writer.Write(request, value)
+}
