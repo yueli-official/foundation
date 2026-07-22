@@ -1,4 +1,5 @@
 import type { LocationQuery, LocationQueryRaw, Router } from "vue-router";
+import { onScopeDispose, shallowRef, type Ref } from "vue";
 import type { CollectionQuerySync } from "./workflow";
 import type {
   RouteQuery,
@@ -10,6 +11,12 @@ export interface VueRouterCollectionQuerySyncOptions<TQuery> {
   readonly router: Pick<Router, "afterEach" | "currentRoute" | "replace">;
   readonly codec: RouteQueryCodec<TQuery>;
   readonly preserveUnknown?: boolean;
+}
+
+export interface VueRouterCollectionQuery<TQuery extends object> {
+  readonly query: Readonly<Ref<TQuery>>;
+  replace(query: TQuery): Promise<void>;
+  update(patch: Partial<TQuery>): Promise<void>;
 }
 
 function toRouteQuery(query: LocationQuery): RouteQuery {
@@ -110,5 +117,28 @@ export function createVueRouterCollectionQuerySync<TQuery>(
         listener(options.codec.parse(toRouteQuery(to.query)));
       });
     },
+  };
+}
+
+/** Reactive route-query state for collection screens whose data loader is owned by the host app. */
+export function useVueRouterCollectionQuery<TQuery extends object>(
+  options: VueRouterCollectionQuerySyncOptions<TQuery>,
+): VueRouterCollectionQuery<TQuery> {
+  const sync = createVueRouterCollectionQuerySync(options);
+  const state = shallowRef(sync.read()) as Ref<TQuery>;
+  const stop = sync.subscribe((next) => {
+    state.value = next;
+  });
+  onScopeDispose(stop);
+
+  async function replace(next: TQuery) {
+    state.value = next;
+    await sync.replace(next);
+  }
+
+  return {
+    query: state as Readonly<Ref<TQuery>>,
+    replace,
+    update: (patch) => replace({ ...state.value, ...patch }),
   };
 }

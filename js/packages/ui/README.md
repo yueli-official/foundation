@@ -29,8 +29,8 @@ Current public surface:
 - `@yueli/ui/settings/pattern` — SettingsLayout, SettingSection and SettingsSaveDock explicit imports.
 - `@yueli/ui/collection` — framework-independent remote collection workflow, schema-driven route query codec and memory query Adapter.
 - `@yueli/ui/collection/vue` — Vue setup lifecycle, reactive snapshot and data-query invalidation Adapter.
-- `@yueli/ui/collection/vue-router` — optional Vue Router query Adapter.
-- `@yueli/ui/collection/pattern` — explicit `CollectionFrame` and full `CollectionPanel` imports for consumers that do not use Nuxt component auto-import.
+- `@yueli/ui/collection/vue-router` — optional Vue Router query Adapter plus a reactive query-only composable for host-owned data loaders.
+- `@yueli/ui/collection/pattern` — complete `CollectionPanel`, lower-level `CollectionFrame`, and composable Toolbar/Pagination/Dock/Footer/Tabs/View/selection patterns.
 
 Enable the Nuxt module and package Tailwind source:
 
@@ -99,9 +99,9 @@ const save = useActionFeedback();
 </template>
 ```
 
-`CollectionPanel` is the default complete Pattern: it owns responsive search, configured select/direction controls, page and result selection, sticky bulk actions, loading/error/empty states, row/grid containers and pagination. Select controls remain compact by default; callers with larger option sets can provide `searchPlaceholder` to opt into Nuxt UI's searchable `USelectMenu` while retaining caller-owned translation. Callers provide translated `CollectionPanelMessages`, query control values, items and domain slots; business HTTP and mutations remain outside the Module. `isSelectable` on the Workflow and `isItemSelectable` on the Pattern express rows such as the current administrator that must remain visible but cannot enter batch selection. Because page-local eligibility cannot describe unloaded rows, all-results selection is intentionally unavailable when that predicate is configured. `CollectionFrame` remains available as the lower-level anatomy seam.
+`CollectionPanel` is the default complete Pattern: it owns responsive search, configured select/direction controls, page and result selection, sticky bulk actions, loading/error/empty states, row/grid containers and pagination. Select controls remain compact by default; callers with larger option sets can provide `searchPlaceholder` to opt into Nuxt UI's searchable `USelectMenu` while retaining caller-owned translation. Callers provide translated `CollectionPanelMessages`, query control values, items and domain slots; business HTTP and mutations remain outside the Module. `isSelectable` on the Workflow and `isItemSelectable` on the Pattern express rows such as the current administrator that must remain visible but cannot enter batch selection. Because page-local eligibility cannot describe unloaded rows, all-results selection is intentionally unavailable when that predicate is configured. `CollectionFrame` remains the lower-level anatomy seam. Lightweight or domain-shaped screens may compose `CollectionToolbar`, `CollectionPagination`, `CollectionDock`, `CollectionFooter`, `CollectionLifecycleTabs`, `CollectionViewToggle`, `CollectionActiveFilters`, `CollectionPageSelection`, `CollectionRowShell` and `CollectionSortDirectionButton`.
 
-Nuxt UI owns primitives. This package does not re-export or wrap buttons, tables, pagination, cards or tabs. DashboardLayout is a workflow-level composition of caller-owned regions, not a generic card/dashboard primitive.
+Nuxt UI owns primitives. Collection patterns compose Nuxt UI controls only where the package adds stable responsive anatomy, query/selection semantics or accessibility behavior; it does not re-export generic buttons, cards or tables. DashboardLayout is a workflow-level composition of caller-owned regions, not a generic card/dashboard primitive.
 
 Route query semantics stay caller-owned, while the shared codec applies the same normalization rules in every consumer:
 
@@ -120,6 +120,8 @@ const codec = createCollectionRouteQueryCodec({
 Defaults are omitted from the URL. Repeated query values use the first value; invalid enums and positive integers fall back to the caller's declared default.
 
 `useVueCollectionWorkflow` creates and disposes the Workflow inside Vue setup, binds an optional query Adapter, runs the first load on mount and exposes a reactive snapshot. A caller-owned primitive `dataQueryKey` can exclude presentation-only fields such as `view`, so list/grid changes do not refetch identical data. The caller's async `load` still owns business HTTP and must resolve or reject the supplied Workflow load token.
+
+When Nuxt `useAsyncData` or another host loader already owns fetching, `useVueRouterCollectionQuery` supplies normalized reactive URL state and `replace`/`update` commands without introducing a second loader.
 
 Run `pnpm --filter @yueli/ui test`, `pnpm --filter @yueli/ui typecheck` and
 `pnpm --filter @yueli/ui test:pack` from the repository root. The pack conformance checks the

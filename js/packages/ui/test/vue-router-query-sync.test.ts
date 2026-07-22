@@ -1,6 +1,12 @@
+// @vitest-environment happy-dom
 import { createMemoryHistory, createRouter } from "vue-router";
+import { mount } from "@vue/test-utils";
+import { defineComponent, h, nextTick } from "vue";
 import { describe, expect, it, vi } from "vitest";
-import { createVueRouterCollectionQuerySync } from "../src/collection/vue-router";
+import {
+  createVueRouterCollectionQuerySync,
+  useVueRouterCollectionQuery,
+} from "../src/collection/vue-router";
 
 async function testRouter(query: Record<string, string> = {}) {
   const router = createRouter({
@@ -64,5 +70,35 @@ describe("createVueRouterCollectionQuerySync", () => {
       sync.replace({ q: "latest", page: 1 }),
     ]);
     expect(router.currentRoute.value.query).toEqual({ q: "latest" });
+  });
+});
+
+describe("useVueRouterCollectionQuery", () => {
+  it("keeps host-owned loaders on reactive normalized route state", async () => {
+    const router = await testRouter({ q: "initial", page: "2" });
+    let collectionQuery: ReturnType<
+      typeof useVueRouterCollectionQuery<{ q: string; page: number }>
+    >;
+    const Host = defineComponent({
+      setup() {
+        collectionQuery = useVueRouterCollectionQuery({
+          router,
+          codec: queryCodec(),
+        });
+        return () => h("span", collectionQuery.query.value.q);
+      },
+    });
+    const wrapper = mount(Host);
+    expect(wrapper.text()).toBe("initial");
+
+    await collectionQuery!.update({ q: "local", page: 1 });
+    await nextTick();
+    expect(wrapper.text()).toBe("local");
+    expect(router.currentRoute.value.query).toEqual({ q: "local" });
+
+    await router.push({ query: { q: "history", page: "3" } });
+    await nextTick();
+    expect(collectionQuery!.query.value).toEqual({ q: "history", page: 3 });
+    wrapper.unmount();
   });
 });
