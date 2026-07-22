@@ -14,12 +14,14 @@ const props = withDefaults(
     description?: string;
     sections?: readonly SettingsSectionItem[];
     showSectionNavigation?: boolean;
+    showHeader?: boolean;
     navigationLabel: string;
   }>(),
   {
     description: "",
     sections: () => [],
     showSectionNavigation: true,
+    showHeader: true,
   },
 );
 const activeSection = defineModel<string>("activeSection", { default: "" });
@@ -37,6 +39,7 @@ function selectSection(key: string) {
 <template>
   <div class="space-y-5 pb-28">
     <header
+      v-if="showHeader"
       class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
     >
       <div class="min-w-0">

@@ -34,10 +34,12 @@ export default defineNuxtModule<YueliUiModuleOptions>({
 
     for (const directory of [
       "account-menu",
+      "admin",
       "collection",
       "dashboard",
       "feedback",
       "navigation",
+      "remote-select",
       "settings",
     ]) {
       addComponentsDir({

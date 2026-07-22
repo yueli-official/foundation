@@ -53,7 +53,7 @@ const copy = computed(() => ({
 
 <template>
   <div class="space-y-5">
-    <PageHeader :title :description>
+    <PageHeader :title :description size="compact">
       <template v-if="slots.actions" #actions><slot name="actions" /></template>
     </PageHeader>
 
@@ -62,118 +62,128 @@ const copy = computed(() => ({
       <slot name="metrics" />
     </section>
 
-    <div class="grid items-stretch gap-4 xl:grid-cols-12">
-      <section
-        v-if="slots.pending"
-        class="overflow-hidden rounded-xl border border-default bg-default shadow-sm xl:col-span-8"
-        :aria-labelledby="`${id}-pending`"
+    <div class="grid items-start gap-4 lg:grid-cols-3">
+      <div
+        class="grid min-w-0 content-start gap-4 lg:col-span-2"
+        data-dashboard-column="primary"
       >
-        <header
-          class="flex items-start gap-3 border-b border-default px-5 py-4"
+        <section
+          v-if="slots.pending"
+          class="overflow-hidden rounded-xl border border-default bg-default shadow-sm"
+          :aria-labelledby="`${id}-pending`"
         >
-          <span
-            class="grid size-8 shrink-0 place-items-center rounded-lg bg-warning/10 text-warning"
-            aria-hidden="true"
+          <header
+            class="flex items-start gap-3 border-b border-default px-5 py-4"
           >
-            <UIcon name="i-tabler-alert-circle" class="size-4" />
-          </span>
-          <div class="min-w-0">
-            <h2
-              :id="`${id}-pending`"
-              class="text-sm font-semibold text-highlighted"
+            <span
+              class="grid size-8 shrink-0 place-items-center rounded-lg bg-warning/10 text-warning"
+              aria-hidden="true"
             >
-              {{ copy.pending.title }}
-            </h2>
-            <p class="mt-0.5 text-xs leading-5 text-muted">
-              {{ copy.pending.description }}
-            </p>
-          </div>
-        </header>
-        <div class="p-5"><slot name="pending" /></div>
-      </section>
+              <UIcon name="i-tabler-alert-circle" class="size-4" />
+            </span>
+            <div class="min-w-0">
+              <h2
+                :id="`${id}-pending`"
+                class="text-sm font-semibold text-highlighted"
+              >
+                {{ copy.pending.title }}
+              </h2>
+              <p class="mt-0.5 text-xs leading-5 text-muted">
+                {{ copy.pending.description }}
+              </p>
+            </div>
+          </header>
+          <div class="p-5"><slot name="pending" /></div>
+        </section>
 
-      <section
-        v-if="slots.health"
-        class="rounded-xl border border-default bg-default p-5 shadow-sm xl:col-span-4"
-        :aria-labelledby="`${id}-health`"
-      >
-        <div class="flex items-start gap-3">
-          <span
-            class="grid size-8 shrink-0 place-items-center rounded-lg bg-success/10 text-success"
-            aria-hidden="true"
-          >
-            <UIcon name="i-tabler-heart-rate-monitor" class="size-4" />
-          </span>
-          <div class="min-w-0">
-            <h2
-              :id="`${id}-health`"
-              class="text-sm font-semibold text-highlighted"
-            >
-              {{ copy.health.title }}
-            </h2>
-            <p class="mt-0.5 text-xs leading-5 text-muted">
-              {{ copy.health.description }}
-            </p>
-          </div>
-        </div>
-        <div class="mt-5"><slot name="health" /></div>
-      </section>
-
-      <section
-        v-if="slots.recent"
-        class="overflow-hidden rounded-xl border border-default bg-default shadow-sm xl:col-span-8"
-        :aria-labelledby="`${id}-recent`"
-      >
-        <header
-          class="flex items-start gap-3 border-b border-default px-5 py-4"
+        <section
+          v-if="slots.recent"
+          class="overflow-hidden rounded-xl border border-default bg-default shadow-sm"
+          :aria-labelledby="`${id}-recent`"
         >
-          <span
-            class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
-            aria-hidden="true"
+          <header
+            class="flex items-start gap-3 border-b border-default px-5 py-4"
           >
-            <UIcon name="i-tabler-history" class="size-4" />
-          </span>
-          <div class="min-w-0">
-            <h2
-              :id="`${id}-recent`"
-              class="text-sm font-semibold text-highlighted"
+            <span
+              class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
+              aria-hidden="true"
             >
-              {{ copy.recent.title }}
-            </h2>
-            <p class="mt-0.5 text-xs leading-5 text-muted">
-              {{ copy.recent.description }}
-            </p>
-          </div>
-        </header>
-        <slot name="recent" />
-      </section>
+              <UIcon name="i-tabler-history" class="size-4" />
+            </span>
+            <div class="min-w-0">
+              <h2
+                :id="`${id}-recent`"
+                class="text-sm font-semibold text-highlighted"
+              >
+                {{ copy.recent.title }}
+              </h2>
+              <p class="mt-0.5 text-xs leading-5 text-muted">
+                {{ copy.recent.description }}
+              </p>
+            </div>
+          </header>
+          <slot name="recent" />
+        </section>
+      </div>
 
-      <section
-        v-if="slots.quickActions"
-        class="rounded-xl border border-default bg-default p-5 shadow-sm xl:col-span-4"
-        :aria-labelledby="`${id}-actions`"
+      <div
+        class="grid min-w-0 content-start gap-4"
+        data-dashboard-column="secondary"
       >
-        <div class="flex items-start gap-3">
-          <span
-            class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
-            aria-hidden="true"
-          >
-            <UIcon name="i-tabler-bolt" class="size-4" />
-          </span>
-          <div class="min-w-0">
-            <h2
-              :id="`${id}-actions`"
-              class="text-sm font-semibold text-highlighted"
+        <section
+          v-if="slots.health"
+          class="rounded-xl border border-default bg-default p-5 shadow-sm"
+          :aria-labelledby="`${id}-health`"
+        >
+          <div class="flex items-start gap-3">
+            <span
+              class="grid size-8 shrink-0 place-items-center rounded-lg bg-success/10 text-success"
+              aria-hidden="true"
             >
-              {{ copy.quickActions.title }}
-            </h2>
-            <p class="mt-0.5 text-xs leading-5 text-muted">
-              {{ copy.quickActions.description }}
-            </p>
+              <UIcon name="i-tabler-heart-rate-monitor" class="size-4" />
+            </span>
+            <div class="min-w-0">
+              <h2
+                :id="`${id}-health`"
+                class="text-sm font-semibold text-highlighted"
+              >
+                {{ copy.health.title }}
+              </h2>
+              <p class="mt-0.5 text-xs leading-5 text-muted">
+                {{ copy.health.description }}
+              </p>
+            </div>
           </div>
-        </div>
-        <div class="mt-5"><slot name="quickActions" /></div>
-      </section>
+          <div class="mt-5"><slot name="health" /></div>
+        </section>
+
+        <section
+          v-if="slots.quickActions"
+          class="rounded-xl border border-default bg-default p-5 shadow-sm"
+          :aria-labelledby="`${id}-actions`"
+        >
+          <div class="flex items-start gap-3">
+            <span
+              class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
+              aria-hidden="true"
+            >
+              <UIcon name="i-tabler-bolt" class="size-4" />
+            </span>
+            <div class="min-w-0">
+              <h2
+                :id="`${id}-actions`"
+                class="text-sm font-semibold text-highlighted"
+              >
+                {{ copy.quickActions.title }}
+              </h2>
+              <p class="mt-0.5 text-xs leading-5 text-muted">
+                {{ copy.quickActions.description }}
+              </p>
+            </div>
+          </div>
+          <div class="mt-5"><slot name="quickActions" /></div>
+        </section>
+      </div>
     </div>
   </div>
 </template>

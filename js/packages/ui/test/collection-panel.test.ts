@@ -139,6 +139,53 @@ describe("CollectionPanel", () => {
     expect(wrapper.text()).toContain("1-2/2");
   });
 
+  it("keeps columns visible and renders bulk actions in normal document flow", async () => {
+    const wrapper = mount(CollectionPanel, {
+      props: {
+        label: "Records",
+        items: [{ id: "one", title: "First" }],
+        itemKey: (item: unknown) => (item as { id: string; title: string }).id,
+        itemLabel: (item: unknown) =>
+          (item as { id: string; title: string }).title,
+        messages,
+        total: 1,
+        page: 1,
+        pageSize: 10,
+        selectable: true,
+        selectionCount: 0,
+      },
+      slots: {
+        columns: "Name",
+        item: "First",
+        "bulk-actions": "Archive",
+      },
+      global: {
+        components: {
+          UInput,
+          UButton,
+          UCheckbox,
+          USelect: passiveStub,
+          USelectMenu: passiveStub,
+          UPagination: passiveStub,
+          USkeleton: passiveStub,
+          UIcon: passiveStub,
+        },
+      },
+    });
+
+    expect(wrapper.find("[data-collection-modebar]").exists()).toBe(false);
+    expect(wrapper.find("[data-collection-columns]").exists()).toBe(true);
+    expect(wrapper.find("[data-collection-bulk]").exists()).toBe(false);
+
+    await wrapper.setProps({ selectionCount: 1 });
+    expect(wrapper.find("[data-collection-modebar]").exists()).toBe(false);
+    expect(wrapper.find("[data-collection-columns]").exists()).toBe(true);
+    expect(wrapper.get("[data-collection-bulk]").text()).toContain(
+      "1 selected",
+    );
+    expect(wrapper.get("[data-collection-bulk]").text()).toContain("Archive");
+  });
+
   it("uses a searchable Nuxt UI control only when caller text is supplied", () => {
     const wrapper = mount(CollectionPanel, {
       props: {

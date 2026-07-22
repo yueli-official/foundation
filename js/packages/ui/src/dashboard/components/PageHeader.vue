@@ -1,9 +1,13 @@
 <script setup lang="ts">
-defineProps<{
-  title: string;
-  description?: string;
-  headingId?: string;
-}>();
+withDefaults(
+  defineProps<{
+    title: string;
+    description?: string;
+    headingId?: string;
+    size?: "default" | "compact";
+  }>(),
+  { size: "default" },
+);
 </script>
 
 <template>
@@ -14,7 +18,10 @@ defineProps<{
       <div v-if="$slots.eyebrow" class="mb-2"><slot name="eyebrow" /></div>
       <h1
         :id="headingId"
-        class="text-2xl font-semibold tracking-tight text-highlighted sm:text-3xl"
+        class="font-semibold tracking-tight text-highlighted"
+        :class="
+          size === 'compact' ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'
+        "
       >
         {{ title }}
       </h1>

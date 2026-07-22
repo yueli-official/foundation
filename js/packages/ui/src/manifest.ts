@@ -12,6 +12,8 @@ export interface PublicUiManifestEntry {
   readonly responsibility: string;
   readonly nonResponsibilities: readonly string[];
   readonly runtimeDependencies: readonly string[];
+  readonly replacement?: `@yueli/ui/${string}`;
+  readonly removalVersion?: string;
   readonly evidence: {
     readonly docs: readonly string[];
     readonly tests: readonly string[];
@@ -213,12 +215,13 @@ export const publicUiManifest = [
     entrypoint: "@yueli/ui/account-menu/pattern",
     owner: "foundation",
     responsibility:
-      "Own provider-neutral identity fallback, account action grouping, accessible trigger anatomy and the async logout command boundary.",
+      "Own provider-neutral identity fallback, account and appearance action grouping, inline/sidebar/collapsed trigger anatomy and the async logout command boundary.",
     nonResponsibilities: [
       "identity providers",
       "session state",
       "application navigation",
       "locale catalogs",
+      "color-mode state or persistence",
     ],
     runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
     evidence: {
@@ -229,9 +232,55 @@ export const publicUiManifest = [
     },
   },
   {
-    id: "dashboard-patterns",
+    id: "admin-template",
     kind: "pattern",
     status: "experimental",
+    entrypoint: "@yueli/ui/admin",
+    owner: "foundation",
+    responsibility:
+      "Compose Nuxt UI dashboard group, sidebar, search, page panel, navbar and toolbar with stable responsive ownership and caller-owned navigation/content.",
+    nonResponsibilities: [
+      "business dashboard regions",
+      "application routes",
+      "authorization",
+      "brand assets",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/admin-template.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/apps/ui-lab", "js/conformance/ui"],
+      accessibility: ["test/admin-template.test.ts"],
+    },
+  },
+  {
+    id: "remote-select",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/remote-select",
+    owner: "foundation",
+    responsibility:
+      "Own debounced, abortable, latest-wins remote option loading, per-instance query caching and retry around Nuxt UI SelectMenu.",
+    nonResponsibilities: [
+      "business HTTP clients",
+      "local option filtering",
+      "multi-select",
+      "creating domain entities",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/remote-select.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/apps/ui-lab", "js/conformance/ui"],
+      accessibility: ["test/remote-select.test.ts"],
+    },
+  },
+  {
+    id: "dashboard-patterns",
+    kind: "pattern",
+    status: "deprecated",
     entrypoint: "@yueli/ui/dashboard/pattern",
     owner: "foundation",
     responsibility:
@@ -243,6 +292,8 @@ export const publicUiManifest = [
       "application navigation",
     ],
     runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    replacement: "@yueli/ui/admin",
+    removalVersion: "0.2.0",
     evidence: {
       docs: ["README.md"],
       tests: ["test/dashboard-patterns.test.ts", "scripts/test-pack.mjs"],
@@ -327,13 +378,14 @@ export const publicUiManifest = [
     entrypoint: "@yueli/ui/collection/pattern",
     owner: "foundation",
     responsibility:
-      "Own the integrated collection frame anatomy, responsive controls disclosure, sticky bulk region and accessible structural defaults.",
+      "Own the integrated collection frame anatomy, responsive controls disclosure, in-flow bulk region and accessible structural defaults.",
     nonResponsibilities: [
       "filter and sort semantics",
       "domain columns and items",
       "business actions",
       "pagination primitives",
       "translated copy",
+      "data-table column sizing and alignment owned by Nuxt UI Table",
     ],
     runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
     evidence: {
@@ -347,16 +399,40 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "collection-table-toolbar",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/collection/pattern",
+    owner: "foundation",
+    responsibility:
+      "Own one responsive default toolbar, stable filter popover and in-place selection mode around a caller-owned Nuxt UI Table.",
+    nonResponsibilities: [
+      "data-table rendering and column alignment",
+      "filter and sort semantics",
+      "business bulk actions",
+      "business HTTP",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md", "src/collection/toolbar-standard.md"],
+      tests: ["test/collection-table-toolbar.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["yueli-official/platform/products/docs/web"],
+      accessibility: ["test/collection-table-toolbar.test.ts"],
+    },
+  },
+  {
     id: "collection-panel",
     kind: "pattern",
     status: "experimental",
     entrypoint: "@yueli/ui/collection/pattern",
     owner: "foundation",
     responsibility:
-      "Own the complete responsive search, configured controls, selection, bulk, loading/error/empty, row/grid and pagination anatomy for remote collections.",
+      "Own complete responsive search, configured controls, in-flow selection and bulk actions, loading/error/empty states, row/grid containers and pagination for remote collections.",
     nonResponsibilities: [
       "business HTTP",
       "domain item fields",
+      "strict data-table column alignment",
       "business bulk actions",
       "locale catalogs",
     ],

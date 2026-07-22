@@ -82,6 +82,10 @@ try {
     "package/package.json",
     "package/src/account-menu/components/AccountMenu.vue",
     "package/src/account-menu/pattern.ts",
+    "package/src/admin/components/AdminPage.vue",
+    "package/src/admin/components/AdminShell.vue",
+    "package/src/admin/index.ts",
+    "package/src/admin/types.ts",
     "package/src/collection/components/CollectionActiveFilters.vue",
     "package/src/collection/components/CollectionDock.vue",
     "package/src/collection/components/CollectionFooter.vue",
@@ -92,12 +96,14 @@ try {
     "package/src/collection/components/CollectionPanel.vue",
     "package/src/collection/components/CollectionRowShell.vue",
     "package/src/collection/components/CollectionSortDirectionButton.vue",
+    "package/src/collection/components/CollectionTableToolbar.vue",
     "package/src/collection/components/CollectionToolbar.vue",
     "package/src/collection/components/CollectionViewToggle.vue",
     "package/src/collection/index.ts",
     "package/src/collection/panel.ts",
     "package/src/collection/pattern.ts",
     "package/src/collection/route-query.ts",
+    "package/src/collection/toolbar-standard.md",
     "package/src/collection/vue.ts",
     "package/src/collection/vue-router.ts",
     "package/src/collection/workflow.ts",
@@ -117,6 +123,9 @@ try {
     "package/src/module.ts",
     "package/src/navigation/back-to-top.ts",
     "package/src/navigation/components/BackToTop.vue",
+    "package/src/remote-select/components/RemoteSelect.vue",
+    "package/src/remote-select/index.ts",
+    "package/src/remote-select/types.ts",
     "package/src/settings/browser.ts",
     "package/src/settings/components/SettingSection.vue",
     "package/src/settings/components/SettingsLayout.vue",
@@ -178,13 +187,15 @@ try {
     join(consumerRoot, "app", "app.vue"),
     `<script setup lang="ts">
 import { createCollectionRouteQueryCodec, createJsonCollectionQueryPolicy } from "@yueli/ui/collection";
-import type { AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
+import type { AccountMenuAppearance, AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
+import type { AdminNavigationItem, AdminSearchGroup, AdminShellMessages } from "@yueli/ui/admin";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
 import { useActionFeedback } from "@yueli/ui/feedback";
 import { evaluateImageOptimization } from "@yueli/ui/image";
 import { optimizeImageFile } from "@yueli/ui/image/browser";
 import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
+import type { RemoteSelectLoader, RemoteSelectMessages, RemoteSelectValue } from "@yueli/ui/remote-select";
 import { publicUiManifest } from "@yueli/ui/manifest";
 import { useVueSettingsWorkflow } from "@yueli/ui/settings/vue";
 
@@ -226,13 +237,42 @@ const accountMessages: AccountMenuMessages = {
   logout: "Sign out",
   openMenu: (name) => "Open " + name + " menu",
 };
+const accountAppearance: AccountMenuAppearance = {
+  value: "system",
+  messages: { label: "Appearance", system: "System", light: "Light", dark: "Dark" },
+  onChange: () => undefined,
+};
+const shellMessages: AdminShellMessages = {
+  skipToContent: "Skip to content",
+  search: "Search",
+  searchPlaceholder: "Search pages",
+};
+const navigation: readonly AdminNavigationItem[] = [{ label: "Dashboard", icon: "i-tabler-layout-dashboard", to: "/" }];
+const searchGroups: readonly AdminSearchGroup[] = [{ id: "pages", label: "Pages", items: [{ label: "Dashboard", to: "/" }] }];
+const remoteMessages: RemoteSelectMessages = {
+  placeholder: "Select owner",
+  searchPlaceholder: "Search owners",
+  empty: "No owners",
+  error: "Owners unavailable",
+  retry: "Retry",
+  minimumQuery: (count) => "Enter " + count + " characters",
+};
+const owner = ref<RemoteSelectValue | null>(null);
+const packedSearch = ref("");
+const loadOwners: RemoteSelectLoader = async ({ signal }) => {
+  signal.throwIfAborted();
+  return { items: [{ value: "packed", label: "Packed owner" }] };
+};
 const imageDecision = evaluateImageOptimization({ name: "packed.png", type: "image/png", size: 2_000_000 });
 void optimizeImageFile;
 </script>
 
 <template>
-  <main id="main-content" tabindex="-1">
-    <YAccountMenu name="Packed user" :messages="accountMessages" :logout="() => undefined" />
+  <YAdminShell :navigation="navigation" :search-groups="searchGroups" :messages="shellMessages" main-id="main-content">
+    <template #brand>Packed admin</template>
+    <YAdminPage id="packed" title="Dashboard" main-id="main-content">
+    <YRemoteSelect v-model="owner" :load="loadOwners" :messages="remoteMessages" />
+    <YAccountMenu name="Packed user" :messages="accountMessages" :appearance="accountAppearance" trigger-mode="sidebar" :logout="() => undefined" />
     <YDashboardLayout title="Dashboard" :messages="dashboardMessages">
       <template #recent><span>Recent work</span></template>
     </YDashboardLayout>
@@ -247,9 +287,15 @@ void optimizeImageFile;
       <span>packed {{ publicUiManifest.length }} {{ imageDecision.reason }}</span>
       <template #footer><span>Footer</span></template>
     </YCollectionFrame>
+    <YCollectionTableToolbar v-model:search="packedSearch" label="Packed table" search-placeholder="Search" search-action="Search" filter-label="Filters">
+      <template #filters><span>Status</span></template>
+      <template #utilities><button type="button">Columns</button></template>
+      <template #selection><span>Selected</span></template>
+    </YCollectionTableToolbar>
     <YBackToTop label="Back to top" :threshold="0" />
     <YSettingSection title="Settings"><input v-model="settingsForm.title" /></YSettingSection>
-  </main>
+    </YAdminPage>
+  </YAdminShell>
 </template>
 `,
   );
@@ -268,6 +314,15 @@ void optimizeImageFile;
       "Packed consumer CSS is missing CollectionFrame Tailwind selectors.",
     );
   }
+  if (
+    !generatedCss.some((source) =>
+      source.includes("@3xl\\:grid-cols-\\[minmax\\(14rem\\,1fr\\)_auto\\]"),
+    )
+  ) {
+    throw new Error(
+      "Packed consumer CSS is missing CollectionTableToolbar responsive selectors.",
+    );
+  }
   if (!generatedCss.some((source) => source.includes("--yueli-surface-page"))) {
     throw new Error("Packed consumer CSS is missing public theme tokens.");
   }
@@ -282,6 +337,7 @@ void optimizeImageFile;
     packedPackage.name !== "@yueli/ui" ||
     !packedPackage.exports?.["."] ||
     !packedPackage.exports?.["./account-menu/pattern"] ||
+    !packedPackage.exports?.["./admin"] ||
     !packedPackage.exports?.["./tailwind.css"] ||
     !packedPackage.exports?.["./theme"] ||
     !packedPackage.exports?.["./theme.css"] ||
@@ -291,6 +347,7 @@ void optimizeImageFile;
     !packedPackage.exports?.["./image"] ||
     !packedPackage.exports?.["./image/browser"] ||
     !packedPackage.exports?.["./navigation/back-to-top"] ||
+    !packedPackage.exports?.["./remote-select"] ||
     !packedPackage.exports?.["./settings"] ||
     !packedPackage.exports?.["./settings/vue"] ||
     !packedPackage.exports?.["./settings/browser"] ||

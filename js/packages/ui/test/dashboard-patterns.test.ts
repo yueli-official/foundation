@@ -48,10 +48,22 @@ describe("dashboard Patterns", () => {
     expect(wrapper.findAll("h2").map((heading) => heading.text())).toEqual([
       "Key metrics",
       "Pending",
-      "Health",
       "Recent work",
+      "Health",
       "Quick actions",
     ]);
+    expect(
+      wrapper
+        .get('[data-dashboard-column="primary"]')
+        .findAll("h2")
+        .map((heading) => heading.text()),
+    ).toEqual(["Pending", "Recent work"]);
+    expect(
+      wrapper
+        .get('[data-dashboard-column="secondary"]')
+        .findAll("h2")
+        .map((heading) => heading.text()),
+    ).toEqual(["Health", "Quick actions"]);
     for (const region of wrapper.findAll("section")) {
       const labelledby = region.attributes("aria-labelledby");
       expect(labelledby).toBeTruthy();

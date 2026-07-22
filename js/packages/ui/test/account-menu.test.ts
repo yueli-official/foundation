@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import { defineComponent, h } from "vue";
 import { describe, expect, it, vi } from "vitest";
 import AccountMenu, {
+  type AccountMenuAppearance,
   type AccountMenuMessages,
 } from "../src/account-menu/components/AccountMenu.vue";
 
@@ -28,6 +29,12 @@ const messages: AccountMenuMessages = {
   currentUser: "Current user",
   logout: "Sign out",
   openMenu: (name) => `Open ${name} account menu`,
+};
+const appearanceMessages = {
+  label: "Appearance",
+  system: "System",
+  light: "Light",
+  dark: "Dark",
 };
 const global = {
   components: {
@@ -88,5 +95,62 @@ describe("AccountMenu", () => {
     >;
     await groups.at(-1)?.[0]?.onSelect?.();
     expect(logout).toHaveBeenCalledOnce();
+  });
+
+  it("renders a caller-owned appearance submenu and changes preference", async () => {
+    const onChange = vi.fn(async () => undefined);
+    const appearance: AccountMenuAppearance = {
+      value: "system",
+      messages: appearanceMessages,
+      onChange,
+    };
+    const wrapper = mount(AccountMenu, {
+      props: { appearance, logout: vi.fn(), messages },
+      global,
+    });
+    const groups = wrapper.getComponent(passiveStub).props("items") as Array<
+      Array<{
+        label: string;
+        children?: Array<{
+          label: string;
+          checked?: boolean;
+          onSelect?: (event: Event) => Promise<void>;
+        }>;
+      }>
+    >;
+    expect(groups.map((group) => group.map((item) => item.label))).toEqual([
+      ["Current user"],
+      ["Appearance"],
+      ["Sign out"],
+    ]);
+    const options = groups[1]?.[0]?.children ?? [];
+    expect(options.map(({ label, checked }) => ({ label, checked }))).toEqual([
+      { label: "System", checked: true },
+      { label: "Light", checked: false },
+      { label: "Dark", checked: false },
+    ]);
+
+    const event = new Event("select", { cancelable: true });
+    await options[2]?.onSelect?.(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(onChange).toHaveBeenCalledWith("dark");
+  });
+
+  it("owns expanded and collapsed sidebar trigger anatomy", async () => {
+    const wrapper = mount(AccountMenu, {
+      props: {
+        name: "Lin",
+        triggerMode: "sidebar",
+        logout: vi.fn(),
+        messages,
+      },
+      global,
+    });
+    expect(wrapper.get("button").classes()).toContain("w-full");
+    expect(wrapper.get("button").text()).toContain("Lin");
+
+    await wrapper.setProps({ triggerMode: "collapsed" });
+    expect(wrapper.get("button").classes()).toContain("aspect-square");
+    expect(wrapper.get("button").text()).not.toContain("Lin");
   });
 });

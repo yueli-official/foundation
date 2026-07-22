@@ -21,7 +21,7 @@ const passiveStub = defineComponent({
 });
 
 describe("settings Patterns", () => {
-  it("renders caller-owned settings copy and section anatomy", () => {
+  it("renders caller-owned settings copy and section anatomy", async () => {
     const layout = mount(SettingsLayout, {
       props: {
         title: "Workspace",
@@ -36,6 +36,9 @@ describe("settings Patterns", () => {
     });
     expect(layout.get("h1").text()).toBe("Workspace");
     expect(layout.get('nav[aria-label="Settings sections"]')).toBeTruthy();
+
+    await layout.setProps({ showHeader: false });
+    expect(layout.find("h1").exists()).toBe(false);
 
     const section = mount(SettingSection, {
       props: { title: "Identity", description: "Public profile" },

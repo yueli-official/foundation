@@ -239,7 +239,9 @@ function toggle(item: TItem, key: TKey) {
           messages.selected(selectionCount, selectionMode)
         }}</span>
       </div>
-      <div class="flex flex-wrap items-center justify-end gap-1">
+      <div
+        class="flex shrink-0 items-center justify-end gap-1 whitespace-nowrap"
+      >
         <UButton
           v-if="canSelectAllResults"
           :label="messages.selectAllResults"
@@ -261,7 +263,7 @@ function toggle(item: TItem, key: TKey) {
 
     <template #columns>
       <div
-        class="flex min-w-0 items-center gap-0 text-[0.6875rem] font-medium text-muted"
+        class="flex w-full min-w-0 items-center gap-0 text-xs font-medium leading-5 text-muted"
       >
         <div v-if="selectable" class="w-9 shrink-0">
           <UCheckbox
@@ -270,7 +272,9 @@ function toggle(item: TItem, key: TKey) {
             @update:model-value="emit('togglePage', $event === true)"
           />
         </div>
-        <div class="min-w-0 flex-1"><slot name="columns" /></div>
+        <div class="min-w-0 flex-1">
+          <slot name="columns" />
+        </div>
       </div>
     </template>
 
@@ -372,6 +376,7 @@ function toggle(item: TItem, key: TKey) {
           :key="itemKey(item)"
           :selected="selected(item, itemKey(item))"
           :toggle="() => toggle(item, itemKey(item))"
+          :selection-active="selectionCount > 0"
         />
       </article>
     </div>
@@ -381,7 +386,11 @@ function toggle(item: TItem, key: TKey) {
         v-for="item in items"
         :key="itemKey(item)"
         class="flex min-w-0 items-center px-3 py-3 transition-colors sm:px-4"
-        :class="selected(item, itemKey(item)) ? 'bg-primary/5' : ''"
+        :class="
+          selected(item, itemKey(item))
+            ? 'bg-elevated/70 hover:bg-elevated/70'
+            : 'hover:bg-elevated/40'
+        "
       >
         <div v-if="selectable" class="w-9 shrink-0">
           <UCheckbox
@@ -400,6 +409,7 @@ function toggle(item: TItem, key: TKey) {
             :key="itemKey(item)"
             :selected="selected(item, itemKey(item))"
             :toggle="() => toggle(item, itemKey(item))"
+            :selection-active="selectionCount > 0"
           />
         </div>
       </article>

@@ -45,8 +45,8 @@ function toggleControls() {
       <div
         :id="controlsId"
         :class="[
-          controlsOpen ? 'flex' : 'hidden',
-          'mt-3 flex-wrap items-center gap-2 @sm/collection:flex',
+          controlsOpen ? 'flex' : 'hidden sm:flex',
+          'mt-3 flex-wrap items-center gap-2',
         ]"
       >
         <slot name="controls" />
@@ -55,14 +55,17 @@ function toggleControls() {
 
     <div
       v-if="bulkVisible"
+      data-collection-bulk
       role="region"
       :aria-label="bulkLabel"
-      class="sticky top-2 z-20 mx-3 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/25 bg-default/95 px-3 py-2 shadow-lg backdrop-blur motion-reduce:backdrop-blur-none sm:mx-4"
+      class="flex min-h-11 items-center justify-between gap-3 overflow-x-auto border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
     >
       <slot name="bulk" />
     </div>
-
-    <div class="border-b border-default bg-muted/40 px-3 py-2 sm:px-4">
+    <div
+      data-collection-columns
+      class="flex min-h-11 items-center border-b border-default bg-muted/30 px-3 py-2 sm:px-4"
+    >
       <slot name="columns" />
     </div>
 

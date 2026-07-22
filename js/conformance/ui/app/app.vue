@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import type { AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
+import type {
+  AccountMenuAppearance,
+  AccountMenuAppearanceValue,
+  AccountMenuMessages,
+} from "@yueli/ui/account-menu/pattern";
+import type {
+  AdminNavigationItem,
+  AdminSearchGroup,
+  AdminShellMessages,
+} from "@yueli/ui/admin";
 import {
   createCollectionRouteQueryCodec,
   createJsonCollectionQueryPolicy,
@@ -9,8 +18,13 @@ import {
 } from "@yueli/ui/collection";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
-import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import { useActionFeedback } from "@yueli/ui/feedback";
+import type {
+  RemoteSelectLoader,
+  RemoteSelectMessages,
+  RemoteSelectOption,
+  RemoteSelectValue,
+} from "@yueli/ui/remote-select";
 import { bindSettingsBeforeUnload } from "@yueli/ui/settings/browser";
 import type { SettingsSaveDockMessages } from "@yueli/ui/settings/pattern";
 import { useVueSettingsWorkflow } from "@yueli/ui/settings/vue";
@@ -143,18 +157,103 @@ const settingsMessages: SettingsSaveDockMessages = {
   savePending: "保存中",
   saveSuccess: "已保存",
 };
-const dashboardMessages: DashboardMessages = {
-  metrics: "关键指标",
-  pending: { title: "待处理", description: "优先处理阻塞工作。" },
-  recent: { title: "最近工作", description: "继续最近更新的内容。" },
-  health: { title: "运行状态", description: "当前服务状态。" },
-  quickActions: { title: "快捷动作", description: "常用的下一步。" },
+const adminMessages: AdminShellMessages = {
+  skipToContent: "跳到主要内容",
+  search: "搜索",
+  searchPlaceholder: "搜索页面与操作",
+};
+const navigation: readonly AdminNavigationItem[] = [
+  {
+    label: "内容集合",
+    icon: "i-tabler-files",
+    active: true,
+  },
+  {
+    label: "设置工作流",
+    icon: "i-tabler-settings",
+  },
+];
+const secondaryNavigation: readonly AdminNavigationItem[] = [
+  {
+    label: "使用文档",
+    icon: "i-tabler-book-2",
+    to: "https://github.com/yueli-official/foundation",
+    target: "_blank",
+  },
+];
+const searchGroups: readonly AdminSearchGroup[] = [
+  {
+    id: "pages",
+    label: "页面",
+    items: [
+      { id: "content", label: "内容集合", icon: "i-tabler-files" },
+      { id: "settings", label: "设置工作流", icon: "i-tabler-settings" },
+    ],
+  },
+];
+const owners: readonly RemoteSelectOption<string>[] = [
+  {
+    value: "owner-lin",
+    label: "Lin",
+    description: "内容负责人",
+    icon: "i-tabler-user",
+  },
+  {
+    value: "owner-yue",
+    label: "Yue",
+    description: "设计系统维护者",
+    icon: "i-tabler-user",
+  },
+  {
+    value: "owner-api",
+    label: "API Team",
+    description: "GoFrame 服务团队",
+    icon: "i-tabler-users",
+  },
+];
+const ownerId = ref<RemoteSelectValue | null>("owner-lin");
+const ownerMessages: RemoteSelectMessages = {
+  placeholder: "选择负责人",
+  searchPlaceholder: "搜索负责人",
+  empty: "没有匹配的负责人",
+  error: "负责人加载失败",
+  retry: "重试",
+  minimumQuery: (count) => `至少输入 ${count} 个字符`,
+};
+const loadOwners: RemoteSelectLoader<string> = async ({ query, signal }) => {
+  await Promise.resolve();
+  if (signal.aborted) return { items: [] };
+  const needle = query.toLocaleLowerCase();
+  return {
+    items: owners.filter((owner) =>
+      `${owner.label} ${owner.description ?? ""}`
+        .toLocaleLowerCase()
+        .includes(needle),
+    ),
+  };
 };
 const accountMessages: AccountMenuMessages = {
   currentUser: "当前用户",
   logout: "退出登录",
   openMenu: (name) => `打开 ${name} 的用户菜单`,
 };
+const colorMode = useColorMode();
+const accountAppearance = computed<AccountMenuAppearance>(() => ({
+  value: (["light", "dark"] as const).includes(
+    colorMode.preference as "light" | "dark",
+  )
+    ? (colorMode.preference as AccountMenuAppearanceValue)
+    : "system",
+  messages: {
+    label: "外观",
+    system: "跟随系统",
+    light: "浅色",
+    dark: "深色",
+  },
+  onChange: (value) => {
+    colorMode.preference = value;
+  },
+}));
 let unbindBeforeUnload: (() => void) | undefined;
 onMounted(() => {
   unbindBeforeUnload = bindSettingsBeforeUnload({
@@ -348,83 +447,77 @@ function saveSettings() {
 
 <template>
   <UApp>
-    <div class="min-h-dvh bg-muted/30 text-default">
-      <header class="border-b border-default bg-default">
-        <div
-          class="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
-        >
-          <div class="flex min-w-0 items-center gap-2.5">
-            <span
-              class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
-            >
-              <UIcon name="i-tabler-box-multiple" class="size-4" />
-            </span>
-            <div class="min-w-0">
-              <p class="truncate text-sm font-semibold text-highlighted">
-                Yueli UI Conformance
-              </p>
-              <p class="hidden text-xs text-muted sm:block">
-                public Collection Pattern
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <YAccountMenu
-              name="Lin"
-              email="lin@example.test"
-              :messages="accountMessages"
-              :context-actions="[
-                { label: '工作区', icon: 'i-tabler-layout-dashboard' },
-              ]"
-              :logout="() => undefined"
-            />
-            <UColorModeButton size="sm" aria-label="切换颜色模式" />
+    <YAdminShell
+      storage-key="ui-conformance-admin"
+      main-id="main-content"
+      :navigation="navigation"
+      :secondary-navigation="secondaryNavigation"
+      :search-groups="searchGroups"
+      :messages="adminMessages"
+    >
+      <template #brand>
+        <div class="flex min-w-0 items-center gap-2.5 px-2">
+          <span
+            class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
+          >
+            <UIcon name="i-tabler-box-multiple" class="size-4" />
+          </span>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-semibold text-highlighted">
+              Yueli UI
+            </p>
+            <p class="truncate text-xs text-muted">Admin conformance</p>
           </div>
         </div>
-      </header>
+      </template>
+      <template #sidebar-footer="{ collapsed }">
+        <YAccountMenu
+          name="Lin"
+          email="lin@example.test"
+          :messages="accountMessages"
+          :context-actions="[
+            { label: '工作区', icon: 'i-tabler-layout-dashboard' },
+          ]"
+          :appearance="accountAppearance"
+          :trigger-mode="collapsed ? 'collapsed' : 'sidebar'"
+          :logout="() => undefined"
+        />
+      </template>
 
-      <main
-        id="main-content"
-        tabindex="-1"
-        class="mx-auto w-full max-w-7xl px-4 py-8 outline-none sm:px-6 lg:px-8 lg:py-12"
+      <YAdminPage
+        id="content"
+        title="内容集合"
+        icon="i-tabler-files"
+        main-id="main-content"
+        body-class="space-y-16 lg:p-8"
       >
-        <YDashboardLayout
-          class="mb-6"
-          title="内容集合"
-          description="搜索、筛选、批量选择、状态、数据区与分页均来自公共 Pattern。"
-          :messages="dashboardMessages"
-        >
-          <template #actions>
-            <div class="flex items-center gap-2">
-              <YActionFeedbackButton
-                :status="actionFeedback.status.value"
-                idle-label="保存更改"
-                pending-label="保存中"
-                success-label="已保存"
-                error-label="保存失败"
-                size="sm"
-                @click="simulateAction"
-              />
-              <UButton icon="i-tabler-plus" label="新建内容" size="sm" />
-            </div>
-          </template>
-          <template #metrics>
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div class="rounded-xl border border-default bg-default p-4">
-                <p class="text-xl font-semibold tabular-nums text-highlighted">
-                  64
-                </p>
-                <p class="text-xs text-muted">内容</p>
-              </div>
-              <div class="rounded-xl border border-default bg-default p-4">
-                <p class="text-xl font-semibold tabular-nums text-highlighted">
-                  48
-                </p>
-                <p class="text-xs text-muted">已发布</p>
-              </div>
-            </div>
-          </template>
-        </YDashboardLayout>
+        <template #actions>
+          <div class="flex items-center gap-2">
+            <YActionFeedbackButton
+              :status="actionFeedback.status.value"
+              idle-label="保存更改"
+              pending-label="保存中"
+              success-label="已保存"
+              error-label="保存失败"
+              size="sm"
+              @click="simulateAction"
+            />
+            <UButton icon="i-tabler-plus" label="新建内容" size="sm" />
+          </div>
+        </template>
+        <template #toolbar-left>
+          <YRemoteSelect
+            v-model="ownerId"
+            class="w-56"
+            aria-label="按负责人筛选"
+            :load="loadOwners"
+            :initial-items="owners.slice(0, 1)"
+            :messages="ownerMessages"
+          />
+        </template>
+        <template #toolbar-right>
+          <span class="text-xs text-muted">远程选项 · latest wins</span>
+        </template>
 
         <YCollectionPanel
           v-model:search="searchInput"
@@ -518,7 +611,6 @@ function saveSettings() {
         </YCollectionPanel>
 
         <YSettingsLayout
-          class="mt-16"
           title="设置工作流"
           description="Baseline、dirty、discard、leave guard 与保存反馈均穿过公共 Interface。"
           navigation-label="设置分区"
@@ -550,8 +642,13 @@ function saveSettings() {
             @save="saveSettings"
           />
         </YSettingsLayout>
-      </main>
-      <YBackToTop label="返回顶部" :threshold="0.5" />
-    </div>
+      </YAdminPage>
+      <YBackToTop
+        label="返回顶部"
+        target-id="main-content"
+        scroll-container-id="main-content"
+        :threshold="0.5"
+      />
+    </YAdminShell>
   </UApp>
 </template>

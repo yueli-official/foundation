@@ -2,8 +2,9 @@
 
 Blank Nuxt 4 consumer for the experimental `@yueli/ui` public Interface.
 
-The visible collection page is deliberately a copy-owned Block in this app. It proves that the headless workflow can drive Nuxt UI without
-turning the app page, fixtures, filters, columns, or domain actions into a public runtime export.
+The app consumes the public Admin template and RemoteSelect together with the Collection, Settings, Feedback, AccountMenu and BackToTop
+modules. Its fixtures, filters, columns, navigation, translations and domain actions stay copy-owned; the conformance app is not a product
+template or a deployment target.
 
 Current checks:
 
@@ -11,7 +12,8 @@ Current checks:
 - `pnpm --filter @yueli/ui-foundation-conformance build`
 - `pnpm --filter @yueli/ui-foundation-conformance test:e2e`
 
-The Playwright suite runs against a production Nuxt server and covers controlled URL history, keyboard search and bulk selection, sticky bulk actions, mobile reflow, horizontal overflow, light/dark screenshots and axe checks.
+The Playwright suite runs against a production Nuxt server and covers admin ownership, remote option search, controlled URL history,
+keyboard search and bulk selection, sticky bulk actions, mobile reflow, horizontal overflow, light/dark screenshots and axe checks.
 
 Still required before any Pattern promotion:
 

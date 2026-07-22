@@ -8,6 +8,7 @@ export { default as CollectionPagination } from "./components/CollectionPaginati
 export { default as CollectionPageSelection } from "./components/CollectionPageSelection.vue";
 export { default as CollectionRowShell } from "./components/CollectionRowShell.vue";
 export { default as CollectionSortDirectionButton } from "./components/CollectionSortDirectionButton.vue";
+export { default as CollectionTableToolbar } from "./components/CollectionTableToolbar.vue";
 export { default as CollectionToolbar } from "./components/CollectionToolbar.vue";
 export { default as CollectionViewToggle } from "./components/CollectionViewToggle.vue";
 export type {

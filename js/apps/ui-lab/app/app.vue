@@ -3,6 +3,16 @@ import type {
   CollectionControl,
   CollectionPanelMessages,
 } from "@yueli/ui/collection";
+import type {
+  AdminNavigationItem,
+  AdminSearchGroup,
+  AdminShellMessages,
+} from "@yueli/ui/admin";
+import type {
+  RemoteSelectLoader,
+  RemoteSelectMessages,
+  RemoteSelectValue,
+} from "@yueli/ui/remote-select";
 import { useActionFeedback } from "@yueli/ui/feedback";
 
 interface LabItem {
@@ -12,6 +22,46 @@ interface LabItem {
   readonly category: "design" | "engineering";
   readonly status: "draft" | "published";
 }
+
+const shellMessages: AdminShellMessages = {
+  skipToContent: "跳到主要内容",
+  search: "搜索",
+  searchPlaceholder: "搜索页面与操作",
+};
+const navigation: readonly AdminNavigationItem[] = [
+  { label: "内容集合", icon: "i-tabler-files", to: "/", active: true },
+  { label: "设置", icon: "i-tabler-settings", to: "/settings" },
+];
+const searchGroups: readonly AdminSearchGroup[] = [
+  {
+    id: "pages",
+    label: "页面",
+    items: [
+      { label: "内容集合", icon: "i-tabler-files", to: "/" },
+      { label: "设置", icon: "i-tabler-settings", to: "/settings" },
+    ],
+  },
+];
+const ownerMessages: RemoteSelectMessages = {
+  placeholder: "选择负责人",
+  searchPlaceholder: "搜索负责人",
+  empty: "没有匹配的负责人",
+  error: "负责人加载失败",
+  retry: "重试",
+  minimumQuery: (count) => `至少输入 ${count} 个字符`,
+};
+const selectedOwner = ref<RemoteSelectValue | null>(null);
+const loadOwners: RemoteSelectLoader = async ({ query, signal }) => {
+  signal.throwIfAborted();
+  const needle = query.toLocaleLowerCase();
+  return {
+    items: [
+      { value: "alex", label: "Alex Chen", description: "Content operations" },
+      { value: "sam", label: "Sam Lee", description: "Platform engineering" },
+      { value: "taylor", label: "Taylor Wu", description: "Design systems" },
+    ].filter((item) => item.label.toLocaleLowerCase().includes(needle)),
+  };
+};
 
 const messages: CollectionPanelMessages = {
   searchPlaceholder: "搜索名称、描述或内容 ID",
@@ -176,52 +226,44 @@ function simulateAction() {
 
 <template>
   <UApp>
-    <div class="min-h-dvh bg-muted/30 text-default">
-      <header class="border-b border-default bg-default">
-        <div
-          class="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
-        >
-          <div class="flex min-w-0 items-center gap-2.5">
-            <span
-              class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
-              ><UIcon name="i-tabler-box-multiple" class="size-4"
-            /></span>
-            <div class="min-w-0">
-              <p class="truncate text-sm font-semibold text-highlighted">
-                Yueli Foundation UI Lab
-              </p>
-              <p class="hidden text-xs text-muted sm:block">
-                public Pattern laboratory
-              </p>
-            </div>
+    <YAdminShell
+      :navigation="navigation"
+      :search-groups="searchGroups"
+      :messages="shellMessages"
+      storage-key="foundation-ui-lab"
+      main-id="admin-main"
+    >
+      <template #brand="{ collapsed }">
+        <div class="flex min-w-0 items-center gap-2.5">
+          <span
+            class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
+          >
+            <UIcon name="i-tabler-box-multiple" class="size-4" />
+          </span>
+          <div v-if="!collapsed" class="min-w-0">
+            <p class="truncate text-sm font-semibold text-highlighted">
+              Foundation UI
+            </p>
+            <p class="truncate text-xs text-muted">public pattern lab</p>
           </div>
-          <UColorModeButton size="sm" aria-label="切换颜色模式" />
         </div>
-      </header>
+      </template>
 
-      <main
-        id="main-content"
-        tabindex="-1"
-        class="mx-auto w-full max-w-7xl px-4 py-8 outline-none sm:px-6 lg:px-8 lg:py-12"
+      <template #sidebar-footer="{ collapsed }">
+        <div class="flex items-center gap-2">
+          <UColorModeButton aria-label="切换颜色模式" />
+          <span v-if="!collapsed" class="text-xs text-muted">颜色模式</span>
+        </div>
+      </template>
+
+      <YAdminPage
+        id="collection-lab"
+        title="内容集合"
+        icon="i-tabler-files"
+        main-id="admin-main"
+        body-class="mx-auto w-full max-w-7xl space-y-6"
       >
-        <div
-          class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
-        >
-          <div>
-            <p
-              class="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-primary"
-            >
-              Experimental public pattern
-            </p>
-            <h1
-              class="text-2xl font-semibold tracking-tight text-highlighted sm:text-3xl"
-            >
-              内容集合
-            </h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Lab 只拥有 fixture 与场景状态，正式布局来自 `YCollectionPanel`。
-            </p>
-          </div>
+        <template #actions>
           <YActionFeedbackButton
             :status="actionFeedback.status.value"
             idle-label="保存更改"
@@ -230,6 +272,31 @@ function simulateAction() {
             size="sm"
             @click="simulateAction"
           />
+        </template>
+
+        <template #toolbar-left>
+          <YRemoteSelect
+            v-model="selectedOwner"
+            :load="loadOwners"
+            :messages="ownerMessages"
+            aria-label="负责人"
+            class="w-56"
+          />
+        </template>
+        <template #toolbar-right>
+          <UBadge label="Experimental" color="warning" variant="subtle" />
+        </template>
+
+        <div>
+          <p
+            class="text-xs font-medium uppercase tracking-[0.16em] text-primary"
+          >
+            Nuxt UI based public modules
+          </p>
+          <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
+            Dashboard 壳层、页面 ownership 与远程负责人检索来自公开
+            Interface；Lab 只拥有 fixture、领域行和翻译。
+          </p>
         </div>
 
         <YCollectionPanel
@@ -273,13 +340,13 @@ function simulateAction() {
           <template #bulk-actions
             ><UButton label="归档" icon="i-tabler-archive" size="xs"
           /></template>
-          <template #columns
-            ><div class="grid grid-cols-[minmax(0,1fr)_6rem] items-center">
+          <template #columns>
+            <div class="grid grid-cols-[minmax(0,1fr)_6rem] items-center">
               <span>名称</span><span class="text-right">状态</span>
-            </div></template
-          >
-          <template #item="{ item }"
-            ><div class="grid grid-cols-[minmax(0,1fr)_6rem] items-center">
+            </div>
+          </template>
+          <template #item="{ item }">
+            <div class="grid grid-cols-[minmax(0,1fr)_6rem] items-center">
               <div class="min-w-0 pr-3">
                 <p class="truncate text-sm font-medium text-highlighted">
                   {{ item.title }}
@@ -298,11 +365,11 @@ function simulateAction() {
                   variant="subtle"
                   size="sm"
                 />
-              </div></div
-          ></template>
+              </div>
+            </div>
+          </template>
         </YCollectionPanel>
-      </main>
-      <YBackToTop label="返回顶部" :threshold="0.5" />
-    </div>
+      </YAdminPage>
+    </YAdminShell>
   </UApp>
 </template>

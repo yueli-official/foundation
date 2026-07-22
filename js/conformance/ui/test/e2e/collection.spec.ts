@@ -59,18 +59,20 @@ test("mobile search remains one row and filters update the controlled URL", asyn
   });
 });
 
-test("public dashboard chrome exposes caller-owned labelled regions", async ({
+test("public admin chrome exposes navigation, page ownership and remote search", async ({
   page,
 }) => {
   await page.goto("/");
   await settle(page);
 
-  await expect(
-    page.getByRole("heading", { level: 1, name: "内容集合" }),
-  ).toBeVisible();
-  const metrics = page.getByRole("region", { name: "关键指标" });
-  await expect(metrics).toContainText("64");
-  await expect(metrics).toContainText("已发布");
+  await expect(page.getByText("Yueli UI", { exact: true })).toBeVisible();
+  await expect(page.getByRole("navigation")).toContainText("内容集合");
+  await expect(page.locator("#main-content")).toBeVisible();
+
+  const owner = page.getByRole("combobox", { name: "按负责人筛选" });
+  await owner.click();
+  await page.getByPlaceholder("搜索负责人").fill("API");
+  await expect(page.getByRole("option", { name: /API Team/ })).toBeVisible();
 });
 
 test("public account menu exposes grouped actions from an accessible trigger", async ({
@@ -85,6 +87,7 @@ test("public account menu exposes grouped actions from an accessible trigger", a
   await trigger.focus();
   await trigger.press("Enter");
   await expect(page.getByRole("menuitem", { name: "工作区" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "外观" })).toBeVisible();
   await expect(page.getByRole("menuitem", { name: "退出登录" })).toBeVisible();
 });
 
@@ -163,7 +166,9 @@ test("bulk actions stay pinned below the page header while scrolling", async ({
 
   const toolbar = page.getByRole("region", { name: "批量操作" });
   await expect(toolbar).toContainText("已选择");
-  await page.evaluate(() => window.scrollTo({ top: 700, behavior: "instant" }));
+  await page
+    .locator("#main-content")
+    .evaluate((element) => element.scrollTo({ top: 700, behavior: "instant" }));
   await expect
     .poll(async () => {
       const box = await toolbar.boundingBox();
@@ -203,7 +208,9 @@ test("light and dark collection states have no detectable axe violations", async
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "切换颜色模式" }).click();
+  await page.getByRole("button", { name: "打开 Lin 的用户菜单" }).click();
+  await page.getByRole("menuitem", { name: "外观" }).click();
+  await page.getByRole("menuitemcheckbox", { name: "深色" }).click();
   await expect
     .poll(() => page.locator("html").getAttribute("class"))
     .toContain("dark");
@@ -226,12 +233,16 @@ test("public feedback and back-to-top patterns own their runtime behavior", asyn
   await expect(page.getByRole("button", { name: "保存中" })).toBeVisible();
   await expect(page.getByRole("button", { name: "已保存" })).toBeVisible();
 
-  await page.evaluate(() => window.scrollTo({ top: 700, behavior: "instant" }));
+  await page
+    .locator("#main-content")
+    .evaluate((element) => element.scrollTo({ top: 700, behavior: "instant" }));
   const backToTop = page.getByRole("button", { name: "返回顶部" });
   await expect(backToTop).toBeVisible();
   await backToTop.click();
   await expect
-    .poll(() => page.evaluate(() => window.scrollY))
+    .poll(() =>
+      page.locator("#main-content").evaluate((element) => element.scrollTop),
+    )
     .toBeLessThanOrEqual(2);
   await expect(page.locator("#main-content")).toBeFocused();
 });
