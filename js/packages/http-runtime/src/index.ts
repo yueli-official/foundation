@@ -48,7 +48,14 @@ export interface RequestOptions<T> {
   replayAfterReauth?: "never" | "once";
   idempotencyKey?: string;
   decode?: (value: unknown) => T;
+  /** Transitional/provider adapter for non-Problem error formats. */
+  decodeFailure?: FailureDecoder;
 }
+
+export type FailureDecoder = (
+  response: Response,
+  errorBodyLimit: number,
+) => Promise<ApiFailure>;
 
 export interface TransportRequest {
   readonly target: string;
@@ -375,8 +382,10 @@ export function createApiClient({
         if (!response.ok) {
           const wwwAuthenticate =
             response.headers.get("www-authenticate") ?? "";
+          const decodeFailure =
+            options.decodeFailure ?? failureFromProblemResponse;
           let failure = await awaitWithSignal(
-            failureFromProblemResponse(response, errorBodyLimit),
+            decodeFailure(response, errorBodyLimit),
             signal,
           );
           const refreshable =
@@ -399,7 +408,7 @@ export function createApiClient({
               if (!response.ok) {
                 failure = reauthState(
                   await awaitWithSignal(
-                    failureFromProblemResponse(response, errorBodyLimit),
+                    decodeFailure(response, errorBodyLimit),
                     signal,
                   ),
                   "renewed",
@@ -490,3 +499,4 @@ export {
   type RemoteFailure,
   type Violation,
 } from "./failure";
+export { readTextWithinLimit } from "./problem";

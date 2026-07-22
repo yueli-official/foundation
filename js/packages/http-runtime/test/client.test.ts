@@ -91,6 +91,37 @@ describe("ApiClient.request", () => {
     });
   });
 
+  test("allows a bounded provider adapter during an error-format migration", async () => {
+    const transport = createMemoryTransport(
+      () =>
+        new Response(JSON.stringify({ code: "legacy.session_expired" }), {
+          status: 401,
+          headers: { "content-type": "application/json" },
+        }),
+    );
+    const client = createApiClient({ target: "legacy", transport });
+
+    await expect(
+      client.request("/api/account", {
+        decodeFailure: async (response) => ({
+          kind: "remote",
+          status: response.status,
+          code: "legacy.session_expired",
+          params: {},
+          violations: [],
+          traceId: "legacy-adapter-test",
+          reauth: "not-attempted",
+        }),
+      }),
+    ).rejects.toMatchObject({
+      failure: {
+        kind: "remote",
+        status: 401,
+        code: "legacy.session_expired",
+      },
+    });
+  });
+
   test("rejects an origin-escaping path before transport", async () => {
     const transport = createMemoryTransport(() =>
       Response.json({ unreachable: true }),
