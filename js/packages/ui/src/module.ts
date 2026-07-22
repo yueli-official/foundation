@@ -1,4 +1,9 @@
-import { addComponentsDir, createResolver, defineNuxtModule } from "@nuxt/kit";
+import {
+  addComponentsDir,
+  addImports,
+  createResolver,
+  defineNuxtModule,
+} from "@nuxt/kit";
 
 export interface YueliUiModuleOptions {
   /** Prefix for auto-imported public components. */
@@ -15,6 +20,17 @@ export default defineNuxtModule<YueliUiModuleOptions>({
   },
   setup(options) {
     const resolver = createResolver(import.meta.url);
+
+    addImports([
+      {
+        name: "useActionFeedback",
+        from: resolver.resolve("./feedback/index"),
+      },
+      {
+        name: "useMinimumLoading",
+        from: resolver.resolve("./feedback/index"),
+      },
+    ]);
 
     for (const directory of [
       "account-menu",
