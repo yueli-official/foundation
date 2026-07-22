@@ -141,6 +141,76 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "settings-workflow",
+    kind: "headless-workflow",
+    status: "experimental",
+    entrypoint: "@yueli/ui/settings",
+    owner: "foundation",
+    responsibility:
+      "Own JSON-safe settings baseline cloning, structural dirty comparison, capture, discard and revision semantics.",
+    nonResponsibilities: [
+      "business persistence",
+      "Vue rendering",
+      "browser navigation",
+      "locale catalogs",
+    ],
+    runtimeDependencies: [],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/settings-workflow.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/conformance/ui"],
+      accessibility: [],
+    },
+  },
+  {
+    id: "settings-adapters",
+    kind: "adapter",
+    status: "experimental",
+    entrypoint: "@yueli/ui/settings/vue",
+    owner: "foundation",
+    responsibility:
+      "Bind a caller-owned settings form to Vue reactivity and opt-in browser or Router leave protection.",
+    nonResponsibilities: [
+      "confirmation copy",
+      "persistence",
+      "route query semantics",
+      "global window policy",
+    ],
+    runtimeDependencies: ["vue", "vue-router"],
+    evidence: {
+      docs: ["README.md"],
+      tests: [
+        "test/settings-vue.test.ts",
+        "test/settings-browser.test.ts",
+        "test/settings-vue-router.test.ts",
+      ],
+      consumers: ["js/conformance/ui"],
+      accessibility: [],
+    },
+  },
+  {
+    id: "settings-patterns",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/settings/pattern",
+    owner: "foundation",
+    responsibility:
+      "Own responsive settings navigation, section anatomy and a safe-area-aware save lifecycle dock.",
+    nonResponsibilities: [
+      "settings fields",
+      "business persistence",
+      "permissions",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/settings-patterns.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/conformance/ui"],
+      accessibility: ["test/settings-patterns.test.ts"],
+    },
+  },
+  {
     id: "collection-frame",
     kind: "pattern",
     status: "experimental",

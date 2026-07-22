@@ -206,3 +206,25 @@ test("public feedback and back-to-top patterns own their runtime behavior", asyn
     .toBeLessThanOrEqual(2);
   await expect(page.locator("#main-content")).toBeFocused();
 });
+
+test("public settings workflow owns dirty, discard and save lifecycle", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const title = page.getByTestId("settings-title");
+  await title.scrollIntoViewIfNeeded();
+  await title.fill("未保存工作区");
+
+  const dock = page.locator("[data-settings-save-dock]");
+  await expect(dock).toBeVisible();
+  await expect(dock).toContainText("有未保存的更改");
+  await dock.getByRole("button", { name: "放弃" }).click();
+  await expect(title).toHaveValue("公共工作区");
+  await expect(dock).toBeHidden();
+
+  await title.fill("已保存工作区");
+  await dock.getByRole("button", { name: "保存", exact: true }).click();
+  await expect(dock).toContainText("正在保存更改");
+  await expect(dock).toContainText("更改已保存");
+  await expect(dock).toBeHidden({ timeout: 5_000 });
+});

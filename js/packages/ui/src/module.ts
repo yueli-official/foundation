@@ -16,7 +16,12 @@ export default defineNuxtModule<YueliUiModuleOptions>({
   setup(options) {
     const resolver = createResolver(import.meta.url);
 
-    for (const directory of ["collection", "feedback", "navigation"]) {
+    for (const directory of [
+      "collection",
+      "feedback",
+      "navigation",
+      "settings",
+    ]) {
       addComponentsDir({
         path: resolver.resolve(`./${directory}/components`),
         pathPrefix: false,

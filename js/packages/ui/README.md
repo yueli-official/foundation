@@ -17,6 +17,10 @@ Current public surface:
 - `@yueli/ui/feedback` — latest-wins action lifecycle, minimum loading visibility and transport-neutral notice normalization.
 - `@yueli/ui/feedback/pattern` — explicit `ActionFeedbackButton` import.
 - `@yueli/ui/navigation/back-to-top` — explicit accessible BackToTop Pattern import.
+- `@yueli/ui/settings` — framework-independent JSON-safe baseline, dirty, capture and discard workflow.
+- `@yueli/ui/settings/vue` — reactive Vue Adapter for a caller-owned settings form.
+- `@yueli/ui/settings/browser` and `@yueli/ui/settings/vue-router` — opt-in unload and route-leave guards.
+- `@yueli/ui/settings/pattern` — SettingsLayout, SettingSection and SettingsSaveDock explicit imports.
 - `@yueli/ui/collection` — framework-independent remote collection workflow, schema-driven route query codec and memory query Adapter.
 - `@yueli/ui/collection/vue` — Vue setup lifecycle, reactive snapshot and data-query invalidation Adapter.
 - `@yueli/ui/collection/vue-router` — optional Vue Router query Adapter.
@@ -37,6 +41,8 @@ export default defineNuxtConfig({
 ```
 
 The module auto-imports `CollectionFrame`, `ActionFeedbackButton` and `BackToTop` with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. Visible copy remains caller-owned: pass a translated prop or a message resolver; Foundation ships keys, not locale catalogs.
+
+Settings keeps persistence and translation outside the library. The pure workflow owns a cloned baseline and dirty/capture/discard semantics; Vue, browser unload and Router leave protection are separate opt-in Adapters. Route confirmation is a caller function, so Foundation never hard-codes a language or calls `window.confirm` on behalf of every product. The visible Patterns accept caller-owned labels and slots while standardizing responsive section navigation and the safe-area-aware save dock.
 
 ```vue
 <script setup lang="ts">

@@ -100,6 +100,15 @@ try {
     "package/src/module.ts",
     "package/src/navigation/back-to-top.ts",
     "package/src/navigation/components/BackToTop.vue",
+    "package/src/settings/browser.ts",
+    "package/src/settings/components/SettingSection.vue",
+    "package/src/settings/components/SettingsLayout.vue",
+    "package/src/settings/components/SettingsSaveDock.vue",
+    "package/src/settings/index.ts",
+    "package/src/settings/pattern.ts",
+    "package/src/settings/vue-router.ts",
+    "package/src/settings/vue.ts",
+    "package/src/settings/workflow.ts",
     "package/src/tailwind.css",
   ].sort();
   if (JSON.stringify(packedFiles) !== JSON.stringify(allowedFiles)) {
@@ -149,6 +158,7 @@ import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
 import { useActionFeedback } from "@yueli/ui/feedback";
 import { publicUiManifest } from "@yueli/ui/manifest";
+import { useVueSettingsWorkflow } from "@yueli/ui/settings/vue";
 
 interface Query { q: string }
 interface Item { id: string }
@@ -171,6 +181,11 @@ useVueCollectionWorkflow({
   },
 });
 const feedback = useActionFeedback({ resetMs: 0 });
+const settingsForm = reactive({ title: "Packed" });
+const settings = useVueSettingsWorkflow({
+  snapshot: () => settingsForm,
+  restore: (snapshot) => Object.assign(settingsForm, snapshot),
+});
 </script>
 
 <template>
@@ -187,6 +202,7 @@ const feedback = useActionFeedback({ resetMs: 0 });
       <template #footer><span>Footer</span></template>
     </YCollectionFrame>
     <YBackToTop label="Back to top" :threshold="0" />
+    <YSettingSection title="Settings"><input v-model="settingsForm.title" /></YSettingSection>
   </main>
 </template>
 `,
@@ -220,6 +236,11 @@ const feedback = useActionFeedback({ resetMs: 0 });
     !packedPackage.exports?.["./feedback"] ||
     !packedPackage.exports?.["./feedback/pattern"] ||
     !packedPackage.exports?.["./navigation/back-to-top"] ||
+    !packedPackage.exports?.["./settings"] ||
+    !packedPackage.exports?.["./settings/vue"] ||
+    !packedPackage.exports?.["./settings/browser"] ||
+    !packedPackage.exports?.["./settings/vue-router"] ||
+    !packedPackage.exports?.["./settings/pattern"] ||
     !packedPackage.exports?.["./collection/pattern"] ||
     !packedPackage.exports?.["./collection/vue"] ||
     !packedPackage.exports?.["./collection/vue-router"]

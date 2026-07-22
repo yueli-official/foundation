@@ -9,6 +9,10 @@ import {
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
 import { useActionFeedback } from "@yueli/ui/feedback";
+import { bindSettingsBeforeUnload } from "@yueli/ui/settings/browser";
+import type { SettingsSaveDockMessages } from "@yueli/ui/settings/pattern";
+import { useVueSettingsWorkflow } from "@yueli/ui/settings/vue";
+import { useSettingsLeaveGuard } from "@yueli/ui/settings/vue-router";
 
 type Status = "all" | "draft" | "published";
 type Sort = "updated" | "title";
@@ -117,6 +121,37 @@ const fixture: readonly ContentItem[] = Array.from(
 const searchInput = ref("");
 const filtersOpen = ref(false);
 const actionFeedback = useActionFeedback({ resetMs: 1_500 });
+const settingsFeedback = useActionFeedback({ resetMs: 1_500 });
+const settingsForm = reactive({
+  title: "公共工作区",
+  description: "跨应用设置流程",
+});
+const settings = useVueSettingsWorkflow({
+  snapshot: () => settingsForm,
+  restore: (snapshot) => Object.assign(settingsForm, snapshot),
+});
+const settingsMessages: SettingsSaveDockMessages = {
+  region: "设置保存操作",
+  unsaved: "有未保存的更改",
+  saving: "正在保存更改",
+  saved: "更改已保存",
+  failed: "保存失败",
+  discard: "放弃",
+  save: "保存",
+  savePending: "保存中",
+  saveSuccess: "已保存",
+};
+let unbindBeforeUnload: (() => void) | undefined;
+onMounted(() => {
+  unbindBeforeUnload = bindSettingsBeforeUnload({
+    isDirty: () => settings.dirty.value,
+  });
+});
+onScopeDispose(() => unbindBeforeUnload?.());
+useSettingsLeaveGuard({
+  isDirty: () => settings.dirty.value,
+  confirm: () => window.confirm("有未保存的更改，确定离开当前页面吗？"),
+});
 const router = useRouter();
 const sync = createVueRouterCollectionQuerySync({
   router,
@@ -289,6 +324,12 @@ function simulateAction() {
     () => new Promise<void>((resolve) => window.setTimeout(resolve, 250)),
   );
 }
+function saveSettings() {
+  void settingsFeedback.run(async () => {
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 250));
+    settings.capture();
+  });
+}
 </script>
 
 <template>
@@ -444,6 +485,40 @@ function simulateAction() {
             </div>
           </template>
         </YCollectionPanel>
+
+        <YSettingsLayout
+          class="mt-16"
+          title="设置工作流"
+          description="Baseline、dirty、discard、leave guard 与保存反馈均穿过公共 Interface。"
+          navigation-label="设置分区"
+        >
+          <YSettingSection
+            title="工作区资料"
+            description="字段与持久化仍由调用方拥有。"
+          >
+            <div class="grid gap-4">
+              <UFormField label="名称"
+                ><UInput
+                  v-model="settingsForm.title"
+                  data-testid="settings-title"
+                  class="w-full"
+              /></UFormField>
+              <UFormField label="说明"
+                ><UTextarea
+                  v-model="settingsForm.description"
+                  :rows="3"
+                  class="w-full"
+              /></UFormField>
+            </div>
+          </YSettingSection>
+          <YSettingsSaveDock
+            :dirty="settings.dirty.value"
+            :status="settingsFeedback.status.value"
+            :messages="settingsMessages"
+            @discard="settings.discard"
+            @save="saveSettings"
+          />
+        </YSettingsLayout>
       </main>
       <YBackToTop label="返回顶部" :threshold="0.5" />
     </div>
