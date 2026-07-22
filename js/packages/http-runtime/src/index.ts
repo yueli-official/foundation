@@ -9,6 +9,15 @@ import { failureFromProblemResponse, readTextWithinLimit } from "./problem";
 
 export type HttpMethod = "GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE";
 
+const allowedHttpMethods = new Set<HttpMethod>([
+  "GET",
+  "HEAD",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+]);
+
 export type QueryValue =
   | string
   | number
@@ -320,6 +329,11 @@ export function createApiClient({
 
       const { body, headers } = prepareBodyAndHeaders(options);
       const method = options.method ?? "GET";
+      if (!allowedHttpMethods.has(method)) {
+        throw new ApiFailureError(
+          protocolFailure("foundation.request.invalid_method"),
+        );
+      }
       const replay = allowsReplay(method, options);
       if (replay && !isSafeMutationReplay(method, options, body)) {
         throw new ApiFailureError(

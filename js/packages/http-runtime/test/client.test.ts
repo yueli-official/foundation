@@ -117,6 +117,22 @@ describe("ApiClient.request", () => {
     });
   });
 
+  test("rejects a runtime-invalid method before transport", async () => {
+    const transport = createMemoryTransport(() =>
+      Response.json({ unreachable: true }),
+    );
+    const client = createApiClient({ target: "default", transport });
+
+    await expect(
+      client.request("/api/v1/articles", {
+        method: "TRACE",
+      } as unknown as RequestOptions<unknown>),
+    ).rejects.toMatchObject({
+      failure: { code: "foundation.request.invalid_method" },
+    });
+    expect(transport.requests).toHaveLength(0);
+  });
+
   test("constructs one encoded JSON transport request", async () => {
     const transport = createMemoryTransport(async (request) =>
       Response.json({
