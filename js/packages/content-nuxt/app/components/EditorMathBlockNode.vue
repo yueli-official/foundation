@@ -58,16 +58,18 @@ function onKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <NodeViewWrapper class="math-block-editor" :class="{ 'is-selected': selected }">
+  <NodeViewWrapper
+    class="my-[1em] overflow-hidden rounded-xl border transition-colors duration-150 focus-within:border-primary"
+    :class="selected ? 'border-primary' : 'border-default'">
     <!-- Edit area -->
-    <div v-if="editing" class="math-edit-area">
-      <div class="math-edit-header" contenteditable="false">
-        <span class="math-label">LaTeX</span>
+    <div v-if="editing" class="border-b border-default">
+      <div class="flex items-center border-b border-default bg-elevated px-3 py-1" contenteditable="false">
+        <span class="text-[0.7rem] font-semibold uppercase tracking-[0.05em] text-muted">LaTeX</span>
       </div>
       <textarea
         ref="inputRef"
         :value="node.attrs.latex"
-        class="math-input"
+        class="min-h-[2.5em] w-full resize-none overflow-hidden border-0 bg-default p-[0.75em] font-mono text-[0.875em] leading-6 text-default outline-none"
         spellcheck="false"
         placeholder="E = mc^2"
         @input="onInput"
@@ -76,71 +78,11 @@ function onKeydown(e: KeyboardEvent) {
     </div>
     <!-- Preview -->
     <div
-      class="math-preview"
-      :class="{ 'math-preview--clickable': !editing }"
+      class="overflow-x-auto p-[1em] text-center"
+      :class="{ 'flex min-h-[3em] cursor-pointer items-center justify-center hover:bg-elevated': !editing }"
       contenteditable="false"
       @click="!editing && startEdit()">
       <div v-html="rendered" />
     </div>
   </NodeViewWrapper>
 </template>
-
-<style scoped>
-.math-block-editor {
-  margin: 1em 0;
-  border: 1px solid var(--ui-border);
-  border-radius: 0.75rem;
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-.math-block-editor.is-selected,
-.math-block-editor:focus-within {
-  border-color: var(--ui-primary);
-}
-.math-edit-area {
-  border-bottom: 1px solid var(--ui-border);
-}
-.math-edit-header {
-  display: flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  background: var(--ui-bg-elevated);
-  border-bottom: 1px solid var(--ui-border);
-}
-.math-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ui-text-muted);
-}
-.math-input {
-  width: 100%;
-  min-height: 2.5em;
-  padding: 0.75em;
-  font-family: "JetBrains Mono", "Courier New", monospace;
-  font-size: 0.875em;
-  line-height: 1.5;
-  background: var(--ui-bg);
-  color: var(--ui-text);
-  border: none;
-  outline: none;
-  resize: none;
-  overflow: hidden;
-}
-.math-preview {
-  padding: 1em;
-  text-align: center;
-  overflow-x: auto;
-}
-.math-preview--clickable {
-  cursor: pointer;
-  min-height: 3em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.math-preview--clickable:hover {
-  background: var(--ui-bg-elevated);
-}
-</style>

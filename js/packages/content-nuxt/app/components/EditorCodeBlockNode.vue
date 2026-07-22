@@ -88,11 +88,13 @@ function onKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <NodeViewWrapper class="code-block-with-lang" :class="{ 'is-selected': selected }">
-    <div class="code-block-header" contenteditable="false">
+  <NodeViewWrapper
+    class="relative my-[1em] overflow-hidden rounded-xl border transition-colors duration-150 focus-within:border-primary"
+    :class="selected ? 'border-primary' : 'border-default'">
+    <div class="flex justify-end border-b border-default bg-elevated px-2 py-1" contenteditable="false">
       <select
         :value="node.attrs.language || ''"
-        class="lang-select"
+        class="cursor-pointer rounded border border-default bg-default px-1.5 py-0.5 text-xs text-muted outline-none focus:border-primary"
         @change="onLangChange">
         <option
           v-for="lang in languages"
@@ -103,11 +105,11 @@ function onKeydown(e: KeyboardEvent) {
       </select>
     </div>
     <!-- Edit mode -->
-    <div v-if="editing" class="code-edit-area">
+    <div v-if="editing" class="bg-default">
       <textarea
         ref="inputRef"
         :value="node.attrs.code"
-        class="code-input"
+        class="min-h-[3em] w-full resize-none overflow-hidden border-0 bg-transparent px-[1em] py-[0.75em] font-mono text-[0.875em] leading-6 text-default outline-none"
         spellcheck="false"
         placeholder="点击输入代码…"
         @input="onInput"
@@ -117,89 +119,13 @@ function onKeydown(e: KeyboardEvent) {
     <!-- Preview mode -->
     <div
       v-else
-      class="code-preview"
-      :class="{ 'code-preview--clickable': !editing }"
+      class="min-h-[3em] cursor-pointer hover:bg-elevated"
       contenteditable="false"
       @click="startEdit()">
-      <div v-if="!node.attrs.code?.trim()" class="text-muted text-sm code-placeholder">
+      <div v-if="!node.attrs.code?.trim()" class="p-[1em] text-center text-sm text-muted">
         点击输入代码…
       </div>
-      <pre v-else><code class="hljs" v-html="highlighted" /></pre>
+      <pre v-else class="m-0 overflow-x-auto rounded-none border-0 bg-transparent p-[1em]"><code class="hljs font-mono text-[0.875em]" v-html="highlighted" /></pre>
     </div>
   </NodeViewWrapper>
 </template>
-
-<style scoped>
-.code-block-with-lang {
-  position: relative;
-  margin: 1em 0;
-  border: 1px solid var(--ui-border);
-  border-radius: 0.75rem;
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-.code-block-with-lang.is-selected,
-.code-block-with-lang:focus-within {
-  border-color: var(--ui-primary);
-}
-.code-block-header {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.25rem 0.5rem;
-  background: var(--ui-bg-elevated);
-  border-bottom: 1px solid var(--ui-border);
-}
-.lang-select {
-  font-size: 0.75rem;
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--ui-border);
-  background: var(--ui-bg);
-  color: var(--ui-text-muted);
-  cursor: pointer;
-  outline: none;
-}
-.lang-select:focus {
-  border-color: var(--ui-primary);
-}
-.code-edit-area {
-  background: var(--ui-bg);
-}
-.code-input {
-  width: 100%;
-  min-height: 3em;
-  padding: 0.75em 1em;
-  font-family: "JetBrains Mono", "Courier New", monospace;
-  font-size: 0.875em;
-  line-height: 1.5;
-  background: transparent;
-  color: var(--ui-text);
-  border: none;
-  outline: none;
-  resize: none;
-  overflow: hidden;
-}
-.code-preview pre {
-  margin: 0;
-  padding: 1em;
-  overflow-x: auto;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-}
-.code-preview pre code {
-  font-size: 0.875em;
-  font-family: "JetBrains Mono", "Courier New", monospace;
-}
-.code-preview--clickable {
-  cursor: pointer;
-  min-height: 3em;
-}
-.code-preview--clickable:hover {
-  background: var(--ui-bg-elevated);
-}
-.code-placeholder {
-  padding: 1em;
-  text-align: center;
-}
-</style>

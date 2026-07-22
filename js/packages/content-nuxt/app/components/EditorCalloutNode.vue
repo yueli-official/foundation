@@ -36,14 +36,14 @@ function cycleType() {
 
 <template>
   <NodeViewWrapper
-    class="callout-editor"
+    class="my-[1em] rounded-r-lg border-l-4 px-[1.25em] py-[0.75em]"
     :style="{
       borderLeftColor: colorMap[node.attrs.type],
       background: `color-mix(in srgb, ${colorMap[node.attrs.type]} 6%, transparent)`,
     }">
-    <div class="callout-header" contenteditable="false">
+    <div class="mb-[0.25em] flex select-none items-center gap-[0.5em]" contenteditable="false">
       <button
-        class="callout-type-btn"
+        class="inline-flex cursor-pointer items-center gap-[0.25em] rounded border-0 bg-transparent px-[0.375em] py-[0.125em] transition-colors duration-150 hover:bg-current/10"
         :style="{ color: colorMap[node.attrs.type] }"
         :title="`切换类型(当前:${currentType.label})`"
         @click="cycleType">
@@ -51,41 +51,11 @@ function cycleType() {
         <span class="text-xs font-semibold uppercase">{{ currentType.label }}</span>
       </button>
     </div>
-    <NodeViewContent class="callout-content" />
+    <NodeViewContent class="callout-content min-h-[1.5em]" />
   </NodeViewWrapper>
 </template>
 
 <style scoped>
-.callout-editor {
-  border-left: 4px solid;
-  border-radius: 0 0.5rem 0.5rem 0;
-  padding: 0.75em 1.25em;
-  margin: 1em 0;
-}
-.callout-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  margin-bottom: 0.25em;
-  user-select: none;
-}
-.callout-type-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25em;
-  padding: 0.125em 0.375em;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  transition: background 0.15s;
-}
-.callout-type-btn:hover {
-  background: color-mix(in srgb, currentColor 10%, transparent);
-}
-.callout-content {
-  min-height: 1.5em;
-}
 .callout-content :deep(p) {
   margin: 0.25em 0;
 }
