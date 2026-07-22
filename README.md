@@ -30,6 +30,8 @@ pnpm --filter @yueli/ui-foundation-conformance test:e2e
 cd go && go test -race ./... && go vet ./...
 ```
 
+See [Local consumption](docs/local-consumption.md) for using the JS packages and Go module from a sibling checkout without copying source.
+
 ## License
 
 Apache-2.0. Brand assets, private configuration, credentials and product content are not included.
