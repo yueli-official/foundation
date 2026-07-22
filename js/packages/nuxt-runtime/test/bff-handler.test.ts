@@ -45,6 +45,7 @@ async function startBff(options: {
   credential?: BffCredentialAdapter;
   maxRequestBodyBytes?: number;
   timeoutMs?: number;
+  profile?: "api" | "asset";
 }): Promise<RunningServer> {
   const app = createApp();
   app.use(
@@ -58,6 +59,7 @@ async function startBff(options: {
       credential: options.credential,
       maxRequestBodyBytes: options.maxRequestBodyBytes,
       timeoutMs: options.timeoutMs,
+      profile: options.profile,
     }),
   );
   return listen(createServer(toNodeListener(app)));
@@ -198,6 +200,36 @@ describe("createBffHandler", () => {
     expect(response.headers.get("set-cookie")).toBeNull();
     expect(response.headers.get("x-internal-target")).toBeNull();
     expect(await response.json()).toEqual(problem);
+  });
+
+  it("forwards vetted range metadata only for the asset streaming profile", async () => {
+    let observedRange: string | undefined;
+    const downstream = await listen(
+      createServer((request, response) => {
+        observedRange = request.headers.range;
+        response.statusCode = 206;
+        response.setHeader("content-type", "image/webp");
+        response.setHeader("accept-ranges", "bytes");
+        response.setHeader("content-range", "bytes 0-3/8");
+        response.setHeader("x-storage-bucket", "private-bucket");
+        response.end("data");
+      }),
+    );
+    const bff = await startBff({
+      downstreamOrigin: downstream.origin,
+      profile: "asset",
+    });
+
+    const response = await fetch(`${bff.origin}/api/bff/content/image.webp`, {
+      headers: { range: "bytes=0-3" },
+    });
+
+    expect(observedRange).toBe("bytes=0-3");
+    expect(response.status).toBe(206);
+    expect(response.headers.get("accept-ranges")).toBe("bytes");
+    expect(response.headers.get("content-range")).toBe("bytes 0-3/8");
+    expect(response.headers.get("x-storage-bucket")).toBeNull();
+    expect(await response.text()).toBe("data");
   });
 
   it.each([

@@ -44,6 +44,14 @@ const RESPONSE_HEADER_ALLOWLIST = [
   "x-trace-id",
 ] as const;
 
+const ASSET_REQUEST_HEADERS = ["range"] as const;
+const ASSET_RESPONSE_HEADERS = [
+  "accept-ranges",
+  "content-disposition",
+  "content-length",
+  "content-range",
+] as const;
+
 export interface BffTarget {
   /** An origin only, such as `https://api.example.test`; paths are rejected. */
   origin: string;
@@ -78,6 +86,8 @@ export interface CreateBffHandlerOptions {
   maxRequestBodyBytes?: number;
   /** One deadline for target resolution, credential resolution, and downstream I/O. */
   timeoutMs?: number;
+  /** Adds vetted range/download headers while retaining the streaming response body. */
+  profile?: "api" | "asset";
 }
 
 interface ResolvedTarget {
@@ -131,7 +141,7 @@ export function createBffHandler(
         readLimitedBody(event, maxRequestBodyBytes),
         controller.signal,
       );
-      const headers = copyAllowedRequestHeaders(event);
+      const headers = copyAllowedRequestHeaders(event, options.profile);
       const credential = await resolveCredential(
         options.credential,
         event,
@@ -159,7 +169,10 @@ export function createBffHandler(
         throw gatewayError(controller.signal.aborted ? 504 : 502);
       }
 
-      const responseHeaders = copyAllowedResponseHeaders(response.headers);
+      const responseHeaders = copyAllowedResponseHeaders(
+        response.headers,
+        options.profile,
+      );
       const responseBody =
         event.method === "HEAD" || isBodylessStatus(response.status)
           ? null
@@ -324,9 +337,16 @@ function payloadTooLarge(): ReturnType<typeof createError> {
   });
 }
 
-function copyAllowedRequestHeaders(event: H3Event): Headers {
+function copyAllowedRequestHeaders(
+  event: H3Event,
+  profile: CreateBffHandlerOptions["profile"],
+): Headers {
   const headers = new Headers();
-  for (const name of REQUEST_HEADER_ALLOWLIST) {
+  const allowlist =
+    profile === "asset"
+      ? [...REQUEST_HEADER_ALLOWLIST, ...ASSET_REQUEST_HEADERS]
+      : REQUEST_HEADER_ALLOWLIST;
+  for (const name of allowlist) {
     const value = getRequestHeader(event, name);
     if (value) headers.set(name, value);
   }
@@ -360,9 +380,16 @@ async function resolveCredential(
   return credential;
 }
 
-function copyAllowedResponseHeaders(source: Headers): Headers {
+function copyAllowedResponseHeaders(
+  source: Headers,
+  profile: CreateBffHandlerOptions["profile"],
+): Headers {
   const headers = new Headers();
-  for (const name of RESPONSE_HEADER_ALLOWLIST) {
+  const allowlist =
+    profile === "asset"
+      ? [...RESPONSE_HEADER_ALLOWLIST, ...ASSET_RESPONSE_HEADERS]
+      : RESPONSE_HEADER_ALLOWLIST;
+  for (const name of allowlist) {
     const value = source.get(name);
     if (value) headers.set(name, value);
   }

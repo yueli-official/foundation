@@ -89,6 +89,11 @@ export default createBffHandler({
 origin without credentials, path, query or fragment. Browser input never selects an origin, and
 downstream redirects are returned without being followed.
 
+Set `profile: "asset"` for image/download routes. The response body remains streamed and the
+handler additionally permits vetted byte-range and download metadata headers; browser credentials,
+storage headers and downstream cookies remain blocked. Upload bodies are still bounded and buffered,
+so large uploads should use direct presigned URLs or a separately reviewed streaming-upload adapter.
+
 The default downstream request allowlist is `accept`, `accept-language`, `content-type`,
 `idempotency-key`, `if-match`, `if-none-match` and `prefer`. Browser Cookie, Authorization,
 forwarding and trace-control headers are discarded; the credential Adapter can only select
