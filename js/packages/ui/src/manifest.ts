@@ -44,6 +44,50 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "image-policy",
+    kind: "contract",
+    status: "experimental",
+    entrypoint: "@yueli/ui/image",
+    owner: "foundation",
+    responsibility:
+      "Own bounded raster optimization decisions, resize geometry, cropper configuration, output naming and caller-translatable dimension violations.",
+    nonResponsibilities: [
+      "asset upload HTTP",
+      "media storage",
+      "visible cropper copy",
+      "image CDN transformations",
+    ],
+    runtimeDependencies: [],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/image.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/conformance/ui"],
+      accessibility: [],
+    },
+  },
+  {
+    id: "browser-image-optimization",
+    kind: "adapter",
+    status: "experimental",
+    entrypoint: "@yueli/ui/image/browser",
+    owner: "foundation",
+    responsibility:
+      "Apply the public image policy through a disposable browser decode/canvas/file runtime and report explicit fallback reasons.",
+    nonResponsibilities: [
+      "upload retries",
+      "progress UI",
+      "server-side transcoding",
+      "cropper rendering",
+    ],
+    runtimeDependencies: [],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/image.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["js/conformance/ui"],
+      accessibility: [],
+    },
+  },
+  {
     id: "messages",
     kind: "contract",
     status: "experimental",

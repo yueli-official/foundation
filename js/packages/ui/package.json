@@ -23,6 +23,8 @@
     "./theme.css": "./src/theme.css",
     "./manifest": "./src/manifest.ts",
     "./messages": "./src/messages.ts",
+    "./image": "./src/image/index.ts",
+    "./image/browser": "./src/image/browser.ts",
     "./account-menu/pattern": "./src/account-menu/pattern.ts",
     "./dashboard/pattern": "./src/dashboard/pattern.ts",
     "./feedback": "./src/feedback/index.ts",

@@ -100,6 +100,8 @@ try {
     "package/src/feedback/minimum-loading.ts",
     "package/src/feedback/notice.ts",
     "package/src/feedback/pattern.ts",
+    "package/src/image/browser.ts",
+    "package/src/image/index.ts",
     "package/src/manifest.ts",
     "package/src/messages.ts",
     "package/src/module.ts",
@@ -170,6 +172,8 @@ import type { AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
 import { useActionFeedback } from "@yueli/ui/feedback";
+import { evaluateImageOptimization } from "@yueli/ui/image";
+import { optimizeImageFile } from "@yueli/ui/image/browser";
 import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import { publicUiManifest } from "@yueli/ui/manifest";
 import { useVueSettingsWorkflow } from "@yueli/ui/settings/vue";
@@ -212,6 +216,8 @@ const accountMessages: AccountMenuMessages = {
   logout: "Sign out",
   openMenu: (name) => "Open " + name + " menu",
 };
+const imageDecision = evaluateImageOptimization({ name: "packed.png", type: "image/png", size: 2_000_000 });
+void optimizeImageFile;
 </script>
 
 <template>
@@ -228,7 +234,7 @@ const accountMessages: AccountMenuMessages = {
       <template #controls><span>Controls</span></template>
       <template #bulk><span>Bulk</span></template>
       <template #columns><span>Name</span></template>
-      <span>packed {{ publicUiManifest.length }}</span>
+      <span>packed {{ publicUiManifest.length }} {{ imageDecision.reason }}</span>
       <template #footer><span>Footer</span></template>
     </YCollectionFrame>
     <YBackToTop label="Back to top" :threshold="0" />
@@ -272,6 +278,8 @@ const accountMessages: AccountMenuMessages = {
     !packedPackage.exports?.["./dashboard/pattern"] ||
     !packedPackage.exports?.["./feedback"] ||
     !packedPackage.exports?.["./feedback/pattern"] ||
+    !packedPackage.exports?.["./image"] ||
+    !packedPackage.exports?.["./image/browser"] ||
     !packedPackage.exports?.["./navigation/back-to-top"] ||
     !packedPackage.exports?.["./settings"] ||
     !packedPackage.exports?.["./settings/vue"] ||

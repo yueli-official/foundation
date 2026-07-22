@@ -16,6 +16,8 @@ Current public surface:
 - `@yueli/ui/theme.css` — opt-in light/dark semantic surfaces, motion/radius tokens, focus fallback and native scrollbar treatment.
 - `@yueli/ui/manifest` — machine-readable maturity and ownership metadata.
 - `@yueli/ui/messages` — caller-owned message key/parameter contract; no locale catalogs.
+- `@yueli/ui/image` — bounded raster optimization/crop geometry, output naming and caller-translatable dimension validation.
+- `@yueli/ui/image/browser` — disposable browser decode/canvas Adapter with explicit optimization/fallback results.
 - `@yueli/ui/account-menu/pattern` — provider-neutral account action grouping, identity fallback and accessible menu trigger.
 - `@yueli/ui/dashboard/pattern` — PageHeader and slots-driven DashboardLayout with caller-owned section messages.
 - `@yueli/ui/feedback` — latest-wins action lifecycle, minimum loading visibility and transport-neutral notice normalization.
@@ -59,6 +61,20 @@ Tailwind utilities inside components; the stylesheet exists for cross-tree
 tokens and browser-level behavior that cannot be expressed reliably by local
 component utilities. It is opt-in so a consumer may use only the workflow
 packages without adopting the visual theme.
+
+Image policy is split from the browser runtime. The pure entrypoint rejects
+active SVG input, preserves animated GIF by default, caps side length and total
+canvas pixels, and exposes validation data instead of translated sentences.
+The browser Adapter guarantees decoded object URL cleanup and can discard an
+encoded result that is larger than the source:
+
+```ts
+import { optimizeImage } from "@yueli/ui/image/browser";
+
+const result = await optimizeImage(file, { maxSide: 1920 });
+// result.reason is stable; the caller decides whether/how to notify the user.
+await upload(result.file);
+```
 
 The module auto-imports public Patterns with the `Y` prefix by default. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. PageHeader and DashboardLayout own responsive heading/action anatomy, region order and accessible section labelling without owning metrics or business actions. AccountMenu owns identity fallback, action grouping and the async logout command boundary without reading an auth provider. Visible copy remains caller-owned: pass translated props or messages; Foundation ships no locale catalogs.
 
