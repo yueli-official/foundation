@@ -91,6 +91,37 @@ describe("createCollectionWorkflow", () => {
     });
   });
 
+  it("excludes ineligible rows from item and page selection", () => {
+    const workflow = createCollectionWorkflow({
+      initialQuery,
+      queryPolicy,
+      keyOf: (item: { id: string; locked?: boolean }) => item.id,
+      isSelectable: (item) => !item.locked,
+    });
+    const token = workflow.beginLoad();
+    workflow.resolveLoad(token, {
+      items: [{ id: "self", locked: true }, { id: "other" }],
+      total: 2,
+    });
+
+    workflow.toggleKey("self");
+    expect(workflow.getSnapshot().selection.count).toBe(0);
+
+    workflow.togglePage(true);
+    expect(workflow.getSelectionRequest()).toEqual({
+      mode: "keys",
+      keys: ["other"],
+    });
+    expect(workflow.getSnapshot()).toMatchObject({
+      selectedPageCount: 1,
+      isPageSelected: true,
+      isPageIndeterminate: false,
+    });
+    expect(() => workflow.selectAllResults()).toThrow(
+      "item eligibility is page-local",
+    );
+  });
+
   it("keeps loaded items visible while a refresh is pending and surfaces structured issues", () => {
     const workflow = createWorkflow();
     const initialLoad = workflow.beginLoad();

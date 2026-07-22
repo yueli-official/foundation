@@ -36,7 +36,7 @@ const UButton = defineComponent({
 const UCheckbox = defineComponent({
   name: "UCheckbox",
   inheritAttrs: false,
-  props: ["modelValue"],
+  props: ["modelValue", "disabled"],
   emits: ["update:modelValue"],
   setup(props, { attrs, emit }) {
     return () =>
@@ -44,6 +44,7 @@ const UCheckbox = defineComponent({
         ...attrs,
         type: "checkbox",
         checked: props.modelValue === true,
+        disabled: props.disabled,
         onChange: (event: Event) =>
           emit("update:modelValue", (event.target as HTMLInputElement).checked),
       });
@@ -96,6 +97,8 @@ describe("CollectionPanel", () => {
         page: 1,
         pageSize: 10,
         selectable: true,
+        isItemSelectable: (item: unknown) =>
+          (item as (typeof items)[number]).id !== "two",
         isSelected: (key: string | number) => key === "two",
       },
       slots: {
@@ -123,7 +126,12 @@ describe("CollectionPanel", () => {
     expect(wrapper.emitted("search")).toEqual([["first"]]);
     expect(wrapper.text()).toContain("First");
     expect(wrapper.text()).toContain("Second");
-    expect(wrapper.findAll("article")[1]?.classes()).toContain("bg-primary/5");
+    expect(wrapper.findAll("article")[1]?.classes()).not.toContain(
+      "bg-primary/5",
+    );
+    expect(
+      wrapper.get('input[aria-label="Select Second"]').attributes("disabled"),
+    ).toBeDefined();
 
     await wrapper.get('input[aria-label="Select First"]').setValue(true);
     expect(wrapper.emitted("toggleItem")).toEqual([["one", true]]);

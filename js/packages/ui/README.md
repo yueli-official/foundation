@@ -99,7 +99,7 @@ const save = useActionFeedback();
 </template>
 ```
 
-`CollectionPanel` is the default complete Pattern: it owns responsive search, configured select/direction controls, page and result selection, sticky bulk actions, loading/error/empty states, row/grid containers and pagination. Callers provide translated `CollectionPanelMessages`, query control values, items and domain slots; business HTTP and mutations remain outside the Module. `CollectionFrame` remains available as the lower-level anatomy seam.
+`CollectionPanel` is the default complete Pattern: it owns responsive search, configured select/direction controls, page and result selection, sticky bulk actions, loading/error/empty states, row/grid containers and pagination. Callers provide translated `CollectionPanelMessages`, query control values, items and domain slots; business HTTP and mutations remain outside the Module. `isSelectable` on the Workflow and `isItemSelectable` on the Pattern express rows such as the current administrator that must remain visible but cannot enter batch selection. Because page-local eligibility cannot describe unloaded rows, all-results selection is intentionally unavailable when that predicate is configured. `CollectionFrame` remains available as the lower-level anatomy seam.
 
 Nuxt UI owns primitives. This package does not re-export or wrap buttons, tables, pagination, cards or tabs. DashboardLayout is a workflow-level composition of caller-owned regions, not a generic card/dashboard primitive.
 

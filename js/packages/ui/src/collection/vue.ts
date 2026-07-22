@@ -47,6 +47,7 @@ export function useVueCollectionWorkflow<
     initialQuery: options.initialQuery,
     queryPolicy: options.queryPolicy,
     keyOf: options.keyOf,
+    ...(options.isSelectable ? { isSelectable: options.isSelectable } : {}),
     ...(options.initialPage ? { initialPage: options.initialPage } : {}),
   });
   const snapshot = shallowRef(workflow.getSnapshot());

@@ -31,6 +31,7 @@ const props = withDefaults(
     pageSizes?: readonly number[];
     activeFilterCount?: number;
     selectable?: boolean;
+    isItemSelectable?: (item: TItem) => boolean;
     selectionCount?: number;
     selectionMode?: "keys" | "query";
     pageSelected?: boolean;
@@ -102,12 +103,22 @@ function toggleDirection(
   emit("controlChange", control.id, control.value === "asc" ? "desc" : "asc");
 }
 
-function selected(key: TKey) {
-  return props.isSelected?.(key) ?? false;
+function selectableItem(item: TItem) {
+  return props.isItemSelectable?.(item) ?? true;
 }
 
-function toggle(key: TKey) {
-  emit("toggleItem", key, !selected(key));
+function selected(item: TItem, key: TKey) {
+  return selectableItem(item) && (props.isSelected?.(key) ?? false);
+}
+
+function setSelected(item: TItem, key: TKey, next: boolean) {
+  if (!selectableItem(item)) return;
+  emit("toggleItem", key, next);
+}
+
+function toggle(item: TItem, key: TKey) {
+  if (!selectableItem(item)) return;
+  emit("toggleItem", key, !selected(item, key));
 }
 </script>
 
@@ -328,26 +339,27 @@ function toggle(key: TKey) {
         :key="itemKey(item)"
         class="relative min-w-0 rounded-lg border bg-default p-4 transition-colors"
         :class="[
-          selected(itemKey(item))
+          selected(item, itemKey(item))
             ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
             : 'border-default',
         ]"
       >
         <UCheckbox
           v-if="selectable"
-          :model-value="selected(itemKey(item))"
+          :model-value="selected(item, itemKey(item))"
+          :disabled="!selectableItem(item)"
           :aria-label="messages.selectItem(itemLabel(item))"
           class="absolute left-4 top-4 z-10 rounded-md bg-default/90 p-1 shadow-sm backdrop-blur"
           @update:model-value="
-            emit('toggleItem', itemKey(item), $event === true)
+            setSelected(item, itemKey(item), $event === true)
           "
         />
         <slot
           name="item"
           :item="item"
           :key="itemKey(item)"
-          :selected="selected(itemKey(item))"
-          :toggle="() => toggle(itemKey(item))"
+          :selected="selected(item, itemKey(item))"
+          :toggle="() => toggle(item, itemKey(item))"
         />
       </article>
     </div>
@@ -357,14 +369,15 @@ function toggle(key: TKey) {
         v-for="item in items"
         :key="itemKey(item)"
         class="flex min-w-0 items-center px-3 py-3 transition-colors sm:px-4"
-        :class="selected(itemKey(item)) ? 'bg-primary/5' : ''"
+        :class="selected(item, itemKey(item)) ? 'bg-primary/5' : ''"
       >
         <div v-if="selectable" class="w-9 shrink-0">
           <UCheckbox
-            :model-value="selected(itemKey(item))"
+            :model-value="selected(item, itemKey(item))"
+            :disabled="!selectableItem(item)"
             :aria-label="messages.selectItem(itemLabel(item))"
             @update:model-value="
-              emit('toggleItem', itemKey(item), $event === true)
+              setSelected(item, itemKey(item), $event === true)
             "
           />
         </div>
@@ -373,8 +386,8 @@ function toggle(key: TKey) {
             name="item"
             :item="item"
             :key="itemKey(item)"
-            :selected="selected(itemKey(item))"
-            :toggle="() => toggle(itemKey(item))"
+            :selected="selected(item, itemKey(item))"
+            :toggle="() => toggle(item, itemKey(item))"
           />
         </div>
       </article>

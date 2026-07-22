@@ -67,6 +67,7 @@ export interface CollectionWorkflowOptions<
   readonly initialQuery: TQuery;
   readonly queryPolicy: CollectionQueryPolicy<TQuery>;
   readonly keyOf: (item: TItem) => TKey;
+  readonly isSelectable?: (item: TItem) => boolean;
   readonly initialPage?: CollectionPage<TItem>;
 }
 
@@ -183,10 +184,12 @@ export function createJsonCollectionQueryPolicy<
 function normalizePage<TItem, TKey extends CollectionKey>(
   page: CollectionPage<TItem>,
   keyOf: (item: TItem) => TKey,
+  isSelectable?: (item: TItem) => boolean,
 ): {
   readonly items: readonly TItem[];
   readonly total: number;
   readonly keys: readonly TKey[];
+  readonly unselectableKeys: ReadonlySet<TKey>;
 } {
   if (!Number.isSafeInteger(page.total) || page.total < 0) {
     throw new RangeError(
@@ -197,6 +200,7 @@ function normalizePage<TItem, TKey extends CollectionKey>(
   const seen = new Set<TKey>();
   const items: TItem[] = [];
   const keys: TKey[] = [];
+  const unselectableKeys = new Set<TKey>();
   for (const item of page.items) {
     const key = keyOf(item);
     if (typeof key === "number" && !Number.isFinite(key)) {
@@ -207,7 +211,8 @@ function normalizePage<TItem, TKey extends CollectionKey>(
     if (seen.has(key)) continue;
     seen.add(key);
     items.push(item);
-    keys.push(key);
+    if (isSelectable?.(item) === false) unselectableKeys.add(key);
+    else keys.push(key);
   }
 
   if (page.total < items.length) {
@@ -220,6 +225,7 @@ function normalizePage<TItem, TKey extends CollectionKey>(
     items: Object.freeze(items),
     total: page.total,
     keys: Object.freeze(keys),
+    unselectableKeys,
   };
 }
 
@@ -240,6 +246,7 @@ export function createCollectionWorkflow<
   let query = options.queryPolicy.snapshot(options.initialQuery);
   let items: readonly TItem[] = Object.freeze([]);
   let visibleKeys: readonly TKey[] = Object.freeze([]);
+  let unselectableKeys: ReadonlySet<TKey> = new Set();
   let total = 0;
   let loadState: CollectionLoadState = "idle";
   let issue: CollectionIssue | undefined;
@@ -250,9 +257,14 @@ export function createCollectionWorkflow<
     { query: Readonly<TQuery>; excludedKeys: Set<TKey> } | undefined;
 
   if (options.initialPage) {
-    const normalized = normalizePage(options.initialPage, options.keyOf);
+    const normalized = normalizePage(
+      options.initialPage,
+      options.keyOf,
+      options.isSelectable,
+    );
     items = normalized.items;
     visibleKeys = normalized.keys;
+    unselectableKeys = normalized.unselectableKeys;
     total = normalized.total;
     loadState = "ready";
   }
@@ -276,6 +288,7 @@ export function createCollectionWorkflow<
   }
 
   function selected(key: TKey): boolean {
+    if (unselectableKeys.has(key)) return false;
     return querySelection
       ? !querySelection.excludedKeys.has(key)
       : selectedKeys.has(key);
@@ -346,9 +359,14 @@ export function createCollectionWorkflow<
         !options.queryPolicy.equals(token.query, query)
       )
         return false;
-      const normalized = normalizePage(page, options.keyOf);
+      const normalized = normalizePage(
+        page,
+        options.keyOf,
+        options.isSelectable,
+      );
       items = normalized.items;
       visibleKeys = normalized.keys;
+      unselectableKeys = normalized.unselectableKeys;
       total = normalized.total;
       issue = undefined;
       loadState = "ready";
@@ -377,6 +395,7 @@ export function createCollectionWorkflow<
     },
     toggleKey(key) {
       assertActive();
+      if (unselectableKeys.has(key)) return;
       if (querySelection) {
         if (querySelection.excludedKeys.has(key))
           querySelection.excludedKeys.delete(key);
@@ -405,6 +424,11 @@ export function createCollectionWorkflow<
     },
     selectAllResults() {
       assertActive();
+      if (options.isSelectable) {
+        throw new Error(
+          "All-results selection is unavailable when item eligibility is page-local.",
+        );
+      }
       selectedKeys = new Set();
       querySelection = {
         query: options.queryPolicy.snapshot(query as TQuery),
