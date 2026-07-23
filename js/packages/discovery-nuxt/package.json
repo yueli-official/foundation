@@ -1,0 +1,37 @@
+{
+  "name": "@yueli/discovery-nuxt",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yueli-official/foundation.git",
+    "directory": "js/packages/discovery-nuxt"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/module.ts",
+    "./runtime": "./src/runtime/composable.ts",
+    "./server": "./src/server.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nuxt/kit": "catalog:",
+    "h3": "catalog:"
+  },
+  "peerDependencies": {
+    "nuxt": "^4.4.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "ajv": "catalog:",
+    "nuxt": "catalog:",
+    "typescript": "catalog:",
+    "vue": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "url-lifecycle",
+  "entrypoint": "github.com/yueli-official/foundation/go/urllifecycle",
+  "owner": "foundation",
+  "status": "experimental",
+  "responsibility": "Own instance-local canonical route claims, aliases, redirects, gone outcomes, temporary overlays and atomic URL transitions.",
+  "nonResponsibilities": [
+    "product entities, publication state and authorization",
+    "slug generation and content hierarchy derivation",
+    "sitemap, feed, metadata and discovery publication",
+    "remote or cross-instance URL storage",
+    "request Host and trusted-proxy policy"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": ["urllifecycle/README.md", "urllifecycle/CONTEXT.md"],
+    "tests": ["urllifecycle/*_test.go", "urllifecycle/urllifecycletest/conformance.go"],
+    "consumers": [
+      "platform/products/blog/api",
+      "platform/products/resource/api",
+      "platform/products/docs/api"
+    ]
+  }
+}

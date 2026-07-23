@@ -13,10 +13,7 @@
   ],
   "runtimeDependencies": [],
   "evidence": {
-    "docs": [
-      "authorization/README.md",
-      "authorization/CONTEXT.md"
-    ],
+    "docs": ["authorization/README.md", "authorization/CONTEXT.md"],
     "tests": [
       "authorization/*_test.go",
       "authorization/authorizationtest/conformance.go",

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yueli.dev/contracts/discovery/diagnostic.v1.schema.json",
+  "title": "Discovery diagnostic v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "severity", "message"],
+  "properties": {
+    "code": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "severity": { "enum": ["info", "warning", "error"] },
+    "path": { "type": "string" },
+    "protocol": { "type": "string" },
+    "reference": { "type": "string", "format": "uri" },
+    "message": { "type": "string" }
+  }
+}

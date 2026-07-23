@@ -13,10 +13,7 @@
   ],
   "runtimeDependencies": [],
   "evidence": {
-    "docs": [
-      "traffic/README.md",
-      "traffic/CONTEXT.md"
-    ],
+    "docs": ["traffic/README.md", "traffic/CONTEXT.md"],
     "tests": [
       "traffic/*_test.go",
       "traffic/traffictest/conformance.go",

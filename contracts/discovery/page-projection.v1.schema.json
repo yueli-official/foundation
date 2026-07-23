@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yueli.dev/contracts/discovery/page-projection.v1.schema.json",
+  "title": "Discovery page projection v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "contractVersion",
+    "key",
+    "canonicalUrl",
+    "head",
+    "headers",
+    "diagnostics"
+  ],
+  "properties": {
+    "contractVersion": { "const": "discovery.v1" },
+    "key": { "type": "string", "minLength": 1, "maxLength": 1024 },
+    "canonicalUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
+    "head": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["title", "links", "meta", "structuredData"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rel", "href"],
+            "properties": {
+              "rel": { "type": "string", "minLength": 1 },
+              "href": { "type": "string", "format": "uri" },
+              "hreflang": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "meta": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["content"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "property": { "type": "string", "minLength": 1 },
+              "content": { "type": "string" }
+            }
+          }
+        },
+        "structuredData": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "json"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "json": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "headers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "link": { "type": "array", "items": { "type": "string" } },
+        "xRobotsTag": { "type": "string" }
+      }
+    },
+    "sitemap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["location"],
+      "properties": {
+        "location": { "type": "string", "format": "uri" },
+        "lastModified": { "type": "string", "format": "date-time" },
+        "alternates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["locale", "location"],
+            "properties": {
+              "locale": { "type": "string", "minLength": 1 },
+              "location": { "type": "string", "format": "uri" }
+            }
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "diagnostic.v1.schema.json" }
+    }
+  }
+}

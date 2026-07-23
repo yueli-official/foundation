@@ -32,6 +32,25 @@ or wrap successful endpoint DTOs in a generic envelope.
   half-open range queries, atomic legacy baselines, retention maintenance,
   immutable schema generation and shared Adapter conformance. Blog and Resource
   exercise joined and inline read-projection migrations.
+- `work` and `work/postgres`: reliable instance-local background jobs,
+  transactional enqueue/outbox, delayed and recurring schedules, queue
+  concurrency, leases/heartbeats, retry, pause/cancel, progress, immutable
+  attempts, replay, retention, schema generation and shared Adapter
+  conformance.
+- `discovery`: trusted-origin page projection and atomic publication for
+  canonical/robots, Open Graph/X Card, typed JSON-LD, streaming sitemap/index,
+  RSS/Atom and robots.txt. Product cursor sources and publication targets remain
+  instance-local; a versioned contract feeds the Nuxt Adapter.
+- `urllifecycle`, `urllifecycle/postgres` and `urllifecycle/httpadapter`:
+  instance-local canonical Route claims, query-aware variants, aliases,
+  301/302/307/308 redirects, temporary overlays, 410 Gone, atomic declarative
+  transitions, revision/idempotency, archive/recovery, caller-owned PostgreSQL
+  transactions and trusted-origin HTTP resolution.
+- `siteprofile` and `siteprofile/httpadapter`: typed instance-local public site
+  identity, branding Asset/icon references, scheduled announcement, support,
+  footer, social/legal/compliance material, conditional revision/ETag,
+  schema-driven management metadata, caller-owned PostgreSQL transactions and
+  conditional HTTP reads/writes.
 - `telemetry`: mandatory pre-export secret/SQL/body/full-URL sanitizer,
   low-cardinality server span naming, explicit provider assembly and idempotent
   HTTP client instrumentation.

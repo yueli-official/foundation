@@ -1,0 +1,28 @@
+{
+  "contractVersion": "discovery.v1",
+  "key": "search",
+  "canonicalUrl": "https://example.com/search",
+  "head": {
+    "title": "Search",
+    "links": [
+      {
+        "rel": "canonical",
+        "href": "https://example.com/search"
+      }
+    ],
+    "meta": [
+      {
+        "name": "robots",
+        "content": "noindex,follow"
+      }
+    ],
+    "structuredData": []
+  },
+  "headers": {
+    "xRobotsTag": "noindex,follow"
+  },
+  "sitemap": {
+    "location": "https://example.com/search"
+  },
+  "diagnostics": []
+}

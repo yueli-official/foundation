@@ -1,0 +1,48 @@
+{
+  "contractVersion": "discovery.v1",
+  "key": "post:one",
+  "canonicalUrl": "https://example.com/posts/one",
+  "head": {
+    "title": "One",
+    "links": [
+      {
+        "rel": "canonical",
+        "href": "https://example.com/posts/one"
+      }
+    ],
+    "meta": [
+      {
+        "name": "robots",
+        "content": "index,follow"
+      },
+      {
+        "property": "og:url",
+        "content": "https://example.com/posts/one"
+      }
+    ],
+    "structuredData": [
+      {
+        "id": "discovery-jsonld",
+        "json": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Article",
+              "@id": "https://example.com/posts/one#primary",
+              "url": "https://example.com/posts/one"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "headers": {
+    "link": ["<https://example.com/posts/one>; rel=\"canonical\""],
+    "xRobotsTag": "index,follow"
+  },
+  "sitemap": {
+    "location": "https://example.com/posts/one",
+    "alternates": []
+  },
+  "diagnostics": []
+}

@@ -1,0 +1,13 @@
+{
+  "contractVersion": "discovery.v2",
+  "key": "post:one",
+  "canonicalUrl": "https://example.com/posts/one",
+  "head": {
+    "title": "One",
+    "links": [],
+    "meta": [],
+    "structuredData": []
+  },
+  "headers": {},
+  "diagnostics": []
+}

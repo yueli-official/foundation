@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "site-profile",
+  "entrypoint": "github.com/yueli-official/foundation/go/siteprofile",
+  "owner": "foundation",
+  "status": "experimental",
+  "responsibility": "Own one site's validated public identity, branding references, announcement, support contacts, footer, social and legal profile with conditional revision semantics.",
+  "nonResponsibilities": [
+    "product runtime settings and homepage content",
+    "authorization, audit and deployment configuration",
+    "asset bytes, renditions and remote Asset reference delivery",
+    "theme tokens and layout",
+    "personal user profiles and cross-site brand control"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": ["siteprofile/README.md", "siteprofile/CONTEXT.md"],
+    "tests": ["siteprofile/*_test.go", "siteprofile/httpadapter/*_test.go", "siteprofile/siteprofiletest/conformance.go"],
+    "consumers": [
+      "platform/products/resource/api",
+      "platform/products/shop/api",
+      "platform/products/nav/api"
+    ]
+  }
+}

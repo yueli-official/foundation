@@ -7,17 +7,17 @@ The actor must never be accepted from JSON.
 
 ## Suggested resources
 
-| HTTP resource | Public Interface | Notes |
-| --- | --- | --- |
-| `GET /authorization/effective-access` | `AccessReader` | Drive UI only; API checks remain authoritative. |
-| `GET /authorization/scopes` | `ScopeReader` | Administrator view; resource lifecycle uses `ResourceScopeRegistry`. |
-| `GET/POST/PATCH /authorization/roles` | `RoleReader`, `RoleManager` | Role writes target a draft revision. |
-| `GET/POST/DELETE /authorization/grants` | `GrantReader`, `GrantManager` | Use explicit source, validity and expiry. |
-| `GET/POST /authorization/groups` | `GroupReader`, `GroupManager` | Groups are flat; reject group members of kind Group. |
-| `GET/POST /authorization/applications` | `WorkflowReader`, `WorkflowManager` | Separate own and managed list routes to avoid enumeration. |
-| `GET/POST /authorization/invitations` | `WorkflowReader`, `WorkflowManager` | Return plaintext token only from issue/resend responses. |
-| `GET/POST /authorization/policies` | `PolicyReader`, `PolicyManager` | Draft → edit → validate/preview → activate. |
-| `GET /authorization/audit` | `AuditReader`, `DecisionAuditReader` | Bound page sizes and filters. |
+| HTTP resource                           | Public Interface                     | Notes                                                                |
+| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------- |
+| `GET /authorization/effective-access`   | `AccessReader`                       | Drive UI only; API checks remain authoritative.                      |
+| `GET /authorization/scopes`             | `ScopeReader`                        | Administrator view; resource lifecycle uses `ResourceScopeRegistry`. |
+| `GET/POST/PATCH /authorization/roles`   | `RoleReader`, `RoleManager`          | Role writes target a draft revision.                                 |
+| `GET/POST/DELETE /authorization/grants` | `GrantReader`, `GrantManager`        | Use explicit source, validity and expiry.                            |
+| `GET/POST /authorization/groups`        | `GroupReader`, `GroupManager`        | Groups are flat; reject group members of kind Group.                 |
+| `GET/POST /authorization/applications`  | `WorkflowReader`, `WorkflowManager`  | Separate own and managed list routes to avoid enumeration.           |
+| `GET/POST /authorization/invitations`   | `WorkflowReader`, `WorkflowManager`  | Return plaintext token only from issue/resend responses.             |
+| `GET/POST /authorization/policies`      | `PolicyReader`, `PolicyManager`      | Draft → edit → validate/preview → activate.                          |
+| `GET /authorization/audit`              | `AuditReader`, `DecisionAuditReader` | Bound page sizes and filters.                                        |
 
 An application endpoint should use `ListRequestableRoles` instead of exposing
 all roles. Own application queries set both `Actor` and `Subject` to the
@@ -26,14 +26,14 @@ management access.
 
 ## Error mapping
 
-| `ErrorKind` | HTTP status | Public behavior |
-| --- | --- | --- |
-| `invalid_input` | 400 | Return field-safe validation information. |
-| `denied` | 403 | Use the same shape for inaccessible managed objects. |
-| `not_found` | 404 | Use only after enumeration policy permits it. |
-| `conflict`, `invariant_violation` | 409 | Includes stale revision, terminal state and last administrator. |
-| `expired` | 410 | Expired invitation/application token. |
-| `unavailable` | 503 | Fail closed; do not convert to a deny or retry a mutation blindly. |
+| `ErrorKind`                       | HTTP status | Public behavior                                                    |
+| --------------------------------- | ----------- | ------------------------------------------------------------------ |
+| `invalid_input`                   | 400         | Return field-safe validation information.                          |
+| `denied`                          | 403         | Use the same shape for inaccessible managed objects.               |
+| `not_found`                       | 404         | Use only after enumeration policy permits it.                      |
+| `conflict`, `invariant_violation` | 409         | Includes stale revision, terminal state and last administrator.    |
+| `expired`                         | 410         | Expired invitation/application token.                              |
+| `unavailable`                     | 503         | Fail closed; do not convert to a deny or retry a mutation blindly. |
 
 Never return Adapter diagnostics, token digests, Identity facts or database
 errors. Use an external request/trace ID in transport logs and include returned

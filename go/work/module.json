@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "work",
+  "entrypoint": "github.com/yueli-official/foundation/go/work",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Run reliable instance-local PostgreSQL-backed background work with transactional enqueue, leases, retries, schedules and operational history.",
+  "nonResponsibilities": [
+    "cross-instance scheduling and remote worker transport",
+    "consumer payload schemas and business side effects",
+    "HTTP administration and authorization",
+    "workflow DAG orchestration and exactly-once external effects"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": ["work/README.md", "work/CONTEXT.md"],
+    "tests": [
+      "work/*_test.go",
+      "work/worktest/conformance.go",
+      "work/postgres/*_test.go"
+    ],
+    "consumers": [
+      "platform/services/asset",
+      "platform/services/notification",
+      "platform/products/gallery/api"
+    ]
+  }
+}

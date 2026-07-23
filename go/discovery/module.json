@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "discovery",
+  "entrypoint": "github.com/yueli-official/foundation/go/discovery",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Compile instance-local public page facts into deterministic page discovery projections and atomically published sitemap, feed, and robots artifacts.",
+  "nonResponsibilities": [
+    "product publication state and membership queries",
+    "authentication or content access control",
+    "request-host based canonical origin discovery",
+    "cross-instance artifact storage or a remote discovery service"
+  ],
+  "runtimeDependencies": ["github.com/microcosm-cc/bluemonday"],
+  "evidence": {
+    "docs": ["discovery/README.md", "discovery/CONTEXT.md"],
+    "tests": ["discovery/*_test.go", "discovery/discoverytest/conformance.go"],
+    "consumers": [
+      "platform/products/blog",
+      "platform/products/resource",
+      "platform/products/docs"
+    ]
+  }
+}

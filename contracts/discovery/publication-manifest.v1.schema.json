@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yueli.dev/contracts/discovery/publication-manifest.v1.schema.json",
+  "title": "Discovery publication manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "artifacts"],
+  "properties": {
+    "contractVersion": { "const": "discovery.v1" },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "mediaType", "bytes", "sha256"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "mediaType": { "type": "string", "minLength": 1 },
+          "bytes": { "type": "integer", "minimum": 0 },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

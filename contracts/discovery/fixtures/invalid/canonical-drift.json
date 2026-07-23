@@ -1,0 +1,26 @@
+{
+  "contractVersion": "discovery.v1",
+  "key": "post:one",
+  "canonicalUrl": "https://example.com/posts/one",
+  "head": {
+    "title": "One",
+    "links": [
+      {
+        "rel": "canonical",
+        "href": "https://example.com/posts/other"
+      }
+    ],
+    "meta": [
+      {
+        "property": "og:url",
+        "content": "https://example.com/posts/other"
+      }
+    ],
+    "structuredData": []
+  },
+  "headers": {},
+  "sitemap": {
+    "location": "https://example.com/posts/other"
+  },
+  "diagnostics": []
+}
