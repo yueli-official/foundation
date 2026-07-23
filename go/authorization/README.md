@@ -143,11 +143,19 @@ auto-migrate:
 go run ./authorization/postgres/cmd/authzschema \
   -dir ./manifest/sql/migrations \
   -name 0007_authorization_v1
+
+go run ./audit/cmd/auditschema \
+  -dir ./manifest/sql/migrations \
+  -name 0008_audit_v1
 ```
 
 Generated files contain a canonical digest. Re-running refuses to overwrite
 drifted content. Apply each consumer migration with that product's normal
-deployment path.
+deployment path. The PostgreSQL Adapter stores management and decision audit
+truth in the shared Audit Journal and requires both schemas. On first start
+after the cutover it idempotently imports rows from the legacy
+`authorization_audit_events` and `authorization_decision_events` tables when
+they still exist; it never writes those legacy tables again.
 
 ## Consumer integration rules
 
@@ -172,7 +180,8 @@ custom roles and delegated scope administration.
 
 - Run `authorizationtest.Run` for every adapter.
 - Decision audit always records denies and high-risk allows; full-audit
-  capabilities record every result. Management audit is append-only.
+  capabilities record every result. Management and decision evidence use the
+  Foundation Audit Journal with the authorization state transaction.
 - `postgres.RecoverProtectedAdministrator` is an offline, database-credential
   recovery command. It requires zero active protected administrators, a dry
   run and an exact confirmation string; it is not a runtime bypass.

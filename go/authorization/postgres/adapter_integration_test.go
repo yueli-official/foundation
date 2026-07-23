@@ -11,6 +11,7 @@ import (
 
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+	"github.com/yueli-official/foundation/go/audit"
 	"github.com/yueli-official/foundation/go/authorization"
 	"github.com/yueli-official/foundation/go/authorization/authorizationtest"
 	authorizationpostgres "github.com/yueli-official/foundation/go/authorization/postgres"
@@ -488,6 +489,60 @@ func TestPostgresApplicationIdempotencyAndAuditCorrelationSurviveRestart(t *test
 	}
 }
 
+func TestPostgresImportsLegacyAuditWithoutWritingLegacyTables(t *testing.T) {
+	database := openPostgresTestDatabase(t)
+	catalog := authorization.MustCompile(postgresTestDefinition())
+	ctx := context.Background()
+	_, err := authorizationpostgres.New(ctx, catalog, authorizationpostgres.Options{
+		DB: database, InstanceKey: "legacy-audit-cutover",
+		Memory: authorization.MemoryOptions{
+			RootScopeID: "site",
+			ProtectedSubjects: []authorization.SubjectRef{{
+				Kind: authorization.SubjectUser, ID: "admin",
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := database.Exec(`
+		INSERT INTO authorization_audit_events(
+			instance_key, id, action, actor_kind, actor_id, subject_kind,
+			subject_id, role_key, scope_id, policy_revision, correlation_id, occurred_at
+		) VALUES ($1, 'legacy-audit-1', $2, 'user', 'admin', 'user',
+			'author', 'author', 'site', 1, 'legacy-request', now())
+	`, "legacy-audit-cutover", authorization.AuditGrantCreated); err != nil {
+		t.Fatal(err)
+	}
+	restarted, err := authorizationpostgres.New(ctx, catalog, authorizationpostgres.Options{
+		DB: database, InstanceKey: "legacy-audit-cutover",
+		Memory: authorization.MemoryOptions{RootScopeID: "ignored"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, err := restarted.SearchAudit(ctx, authorization.AuditQuery{CorrelationID: "legacy-request"})
+	if err != nil || page.Total != 1 || page.Events[0].ID != "legacy-audit-1" {
+		t.Fatalf("legacy audit = %#v, %v", page, err)
+	}
+	if _, err := restarted.Grant(ctx, authorization.GrantCommand{
+		Actor:  authorization.SubjectRef{Kind: authorization.SubjectUser, ID: "admin"},
+		Target: authorization.SubjectRef{Kind: authorization.SubjectUser, ID: "new-author"},
+		Role:   "author", ScopeID: "site", Source: authorization.GrantSourceDirect,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	var legacyCount int
+	if err := database.QueryRow(`
+		SELECT count(*) FROM authorization_audit_events WHERE instance_key = $1
+	`, "legacy-audit-cutover").Scan(&legacyCount); err != nil {
+		t.Fatal(err)
+	}
+	if legacyCount != 1 {
+		t.Fatalf("legacy table count = %d, want unchanged migration source", legacyCount)
+	}
+}
+
 func openPostgresTestDatabase(t *testing.T) *sql.DB {
 	t.Helper()
 	dsn := os.Getenv("AUTHORIZATION_POSTGRES_DSN")
@@ -515,7 +570,11 @@ func openPostgresTestDatabase(t *testing.T) *sql.DB {
 	if _, err := database.Exec(migration.UpSQL); err != nil {
 		t.Fatalf("schema up error = %v", err)
 	}
+	if _, err := database.Exec(audit.PostgresSchemaUp()); err != nil {
+		t.Fatalf("audit schema up error = %v", err)
+	}
 	t.Cleanup(func() {
+		_, _ = database.Exec(audit.PostgresSchemaDown())
 		_, _ = database.Exec(migration.DownSQL)
 		_, _ = database.Exec("DROP SCHEMA " + pq.QuoteIdentifier(schemaName))
 		_ = database.Close()

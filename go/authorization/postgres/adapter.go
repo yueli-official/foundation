@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/yueli-official/foundation/go/authorization"
+	"github.com/yueli-official/foundation/go/authorization/internal/repository"
 )
 
 type Options struct {
@@ -25,6 +26,7 @@ type Adapter struct {
 	options authorization.MemoryOptions
 	store   stateStore
 	memory  *authorization.Memory
+	audit   *authorizationAuditBridge
 	created bool
 }
 
@@ -84,10 +86,18 @@ func New(ctx context.Context, catalog *authorization.Catalog, options Options) (
 	if err := options.DB.PingContext(ctx); err != nil {
 		return nil, &authorization.Error{Kind: authorization.ErrorUnavailable, Field: "db", Message: "ping failed"}
 	}
+	auditBridge, err := newAuthorizationAuditBridge(ctx, options.DB, options.InstanceKey)
+	if err != nil {
+		return nil, unavailable("initialize audit journal", err)
+	}
 	adapter := &Adapter{
 		catalog: catalog,
 		options: options.Memory,
 		store:   stateStore{db: options.DB, instanceKey: options.InstanceKey},
+		audit:   auditBridge,
+	}
+	if err := adapter.audit.migrateLegacy(ctx, adapter.store); err != nil {
+		return nil, unavailable("migrate legacy audit", err)
 	}
 	stored, err := adapter.store.load(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -95,11 +105,20 @@ func New(ctx context.Context, catalog *authorization.Catalog, options Options) (
 		if createErr != nil {
 			return nil, createErr
 		}
-		if saveErr := adapter.store.save(ctx, catalog.Version(), catalog.Digest(), memory.RepositorySnapshot()); saveErr != nil {
+		snapshot := memory.RepositorySnapshot()
+		if saveErr := adapter.store.save(ctx, catalog.Version(), catalog.Digest(), snapshot, func(ctx context.Context, tx *sql.Tx) error {
+			return adapter.audit.append(ctx, tx, snapshot.Audit, snapshot.DecisionAudit)
+		}); saveErr != nil {
 			return nil, unavailable("bootstrap state", saveErr)
 		}
 		if projectionErr := memory.RebuildCasbinProjection(); projectionErr != nil {
 			return nil, projectionErr
+		}
+		cleanSnapshot := snapshot
+		cleanSnapshot.Audit = nil
+		cleanSnapshot.DecisionAudit = nil
+		if err := memory.RestoreRepositorySnapshot(cleanSnapshot); err != nil {
+			return nil, err
 		}
 		adapter.memory = memory
 		adapter.created = true
@@ -234,18 +253,14 @@ func (adapter *Adapter) GetPolicySnapshot(
 }
 
 func (adapter *Adapter) SearchAudit(ctx context.Context, query authorization.AuditQuery) (authorization.AuditPage, error) {
-	adapter.mu.RLock()
-	defer adapter.mu.RUnlock()
-	return adapter.memory.SearchAudit(ctx, query)
+	return adapter.audit.searchManagement(ctx, query)
 }
 
 func (adapter *Adapter) SearchDecisionAudit(
 	ctx context.Context,
 	query authorization.DecisionAuditQuery,
 ) (authorization.DecisionAuditPage, error) {
-	adapter.mu.RLock()
-	defer adapter.mu.RUnlock()
-	return adapter.memory.SearchDecisionAudit(ctx, query)
+	return adapter.audit.searchDecisions(ctx, query)
 }
 
 func (adapter *Adapter) CreateScope(ctx context.Context, command authorization.CreateScopeCommand) (authorization.Scope, error) {
@@ -456,10 +471,19 @@ func mutate[T any](
 	if err := clone.RebuildCasbinProjection(); err != nil {
 		return zero, err
 	}
-	if err := adapter.store.save(ctx, adapter.catalog.Version(), adapter.catalog.Digest(), clone.RepositorySnapshot()); err != nil {
+	snapshot := clone.RepositorySnapshot()
+	if err := adapter.store.save(ctx, adapter.catalog.Version(), adapter.catalog.Digest(), snapshot, func(ctx context.Context, tx *sql.Tx) error {
+		return adapter.audit.append(ctx, tx, snapshot.Audit, snapshot.DecisionAudit)
+	}); err != nil {
 		return zero, unavailable("commit state", err)
 	}
-	adapter.memory = clone
+	snapshot.Audit = nil
+	snapshot.DecisionAudit = nil
+	clean, err := adapter.memoryFromSnapshot(snapshot)
+	if err != nil {
+		return zero, err
+	}
+	adapter.memory = clean
 	return result, nil
 }
 
@@ -471,8 +495,12 @@ func unavailable(operation string, _ error) error {
 }
 
 func (adapter *Adapter) cloneMemory() (*authorization.Memory, error) {
+	return adapter.memoryFromSnapshot(adapter.memory.RepositorySnapshot())
+}
+
+func (adapter *Adapter) memoryFromSnapshot(snapshot repository.Snapshot) (*authorization.Memory, error) {
 	options := adapter.options
-	options.RootScopeID = authorization.ScopeID(adapter.memory.RepositorySnapshot().RootScopeID)
+	options.RootScopeID = authorization.ScopeID(snapshot.RootScopeID)
 	options.ProtectedSubjects = []authorization.SubjectRef{
 		{Kind: authorization.SubjectUser, ID: "repository-clone-placeholder"},
 	}
@@ -480,7 +508,7 @@ func (adapter *Adapter) cloneMemory() (*authorization.Memory, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := clone.RestoreRepositorySnapshot(adapter.memory.RepositorySnapshot()); err != nil {
+	if err := clone.RestoreRepositorySnapshot(snapshot); err != nil {
 		return nil, err
 	}
 	if err := clone.RebuildCasbinProjection(); err != nil {

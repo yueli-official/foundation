@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "search",
+  "entrypoint": "github.com/yueli-official/foundation/go/search",
+  "owner": "foundation",
+  "status": "experimental",
+  "responsibility": "Own instance-local searchable projections, revision-safe changes, declared queries, structured highlights, keyset cursors and generation rebuild semantics.",
+  "nonResponsibilities": [
+    "product content truth and lifecycle",
+    "authorization or final visibility decisions",
+    "shared cross-instance search infrastructure",
+    "raw search-query analytics",
+    "background job scheduling",
+    "product HTTP response models"
+  ],
+  "runtimeDependencies": [
+    "a consumer-owned PostgreSQL database for the production adapter",
+    "consumer-provided PostgreSQL text-search configurations",
+    "optional Foundation Work orchestration for rebuild execution"
+  ],
+  "evidence": {
+    "docs": ["search/README.md", "search/CONTEXT.md"],
+    "tests": ["search/*_test.go", "search/searchtest/conformance.go"],
+    "consumers": [
+      "platform/products/blog/api",
+      "platform/products/resource/api",
+      "platform/products/docs/api"
+    ]
+  }
+}

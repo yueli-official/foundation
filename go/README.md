@@ -27,6 +27,13 @@ or wrap successful endpoint DTOs in a generic envelope.
   Casbin v3 projection, schema generator, decision/management audit, offline
   recovery and reusable Adapter conformance. Docs and Navigation exercise the
   public Interface with different scope and delegation models.
+- `audit` and `audit/otelmirror`: typed instance-local management and security
+  evidence, caller-owned PostgreSQL transaction binding, bounded keyset reads,
+  streaming export, legal hold, archive-before-purge retention, tamper-evident
+  sequence verification and durable committed-event mirrors.
+- `search`: instance-local searchable projections, revision-safe changes,
+  declared analyzers/filters/facets, structured highlights, keyset cursors,
+  caller-owned PostgreSQL transactions and generation rebuilds.
 - `traffic` and `traffic/postgres`: privacy-bounded typed resource views,
   exact event replay protection, daily instance/resource visitor deduplication,
   half-open range queries, atomic legacy baselines, retention maintenance,
@@ -37,6 +44,11 @@ or wrap successful endpoint DTOs in a generic envelope.
   concurrency, leases/heartbeats, retry, pause/cancel, progress, immutable
   attempts, replay, retention, schema generation and shared Adapter
   conformance.
+- `abuse` and `abuse/turnstile`: stable bound external-input Actions,
+  instance-local atomic multi-budget admission, pending/committed outcome
+  penalties, purpose-bound Signal pseudonyms, explicit challenge/reject
+  decisions, Module-owned PostgreSQL transactions, governance/retention and
+  server-side provider verification.
 - `discovery`: trusted-origin page projection and atomic publication for
   canonical/robots, Open Graph/X Card, typed JSON-LD, streaming sitemap/index,
   RSS/Atom and robots.txt. Product cursor sources and publication targets remain

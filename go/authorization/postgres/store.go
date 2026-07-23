@@ -20,13 +20,14 @@ func (store stateStore) save(
 	catalogVersion uint,
 	catalogDigest string,
 	snapshot repository.Snapshot,
+	appendAudit func(context.Context, *sql.Tx) error,
 ) error {
 	transaction, err := store.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return fmt.Errorf("authorization/postgres: begin state transaction: %w", err)
 	}
 	defer func() { _ = transaction.Rollback() }()
-	if err := store.saveTx(ctx, transaction, catalogVersion, catalogDigest, snapshot); err != nil {
+	if err := store.saveTx(ctx, transaction, catalogVersion, catalogDigest, snapshot, appendAudit); err != nil {
 		return err
 	}
 	if err := transaction.Commit(); err != nil {
@@ -41,6 +42,7 @@ func (store stateStore) saveTx(
 	catalogVersion uint,
 	catalogDigest string,
 	snapshot repository.Snapshot,
+	appendAudit func(context.Context, *sql.Tx) error,
 ) error {
 	now := time.Now().UTC()
 	if _, err := transaction.ExecContext(ctx, `
@@ -313,39 +315,9 @@ func (store stateStore) saveTx(
 		}
 	}
 
-	for _, event := range snapshot.Audit {
-		if _, err := transaction.ExecContext(ctx, `
-			INSERT INTO authorization_audit_events (
-				instance_key, id, action, actor_kind, actor_id, subject_kind,
-				subject_id, role_key, scope_id, policy_revision, correlation_id, occurred_at
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-			ON CONFLICT (instance_key, id) DO NOTHING
-		`, store.instanceKey, event.ID, event.Action, nullString(event.Actor.Kind),
-			nullString(event.Actor.ID), nullString(event.Subject.Kind), nullString(event.Subject.ID),
-			nullString(event.RoleKey), nullString(event.ScopeID), event.PolicyRevision,
-			nullString(event.CorrelationID), event.OccurredAt); err != nil {
-			return fmt.Errorf("authorization/postgres: save audit event %q: %w", event.ID, err)
-		}
-	}
-	for _, event := range snapshot.DecisionAudit {
-		sources, err := json.Marshal(event.Sources)
-		if err != nil {
-			return fmt.Errorf("authorization/postgres: encode decision sources: %w", err)
-		}
-		if _, err := transaction.ExecContext(ctx, `
-			INSERT INTO authorization_decision_events (
-				instance_key, decision_id, subject_kind, subject_id,
-				capability_key, scope_id, resource_type, resource_id,
-				resource_revision, allowed, reason, constraint_key,
-				policy_revision, sources, correlation_id, occurred_at
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-			ON CONFLICT (instance_key, decision_id) DO NOTHING
-		`, store.instanceKey, event.DecisionID, event.Subject.Kind, nullString(event.Subject.ID),
-			event.Capability, event.ScopeID, nullString(event.ResourceType),
-			nullString(event.ResourceID), nullString(event.ResourceRevision), event.Allowed,
-			event.Reason, nullString(event.Constraint), event.PolicyRevision, sources,
-			nullString(event.CorrelationID), event.OccurredAt); err != nil {
-			return fmt.Errorf("authorization/postgres: save decision event %q: %w", event.DecisionID, err)
+	if appendAudit != nil {
+		if err := appendAudit(ctx, transaction); err != nil {
+			return fmt.Errorf("authorization/postgres: append audit journal: %w", err)
 		}
 	}
 	if err := store.rebuildProjectionTx(ctx, transaction, snapshot); err != nil {

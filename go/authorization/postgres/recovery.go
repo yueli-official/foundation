@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/yueli-official/foundation/go/authorization"
+	"github.com/yueli-official/foundation/go/authorization/internal/repository"
 )
 
 type RecoveryCommand struct {
@@ -48,6 +49,10 @@ func RecoverProtectedAdministrator(
 			Message: "does not exactly match the recovery target",
 		}
 	}
+	auditBridge, err := newAuthorizationAuditBridge(ctx, command.DB, command.InstanceKey)
+	if err != nil {
+		return RecoveryResult{}, unavailable("initialize recovery audit", err)
+	}
 	tx, err := command.DB.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return RecoveryResult{}, unavailable("begin recovery", err)
@@ -67,12 +72,12 @@ func RecoverProtectedAdministrator(
 		}
 		return RecoveryResult{}, unavailable("lock recovery instance", err)
 	}
-	var roleID string
+	var roleID, roleKey string
 	if err := tx.QueryRowContext(ctx, `
-		SELECT id
+		SELECT id, role_key
 		FROM authorization_role_definitions
 		WHERE instance_key = $1 AND protected = TRUE
-	`, command.InstanceKey).Scan(&roleID); err != nil {
+	`, command.InstanceKey).Scan(&roleID, &roleKey); err != nil {
 		return RecoveryResult{}, unavailable("find protected role", err)
 	}
 	var activeProtected int
@@ -111,18 +116,14 @@ func RecoverProtectedAdministrator(
 		roleID, rootScopeID, authorization.GrantSourceRecovery, now); err != nil {
 		return RecoveryResult{}, unavailable("insert recovery grant", err)
 	}
-	if _, err := tx.ExecContext(ctx, `
-		INSERT INTO authorization_audit_events (
-			instance_key, id, action, actor_kind, actor_id, subject_kind,
-			subject_id, role_key, scope_id, policy_revision, detail, occurred_at
-		)
-		SELECT $1, $2, $3, 'service', 'offline-recovery', $4, $5,
-			role_key, $6, $7, '{"offline":true}'::jsonb, $8
-		FROM authorization_role_definitions
-		WHERE instance_key = $1 AND id = $9
-	`, command.InstanceKey, auditID, authorization.AuditRecoveryProtected,
-		command.Target.Kind, command.Target.ID, rootScopeID, activeRevision, now, roleID); err != nil {
-		return RecoveryResult{}, unavailable("insert recovery audit", err)
+	if err := auditBridge.append(ctx, tx, []repository.AuditEvent{{
+		ID: string(auditID), Action: string(authorization.AuditRecoveryProtected),
+		Actor:   repository.Subject{Kind: string(authorization.SubjectService), ID: "offline-recovery"},
+		Subject: repository.Subject{Kind: string(command.Target.Kind), ID: command.Target.ID},
+		RoleKey: roleKey, ScopeID: rootScopeID, PolicyRevision: activeRevision,
+		OccurredAt: now,
+	}}, nil); err != nil {
+		return RecoveryResult{}, unavailable("append recovery audit", err)
 	}
 	if _, err := tx.ExecContext(ctx, `
 		UPDATE authorization_instances

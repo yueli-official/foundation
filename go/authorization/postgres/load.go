@@ -274,12 +274,6 @@ func (store stateStore) loadTx(ctx context.Context, transaction *sql.Tx) (stored
 	if err := store.loadInbox(ctx, transaction, &instance.Snapshot); err != nil {
 		return storedInstance{}, err
 	}
-	if err := store.loadAudit(ctx, transaction, &instance.Snapshot); err != nil {
-		return storedInstance{}, err
-	}
-	if err := store.loadDecisionAudit(ctx, transaction, &instance.Snapshot); err != nil {
-		return storedInstance{}, err
-	}
 	return instance, nil
 }
 

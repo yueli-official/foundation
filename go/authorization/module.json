@@ -11,7 +11,9 @@
     "HTTP and UI",
     "cross-instance authorization state"
   ],
-  "runtimeDependencies": [],
+  "runtimeDependencies": [
+    "PostgreSQL and the Foundation Audit PostgreSQL schema for the durable adapter"
+  ],
   "evidence": {
     "docs": ["authorization/README.md", "authorization/CONTEXT.md"],
     "tests": [

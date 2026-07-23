@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "abuse",
+  "entrypoint": "github.com/yueli-official/foundation/go/abuse",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Make privacy-bounded, atomic instance-local allow, challenge or reject decisions for stable external-input actions.",
+  "nonResponsibilities": [
+    "HTTP routing and trusted-proxy selection",
+    "authentication, authorization, account state and business approval",
+    "content moderation, bot scoring and device fingerprinting",
+    "cross-instance risk state and remote shared stores"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": ["abuse/README.md", "abuse/CONTEXT.md"],
+    "tests": [
+      "abuse/*_test.go",
+      "abuse/abusetest/conformance.go",
+      "abuse/turnstile/*_test.go"
+    ],
+    "consumers": [
+      "platform/services/identity",
+      "platform/products/blog/api",
+      "platform/products/docs/api",
+      "platform/products/gallery/api"
+    ]
+  }
+}

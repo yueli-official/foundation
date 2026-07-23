@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "audit",
+  "entrypoint": "github.com/yueli-official/foundation/go/audit",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Record, query, export, retain and mirror typed instance-local audit evidence with caller-owned transaction atomicity and tamper-evident ordering.",
+  "nonResponsibilities": [
+    "authentication, authorization decisions and product mutations",
+    "centralized cross-instance audit storage",
+    "database administrator or operating-system activity auditing",
+    "telemetry durability and archive object storage"
+  ],
+  "runtimeDependencies": [
+    "PostgreSQL for the durable adapter",
+    "an optional consumer-provided ArchiveSink for archive-required retention classes",
+    "an optional OpenTelemetry Logs implementation for the otelmirror adapter"
+  ],
+  "evidence": {
+    "docs": ["audit/README.md", "audit/CONTEXT.md"],
+    "tests": [
+      "audit/*_test.go",
+      "audit/audittest/conformance.go"
+    ],
+    "consumers": [
+      "foundation/authorization",
+      "platform/products/docs/api",
+      "platform/products/nav/api"
+    ]
+  }
+}
