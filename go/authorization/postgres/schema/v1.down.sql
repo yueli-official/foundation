@@ -1,0 +1,17 @@
+DROP TABLE authorization_projection_rules;
+DROP TABLE authorization_decision_events;
+DROP TABLE authorization_audit_events;
+DROP TABLE authorization_inbox_events;
+DROP TABLE authorization_invitations;
+DROP TABLE authorization_applications;
+DROP TABLE authorization_grants;
+DROP TABLE authorization_group_members;
+DROP TABLE authorization_groups;
+DROP TABLE authorization_automatic_rules;
+DROP TABLE authorization_policy_bindings;
+DROP TABLE authorization_role_policies;
+DROP TABLE authorization_role_definitions;
+DROP TABLE authorization_policy_scopes;
+DROP TABLE authorization_policy_revisions;
+DROP TABLE authorization_scopes;
+DROP TABLE authorization_instances;

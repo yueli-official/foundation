@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "authorization",
+  "entrypoint": "github.com/yueli-official/foundation/go/authorization",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Compile and execute instance-local typed authorization policy behind transport- and storage-neutral Interfaces.",
+  "nonResponsibilities": [
+    "authentication and identity accounts",
+    "product resource storage",
+    "HTTP and UI",
+    "cross-instance authorization state"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": [
+      "authorization/README.md",
+      "authorization/CONTEXT.md"
+    ],
+    "tests": [
+      "authorization/*_test.go",
+      "authorization/authorizationtest/conformance.go",
+      "authorization/postgres/*_test.go"
+    ],
+    "consumers": [
+      "platform/products/docs/api/internal/docsauthz",
+      "platform/products/nav/api/internal/navauthz"
+    ]
+  }
+}

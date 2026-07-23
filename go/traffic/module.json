@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "traffic",
+  "entrypoint": "github.com/yueli-official/foundation/go/traffic",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Record privacy-bounded instance-local resource views with exact replay protection, daily visitor deduplication and typed aggregate queries.",
+  "nonResponsibilities": [
+    "sessions, funnels, conversions and arbitrary analytics events",
+    "authentication and identity accounts",
+    "product resource storage and HTTP collection",
+    "cross-instance analytics state"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": [
+      "traffic/README.md",
+      "traffic/CONTEXT.md"
+    ],
+    "tests": [
+      "traffic/*_test.go",
+      "traffic/traffictest/conformance.go",
+      "traffic/postgres/*_test.go"
+    ],
+    "consumers": [
+      "platform/products/blog/api/internal/blogtraffic",
+      "platform/products/resource/api/internal/resourcetraffic"
+    ]
+  }
+}

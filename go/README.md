@@ -21,6 +21,17 @@ or wrap successful endpoint DTOs in a generic envelope.
   policy and unknown-key throttling.
 - `auth` and `goframe/auth`: typed principals, strict JWT policy and required or
   optional GoFrame bearer middleware.
+- `authorization` and `authorization/postgres`: public instance-local
+  Capability/Role/Scope core, typed Constraints and Query planning, complete
+  role/workflow/policy management, normalized PostgreSQL truth, a derived
+  Casbin v3 projection, schema generator, decision/management audit, offline
+  recovery and reusable Adapter conformance. Docs and Navigation exercise the
+  public Interface with different scope and delegation models.
+- `traffic` and `traffic/postgres`: privacy-bounded typed resource views,
+  exact event replay protection, daily instance/resource visitor deduplication,
+  half-open range queries, atomic legacy baselines, retention maintenance,
+  immutable schema generation and shared Adapter conformance. Blog and Resource
+  exercise joined and inline read-projection migrations.
 - `telemetry`: mandatory pre-export secret/SQL/body/full-URL sanitizer,
   low-cardinality server span naming, explicit provider assembly and idempotent
   HTTP client instrumentation.

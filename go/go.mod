@@ -3,8 +3,10 @@ module github.com/yueli-official/foundation/go
 go 1.25.12
 
 require (
+	github.com/casbin/casbin/v3 v3.10.0
 	github.com/go-jose/go-jose/v4 v4.1.4
 	github.com/gogf/gf/v2 v2.10.2
+	github.com/lib/pq v1.10.9
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.65.0
 	go.opentelemetry.io/otel v1.40.0
 	go.opentelemetry.io/otel/sdk v1.40.0
@@ -13,6 +15,8 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
+	github.com/casbin/govaluate v1.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/emirpasic/gods/v2 v2.0.0-alpha // indirect
