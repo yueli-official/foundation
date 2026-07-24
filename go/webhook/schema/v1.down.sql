@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS webhook_replay_receipts;
+DROP TABLE IF EXISTS webhook_inbound_receipts;
+DROP TABLE IF EXISTS webhook_attempts;
+DROP TABLE IF EXISTS webhook_deliveries;
+DROP TABLE IF EXISTS webhook_events;
+DROP TABLE IF EXISTS webhook_subscription_revisions;
+DROP TABLE IF EXISTS webhook_subscriptions;
+DROP TABLE IF EXISTS webhook_endpoint_revisions;
+DROP TABLE IF EXISTS webhook_endpoints;
+DROP TABLE IF EXISTS webhook_secret_material;
+DROP TABLE IF EXISTS webhook_instances;

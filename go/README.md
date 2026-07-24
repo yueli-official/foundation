@@ -44,6 +44,10 @@ or wrap successful endpoint DTOs in a generic envelope.
   concurrency, leases/heartbeats, retry, pause/cancel, progress, immutable
   attempts, replay, retention, schema generation and shared Adapter
   conformance.
+- `webhook` and `webhook/workadapter`: immutable CloudEvents, Standard
+  Webhooks signing/rotation, transaction-bound fan-out, Endpoint/Subscription
+  revisions, safe per-attempt DNS/HTTP, durable Delivery/Attempt history,
+  dead delivery/replay and inbound replay receipts, executed through Work.
 - `abuse` and `abuse/turnstile`: stable bound external-input Actions,
   instance-local atomic multi-budget admission, pending/committed outcome
   penalties, purpose-bound Signal pseudonyms, explicit challenge/reject

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "webhook",
+  "entrypoint": "github.com/yueli-official/foundation/go/webhook",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Publish immutable instance-local CloudEvents and deliver them at least once with Standard Webhooks signatures, safe HTTP, durable delivery history, replay and inbound replay receipts.",
+  "nonResponsibilities": [
+    "central event bus, cross-instance database and workflow orchestration",
+    "consumer event schema meaning and provider-native callback business truth",
+    "authentication, authorization, audit journal, deployment master-key ownership and general work execution",
+    "exactly-once remote effects"
+  ],
+  "runtimeDependencies": [
+    "PostgreSQL for durable production state",
+    "Foundation Work PostgreSQL adapter for delivery execution",
+    "32-byte deployment master key when using the encrypted PostgreSQL SecretStore"
+  ],
+  "evidence": {
+    "docs": ["webhook/README.md", "webhook/CONTEXT.md"],
+    "tests": [
+      "webhook/*_test.go"
+    ],
+    "consumers": [
+      "platform/services/commerce",
+      "platform/products/gallery/api"
+    ]
+  }
+}

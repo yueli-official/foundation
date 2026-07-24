@@ -26,6 +26,11 @@ stable icon/Asset references, scheduled announcements, support/footer/legal
 material, optimistic revision, strong ETag, schema-driven management metadata,
 normalized PostgreSQL truth and conditional HTTP reads/writes.
 
+Webhook adds instance-local CloudEvents publication, Standard Webhooks
+signatures and secret rotation, transaction-bound fan-out, durable delivery
+and attempt history, Work-based retry/replay, inbound verification receipts,
+and DNS-rebinding-resistant outbound HTTP.
+
 No prerelease has been published. Package names and compatibility remain experimental; do not consume repository source paths directly.
 
 Useful local gates:
