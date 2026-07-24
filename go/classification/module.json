@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "classification",
+  "entrypoint": "github.com/yueli-official/foundation/go/classification",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Compile consumer-owned Category, Facet, Facet Value, Tag and Policy snapshots into deterministic classification, discovery and governance decisions.",
+  "nonResponsibilities": [
+    "product classification storage, assignment tables and transactions",
+    "a shared classification database or cross-instance service",
+    "authorization, audit, work scheduling, cache transport and HTTP contracts",
+    "content visibility, result pagination and presentation",
+    "automatic taxonomy translation, transliteration or semantic inference"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": [
+      "classification/README.md",
+      "classification/CONTEXT.md"
+    ],
+    "tests": [
+      "classification/*_test.go",
+      "classification/classificationtest/conformance.go"
+    ],
+    "consumers": [
+      "platform/products/gallery/api",
+      "platform/products/blog/api",
+      "platform/products/resource/api"
+    ]
+  }
+}
+
