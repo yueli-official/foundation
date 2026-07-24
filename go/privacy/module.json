@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "privacy",
+  "entrypoint": "github.com/yueli-official/foundation/go/privacy",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Evaluate typed instance-local processing purposes, retain immutable consent evidence, schedule retention reviews and coordinate idempotent data Owner receipts.",
+  "nonResponsibilities": [
+    "legal advice, jurisdiction selection and notice content",
+    "central user profiles, cross-site consent storage and product source data",
+    "authentication, authorization, work execution, audit storage, notification delivery and export artifact storage",
+    "arbitrary SQL deletion, provider deletion and backup expiry"
+  ],
+  "runtimeDependencies": [
+    "PostgreSQL for durable Runtime, Coordinator and OwnerHost adapters",
+    "consumer-provided OwnerRouter and OwnerExecutor implementations"
+  ],
+  "evidence": {
+    "docs": ["privacy/README.md", "privacy/CONTEXT.md"],
+    "tests": [
+      "privacy/*_test.go",
+      "privacy/privacytest/conformance.go"
+    ],
+    "consumers": [
+      "platform/services/identity",
+      "platform/services/notification",
+      "platform/products/blog/api"
+    ]
+  }
+}

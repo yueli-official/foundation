@@ -49,6 +49,11 @@ or wrap successful endpoint DTOs in a generic envelope.
   penalties, purpose-bound Signal pseudonyms, explicit challenge/reject
   decisions, Module-owned PostgreSQL transactions, governance/retention and
   server-side provider verification.
+- `privacy`: typed instance-local Processing Purpose decisions, immutable
+  consent/withdrawal/signal evidence, calendar retention reviews, verified
+  Rights Request orchestration and an idempotent remote data Owner protocol.
+  Identity may coordinate, but each product retains source-data and disposition
+  ownership.
 - `discovery`: trusted-origin page projection and atomic publication for
   canonical/robots, Open Graph/X Card, typed JSON-LD, streaming sitemap/index,
   RSS/Atom and robots.txt. Product cursor sources and publication targets remain

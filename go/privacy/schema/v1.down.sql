@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS privacy_host_receipts;
+DROP TABLE IF EXISTS privacy_host_commands;
+DROP TABLE IF EXISTS privacy_owner_receipts;
+DROP TABLE IF EXISTS privacy_owner_tasks;
+DROP TABLE IF EXISTS privacy_rights_requests;
+DROP TABLE IF EXISTS privacy_retention_items;
+DROP TABLE IF EXISTS privacy_evidence_events;
+DROP TABLE IF EXISTS privacy_command_receipts;
+DROP TABLE IF EXISTS privacy_definition_revisions;
+DROP TABLE IF EXISTS privacy_instances;
