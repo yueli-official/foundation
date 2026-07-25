@@ -57,6 +57,7 @@ var (
 	_ authorization.AccessReader          = (*Adapter)(nil)
 	_ authorization.ScopeManager          = (*Adapter)(nil)
 	_ authorization.ResourceScopeRegistry = (*Adapter)(nil)
+	_ authorization.ResourceScopeRelocator = (*Adapter)(nil)
 	_ authorization.ScopeReader           = (*Adapter)(nil)
 	_ authorization.RoleManager           = (*Adapter)(nil)
 	_ authorization.RoleReader            = (*Adapter)(nil)
@@ -275,6 +276,15 @@ func (adapter *Adapter) RegisterScope(
 ) (authorization.Scope, error) {
 	return mutate(ctx, adapter, func(memory *authorization.Memory) (authorization.Scope, error) {
 		return memory.RegisterScope(ctx, command)
+	})
+}
+
+func (adapter *Adapter) ReparentScope(
+	ctx context.Context,
+	command authorization.ReparentScopeCommand,
+) (authorization.Scope, error) {
+	return mutate(ctx, adapter, func(memory *authorization.Memory) (authorization.Scope, error) {
+		return memory.ReparentScope(ctx, command)
 	})
 }
 

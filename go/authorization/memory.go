@@ -227,6 +227,35 @@ func (module *Memory) RegisterScope(ctx context.Context, command RegisterScopeCo
 	return scope, nil
 }
 
+func (module *Memory) ReparentScope(ctx context.Context, command ReparentScopeCommand) (Scope, error) {
+	module.mu.Lock()
+	defer module.mu.Unlock()
+	scope, exists := module.scopes[command.ID]
+	if !exists {
+		return Scope{}, &Error{Kind: ErrorNotFound, Field: "id", Message: "scope not found"}
+	}
+	if scope.ParentID == "" {
+		return Scope{}, &Error{Kind: ErrorInvariant, Field: "id", Message: "root scope cannot be reparented"}
+	}
+	parent, exists := module.scopes[command.ParentID]
+	if !exists {
+		return Scope{}, &Error{Kind: ErrorNotFound, Field: "parent_id", Message: "scope not found"}
+	}
+	if scope.ParentID == command.ParentID {
+		return scope, nil
+	}
+	if command.ID == command.ParentID || module.scopeContainsLocked(command.ID, command.ParentID) {
+		return Scope{}, &Error{Kind: ErrorInvariant, Field: "parent_id", Message: "scope cannot move below itself"}
+	}
+	if !module.catalog.AllowsScopeChild(parent.Type, scope.Type) {
+		return Scope{}, &Error{Kind: ErrorInvalidInput, Field: "parent_id", Message: "scope edge is not allowed by the catalog"}
+	}
+	scope.ParentID = command.ParentID
+	module.scopes[scope.ID] = scope
+	module.appendAuditLocked(ctx, AuditScopeReparented, SubjectRef{}, SubjectRef{}, "", scope.ID)
+	return scope, nil
+}
+
 func (module *Memory) ListScopes(_ context.Context, query ScopeListQuery) (ScopePage, error) {
 	module.mu.RLock()
 	defer module.mu.RUnlock()

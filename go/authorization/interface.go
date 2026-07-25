@@ -196,11 +196,25 @@ type RegisterScopeCommand struct {
 	ParentID ScopeID
 }
 
+// ReparentScopeCommand is emitted by a trusted consumer when an existing
+// domain resource moves to a different parent in the declared scope schema.
+// It changes reachability only; grants remain attached to their scope IDs.
+type ReparentScopeCommand struct {
+	ID       ScopeID
+	ParentID ScopeID
+}
+
 // ResourceScopeRegistry is deliberately separate from the administrator-facing
 // ScopeManager. Consumers call it after creating domain resources or during an
 // idempotent backfill, without giving end users authorization.manage.
 type ResourceScopeRegistry interface {
 	RegisterScope(context.Context, RegisterScopeCommand) (Scope, error)
+}
+
+// ResourceScopeRelocator is the optional trusted lifecycle seam for consumers
+// whose resources can move between parents after creation.
+type ResourceScopeRelocator interface {
+	ReparentScope(context.Context, ReparentScopeCommand) (Scope, error)
 }
 
 type ScopeListQuery struct {
@@ -725,6 +739,7 @@ const (
 	AuditBootstrapProtected    AuditAction = "bootstrap.protected"
 	AuditScopeCreated          AuditAction = "scope.created"
 	AuditScopeRegistered       AuditAction = "scope.registered"
+	AuditScopeReparented       AuditAction = "scope.reparented"
 	AuditGroupCreated          AuditAction = "group.created"
 	AuditGroupMemberAdded      AuditAction = "group.member_added"
 	AuditGroupMemberRemoved    AuditAction = "group.member_removed"

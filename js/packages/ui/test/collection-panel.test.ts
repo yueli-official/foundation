@@ -236,4 +236,37 @@ describe("CollectionPanel", () => {
       wrapper.get('[data-search-placeholder="Search categories"]'),
     ).toBeTruthy();
   });
+
+  it("keeps the caller-owned view switch reachable beside mobile filters", () => {
+    const wrapper = mount(CollectionPanel, {
+      props: {
+        label: "Records",
+        items: [],
+        itemKey: () => "record",
+        itemLabel: () => "Record",
+        messages,
+        total: 0,
+        page: 1,
+        pageSize: 10,
+      },
+      slots: {
+        view: () => h("button", { "aria-label": "Grid" }, "Grid"),
+      },
+      global: {
+        components: {
+          UInput,
+          UButton,
+          UCheckbox,
+          USelect: passiveStub,
+          USelectMenu: passiveStub,
+          UPagination: passiveStub,
+          USkeleton: passiveStub,
+          UIcon: passiveStub,
+        },
+      },
+    });
+
+    expect(wrapper.get("[data-collection-mobile-view]").text()).toBe("Grid");
+    expect(wrapper.get("[data-collection-desktop-view]").text()).toBe("Grid");
+  });
 });

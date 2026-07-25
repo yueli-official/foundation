@@ -154,20 +154,29 @@ function toggle(item: TItem, key: TKey) {
       </form>
 
       <div class="mt-3 flex items-center justify-between gap-2 sm:hidden">
-        <UButton
-          icon="i-tabler-adjustments-horizontal"
-          :label="
-            activeFilterCount
-              ? messages.activeFilters(activeFilterCount)
-              : messages.filtersAction
-          "
-          :aria-controls="controlsId"
-          :aria-expanded="controlsOpen"
-          color="neutral"
-          variant="outline"
-          size="xs"
-          @click="toggleControls"
-        />
+        <div class="flex min-w-0 items-center gap-2">
+          <UButton
+            icon="i-tabler-adjustments-horizontal"
+            :label="
+              activeFilterCount
+                ? messages.activeFilters(activeFilterCount)
+                : messages.filtersAction
+            "
+            :aria-controls="controlsId"
+            :aria-expanded="controlsOpen"
+            color="neutral"
+            variant="outline"
+            size="xs"
+            @click="toggleControls"
+          />
+          <div
+            v-if="$slots.view"
+            data-collection-mobile-view
+            class="shrink-0"
+          >
+            <slot name="view" />
+          </div>
+        </div>
         <span class="text-xs text-muted">{{ total }}</span>
       </div>
     </template>
@@ -224,7 +233,7 @@ function toggle(item: TItem, key: TKey) {
         size="xs"
         @click="emit('clearFilters')"
       />
-      <div v-if="$slots.view" class="ml-auto">
+      <div v-if="$slots.view" data-collection-desktop-view class="ml-auto">
         <slot name="view" />
       </div>
     </template>

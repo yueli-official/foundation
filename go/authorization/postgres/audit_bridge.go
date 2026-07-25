@@ -23,6 +23,7 @@ var authorizationManagementActions = []authorization.AuditAction{
 	authorization.AuditBootstrapProtected,
 	authorization.AuditScopeCreated,
 	authorization.AuditScopeRegistered,
+	authorization.AuditScopeReparented,
 	authorization.AuditGroupCreated,
 	authorization.AuditGroupMemberAdded,
 	authorization.AuditGroupMemberRemoved,
