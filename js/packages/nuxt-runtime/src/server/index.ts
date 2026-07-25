@@ -50,6 +50,7 @@ const ASSET_RESPONSE_HEADERS = [
   "content-disposition",
   "content-length",
   "content-range",
+  "location",
 ] as const;
 
 export interface BffTarget {

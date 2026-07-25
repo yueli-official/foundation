@@ -281,6 +281,28 @@ describe("createBffHandler", () => {
     expect(trapRequests).toBe(0);
   });
 
+  it("forwards public redirect locations only for the asset profile", async () => {
+    const publicAsset = "https://cdn.example.test/public/image.webp";
+    const downstream = await listen(
+      createServer((_request, response) => {
+        response.statusCode = 302;
+        response.setHeader("location", publicAsset);
+        response.end();
+      }),
+    );
+    const bff = await startBff({
+      downstreamOrigin: downstream.origin,
+      profile: "asset",
+    });
+
+    const response = await fetch(`${bff.origin}/api/bff/content/image.webp`, {
+      redirect: "manual",
+    });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe(publicAsset);
+  });
+
   it("rejects oversized request bodies before forwarding them", async () => {
     let downstreamRequests = 0;
     const downstream = await listen(
