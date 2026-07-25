@@ -56,6 +56,7 @@ const title = computed(() =>
       <section
         v-if="visible"
         data-settings-save-dock
+        data-manage-dock="save"
         class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-default/95 px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_32px_-20px_rgba(15,23,42,0.35)] backdrop-blur"
         :class="dockClass"
         :aria-label="messages.region"
