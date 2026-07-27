@@ -1,4 +1,4 @@
-package privacyhttp
+package httpadapter
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 )
 
 // ClientCredentialsTokenSource obtains and briefly caches a machine token for
-// Owner protocol calls. The OAuth client and scope are provisioned by Identity;
-// Foundation deliberately does not own this authentication policy.
+// Owner protocol calls. The caller supplies the token endpoint, OAuth client,
+// scope and HTTP transport; this adapter does not discover process policy.
 type ClientCredentialsTokenSource struct {
 	TokenURL     string
 	ClientID     string

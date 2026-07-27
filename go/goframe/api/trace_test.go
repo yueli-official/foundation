@@ -1,4 +1,4 @@
-package ghttpx_test
+package api_test
 
 import (
 	"context"
@@ -10,21 +10,20 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	goframeapi "github.com/yueli-official/foundation/go/goframe/api"
+	"github.com/yueli-official/foundation/go/problem"
+	foundationtelemetry "github.com/yueli-official/foundation/go/telemetry"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
-
-	gerrs "platform/gokit/errs"
-	"platform/gokit/ghttpx"
-	"platform/gokit/observability"
 )
 
-func TestTraceRouteMiddlewareExportsMatchedRouteAndSanitizesUnmatchedPath(t *testing.T) {
+func TestTraceRouteExportsMatchedRouteAndSanitizesUnmatchedPath(t *testing.T) {
 	memory := tracetest.NewInMemoryExporter()
-	provider := sdktrace.NewTracerProvider(sdktrace.WithSyncer(observability.NewSanitizingExporter(memory)))
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSyncer(foundationtelemetry.NewSanitizingExporter(memory)))
 	previousProvider := otel.GetTracerProvider()
 	previousPropagator := otel.GetTextMapPropagator()
 	otel.SetTracerProvider(provider)
@@ -38,7 +37,7 @@ func TestTraceRouteMiddlewareExportsMatchedRouteAndSanitizesUnmatchedPath(t *tes
 	s := g.Server(t.Name())
 	s.SetAddr("127.0.0.1:0")
 	s.SetDumpRouterMap(false)
-	s.Use(ghttpx.TraceRouteMiddleware)
+	s.Use(goframeapi.TraceRoute)
 	s.BindHandler("GET:/items/{id}", func(r *ghttp.Request) { r.Response.WriteStatus(http.StatusNoContent) })
 	s.Start()
 	t.Cleanup(func() { _ = s.Shutdown() })
@@ -69,9 +68,9 @@ func TestTraceRouteMiddlewareExportsMatchedRouteAndSanitizesUnmatchedPath(t *tes
 	}
 }
 
-func TestTraceRouteMiddlewareUsesHTTPServerErrorSemantics(t *testing.T) {
+func TestTraceRouteUsesHTTPServerErrorSemantics(t *testing.T) {
 	memory := tracetest.NewInMemoryExporter()
-	provider := sdktrace.NewTracerProvider(sdktrace.WithSyncer(observability.NewSanitizingExporter(memory)))
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSyncer(foundationtelemetry.NewSanitizingExporter(memory)))
 	previousProvider := otel.GetTracerProvider()
 	otel.SetTracerProvider(provider)
 	t.Cleanup(func() {
@@ -82,11 +81,16 @@ func TestTraceRouteMiddlewareUsesHTTPServerErrorSemantics(t *testing.T) {
 	s := g.Server(t.Name())
 	s.SetAddr("127.0.0.1:0")
 	s.SetDumpRouterMap(false)
-	s.Use(ghttpx.TraceRouteMiddleware)
+	s.Use(goframeapi.TraceRoute)
+	middleware := newMiddleware(t, nil)
 	s.Group("/", func(group *ghttp.RouterGroup) {
-		group.Middleware(ghttpx.Middleware)
+		group.Middleware(middleware.Handle)
 		group.GET("/client-error", func(r *ghttp.Request) {
-			r.SetError(gerrs.New(gerrs.CommonValidationFailed, "invalid input", nil))
+			failure, err := problem.NewError(validation, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.SetError(failure)
 		})
 		group.GET("/server-error", func(r *ghttp.Request) {
 			r.SetError(errors.New("internal test error"))

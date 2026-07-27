@@ -1,4 +1,4 @@
-package ghttpx
+package api
 
 import (
 	"strings"
@@ -8,11 +8,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// TraceRouteMiddleware enriches GoFrame's active server span after routing.
+// TraceRoute enriches GoFrame's active server span after routing.
 // GoFrame 2.10 changes the span name but does not publish semantic route or
 // method attributes; the export privacy boundary needs these trusted values to
 // replace the raw URL-path span name without collapsing all routes together.
-func TraceRouteMiddleware(r *ghttp.Request) {
+func TraceRoute(r *ghttp.Request) {
 	r.Middleware.Next()
 	span := trace.SpanFromContext(r.Context())
 	if !span.IsRecording() {

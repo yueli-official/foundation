@@ -12,6 +12,9 @@ or wrap successful endpoint DTOs in a generic envelope.
   `Error`, validation violations, bounded codec and safe error mapping.
 - `goframe/http`: bounded Problem writer and GoFrame error adapter. Successful
   responses remain endpoint-owned raw JSON DTOs.
+- `goframe/api`: raw-success GoFrame request lifecycle with trace propagation,
+  immutable Problem error mapping, validation violations, caller-owned rate
+  limiting and trusted matched-route telemetry.
 - `httpclient`: bounded raw-success decoder that requires
   `application/problem+json` for non-2xx responses.
 - `health`: concurrent ordinary-Go runner with deadlines, stable snapshots,
@@ -64,7 +67,8 @@ or wrap successful endpoint DTOs in a generic envelope.
   consent/withdrawal/signal evidence, calendar retention reviews, verified
   Rights Request orchestration and an idempotent remote data Owner protocol.
   Identity may coordinate, but each product retains source-data and disposition
-  ownership.
+  ownership. `privacy/httpadapter` and `privacy/goframe` adapt that Owner
+  protocol without owning caller authentication or routing policy.
 - `discovery`: trusted-origin page projection and atomic publication for
   canonical/robots, Open Graph/X Card, typed JSON-LD, streaming sitemap/index,
   RSS/Atom and robots.txt. Product cursor sources and publication targets remain

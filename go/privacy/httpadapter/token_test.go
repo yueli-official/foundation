@@ -1,4 +1,4 @@
-package privacyhttp
+package httpadapter
 
 import (
 	"context"
