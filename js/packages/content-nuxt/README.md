@@ -23,7 +23,7 @@
 
    ```ts
    export default defineNuxtConfig({
-     extends: ['@platform/auth', '@platform/content'],
+     extends: ['@yueli/identity-nuxt', '@platform/content'],
    })
    ```
 
