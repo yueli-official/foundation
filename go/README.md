@@ -52,6 +52,9 @@ or wrap successful endpoint DTOs in a generic envelope.
   and Policy snapshots compiled into deterministic classification, discovery
   and governance decisions. Dynamic lookup/count/impact facts remain
   product-owned and no shared classification database is introduced.
+- `capability`: immutable service capability/provider manifests, deterministic
+  normalization, safe configuration-presence metadata, derived effective state,
+  stable lookup/list snapshots and the embedded v1 JSON Schema.
 - `abuse` and `abuse/turnstile`: stable bound external-input Actions,
   instance-local atomic multi-budget admission, pending/committed outcome
   penalties, purpose-bound Signal pseudonyms, explicit challenge/reject
