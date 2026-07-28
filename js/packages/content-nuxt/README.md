@@ -57,8 +57,9 @@ Foundation 所有的内容工具 Nuxt layer，向 Blog、Docs、Resource、Shop 
 - 本层会启用 `@nuxt/ui`，消费应用必须提供满足版本范围的对等依赖，因为 `useEditorToolbar` 在运行时导入
   `@nuxt/ui/utils/editor`。
 - 可离线使用：Tabler 图标、KaTeX 与 highlight.js 样式都随 `article.css` 提供，不依赖 CDN。
-- Tiptap 固定为与 `@nuxt/ui` 4.9.0 内置版本一致的 `3.28.0`，同时携带 `@tiptap/pm` 与表情菜单所需的
-  `@tiptap/suggestion`，不把编辑器内部 peer 留给消费应用补齐。
+- Tiptap 支持 `3.27.0` 起的同一主版本，并由消费应用 lock 与 `@nuxt/ui` 统一选择具体 patch；Foundation
+  当前以 `3.28.0` 验证。同时携带 `@tiptap/pm` 与表情菜单所需的 `@tiptap/suggestion`，不把编辑器内部
+  peer 留给消费应用补齐。
 
 验证：
 

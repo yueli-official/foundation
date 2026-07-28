@@ -172,28 +172,28 @@ importers:
   js/packages/content-nuxt:
     dependencies:
       '@tiptap/core':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0(@tiptap/pm@3.28.0)
       '@tiptap/extension-blockquote':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)
       '@tiptap/extension-emoji':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)(@tiptap/suggestion@3.28.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0))(emojibase@17.0.0)
       '@tiptap/extension-mathematics':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)(katex@0.16.45)
       '@tiptap/extension-text-align':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))
       '@tiptap/pm':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0
       '@tiptap/suggestion':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)
       '@tiptap/vue-3':
-        specifier: 3.28.0
+        specifier: ^3.27.0
         version: 3.28.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)(vue@3.5.39(typescript@6.0.3))
       highlight.js:
         specifier: 11.11.1
