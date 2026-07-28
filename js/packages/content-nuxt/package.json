@@ -1,0 +1,49 @@
+{
+  "name": "@yueli/content-nuxt",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yueli-official/foundation.git",
+    "directory": "js/packages/content-nuxt"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "nuxt typecheck"
+  },
+  "main": "./nuxt.config.ts",
+  "files": [
+    "app",
+    "nuxt.config.ts",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./nuxt.config.ts",
+    "./article.css": "./app/assets/css/article.css"
+  },
+  "dependencies": {
+    "@tiptap/core": "3.27.0",
+    "@tiptap/extension-blockquote": "3.27.0",
+    "@tiptap/extension-emoji": "3.27.0",
+    "@tiptap/extension-mathematics": "3.27.0",
+    "@tiptap/extension-text-align": "3.27.0",
+    "@tiptap/pm": "3.27.0",
+    "@tiptap/vue-3": "3.27.0",
+    "highlight.js": "11.11.1",
+    "katex": "0.16.45",
+    "marked": "17.0.6",
+    "marked-alert": "2.1.2",
+    "mermaid": "11.14.0"
+  },
+  "peerDependencies": {
+    "@nuxt/ui": "^4.9.0",
+    "nuxt": "^4.4.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@nuxt/ui": "4.9.0",
+    "nuxt": "4.4.8",
+    "vue": "3.5.39"
+  }
+}
