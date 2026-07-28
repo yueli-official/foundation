@@ -1,8 +1,9 @@
-// @platform/content — shared content kit Nuxt layer (rich editor + prose renderer).
-// Consumers `extends: ['@platform/content']` and get the components/composables
+// @yueli/content-nuxt — shared content kit Nuxt layer.
+// Consumers extend the layer and get the components/composables
 // auto-imported PLUS this build config merged in — so they never re-declare the
 // prosemirror dedup / katex css. See checklists/frontend-dev-gotchas §7.
 export default defineNuxtConfig({
+  modules: ['@nuxt/ui'],
   // katex stylesheet is global so it covers both the reading side and the
   // editor's math node previews (E4).
   css: ['katex/dist/katex.min.css'],
@@ -18,16 +19,16 @@ export default defineNuxtConfig({
         '@nuxt/ui > prosemirror-model',
         '@nuxt/ui > prosemirror-view',
         '@nuxt/ui > prosemirror-gapcursor',
-        '@platform/content > @tiptap/core',
-        '@platform/content > @tiptap/vue-3',
-        '@platform/content > @tiptap/extension-emoji',
-        '@platform/content > @tiptap/extension-text-align',
-        '@platform/content > @tiptap/extension-mathematics',
-        '@platform/content > @tiptap/extension-blockquote',
-        '@platform/content > highlight.js',
-        '@platform/content > katex',
-        '@platform/content > marked',
-        '@platform/content > marked-alert'
+        '@yueli/content-nuxt > @tiptap/core',
+        '@yueli/content-nuxt > @tiptap/vue-3',
+        '@yueli/content-nuxt > @tiptap/extension-emoji',
+        '@yueli/content-nuxt > @tiptap/extension-text-align',
+        '@yueli/content-nuxt > @tiptap/extension-mathematics',
+        '@yueli/content-nuxt > @tiptap/extension-blockquote',
+        '@yueli/content-nuxt > highlight.js',
+        '@yueli/content-nuxt > katex',
+        '@yueli/content-nuxt > marked',
+        '@yueli/content-nuxt > marked-alert'
       ]
     }
   }

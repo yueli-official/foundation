@@ -1,6 +1,14 @@
-# @platform/content
+# @yueli/content-nuxt
 
-与站点无关的内容工具 Nuxt layer，向 Blog、Resource、Shop 等内容站共享富 Markdown 编辑器和阅读端渲染器。它只携带数据契约（正文 `v-model`、封面属性），不调用任何站点接口；消费应用通过自己的 `useApi` 提供数据。
+Foundation 所有的内容工具 Nuxt layer，向 Blog、Docs、Resource、Shop 等内容站共享富 Markdown 编辑器和
+阅读端渲染器。它不调用站点接口；消费应用通过 `image-uploader` adapter 提供上传，通过自己的领域流程保存正文。
+
+## Module seam
+
+- 外部 interface 只有 `<ContentEditor>`、`<ContentProse>` 与 `article.css`。
+- Markdown renderer、Tiptap editor extensions、Mermaid diagram renderer 和本地草稿属于 module 内部实现，
+  不拆成要求消费者重新组合的浅 package。
+- 产品拥有文章、商品和资源条目的 schema、权限、发布生命周期与远程保存；本 module 只拥有通用内容行为。
 
 ## 自动导入内容
 
@@ -16,14 +24,14 @@
 1. 在应用 `package.json` 增加工作区依赖：
 
    ```json
-   { "dependencies": { "@platform/content": "workspace:*" } }
+   { "dependencies": { "@yueli/content-nuxt": "<正式 Release URL>" } }
    ```
 
 2. 在 `nuxt.config.ts` 扩展 layer：
 
    ```ts
    export default defineNuxtConfig({
-     extends: ['@yueli/identity-nuxt', '@platform/content'],
+     extends: ['@yueli/identity-nuxt', '@yueli/content-nuxt'],
    })
    ```
 
@@ -31,7 +39,7 @@
 
    ```css
    @plugin "@tailwindcss/typography";
-   @import "@platform/content/article.css";  /* 代码高亮、数学公式与提示块 */
+   @import "@yueli/content-nuxt/article.css";  /* 代码高亮、数学公式与提示块 */
    ```
 
 ## Layer 已统一处理的事项
@@ -50,4 +58,10 @@
 - 可离线使用：Tabler 图标、KaTeX 与 highlight.js 样式都随 `article.css` 提供，不依赖 CDN。
 - Tiptap 固定为与 `@nuxt/ui` 4.x 内置版本一致的 `^3.27.0`，同时携带 `@tiptap/pm`。
 
-验证：`pnpm --filter @platform/content typecheck`，并运行消费产品的编辑器交互测试。
+验证：
+
+```text
+pnpm --filter @yueli/content-nuxt test
+pnpm --filter @yueli/content-nuxt typecheck
+pnpm --filter @yueli/content-nuxt pack --dry-run
+```

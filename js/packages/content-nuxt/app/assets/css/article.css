@@ -197,7 +197,7 @@
 /* ══ Reading craft — editorial refinements over Tailwind Typography ═══════════
    Long-form reading polish (warm-tech, calm). Scoped to .prose so it rides on
    top of the typography plugin without touching the rest of the app. Shared via
-   @platform/content, so every consumer site's article body gets it. */
+   @yueli/content-nuxt, so every consumer site's article body gets it. */
 
 /* Balance headings; avoid orphaned single words trailing body copy. */
 .prose :is(h1, h2, h3, h4) { text-wrap: balance; }
