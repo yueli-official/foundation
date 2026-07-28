@@ -4,46 +4,46 @@
 // with the plugin options store dropped (auto-save is always on, 60s interval).
 
 interface DraftData {
-  title?: string
-  content?: string
-  excerpt?: string
-  savedAt?: string
+  title?: string;
+  content?: string;
+  excerpt?: string;
+  savedAt?: string;
 }
 
-const AUTO_SAVE_INTERVAL = 60_000
+const AUTO_SAVE_INTERVAL = 60_000;
 
 export function useEditorDraft(
-  formData: Ref<{ title?: string, content?: string, excerpt?: string }>,
+  formData: Ref<{ title?: string; content?: string; excerpt?: string }>,
   opts: {
-    mode: 'create' | 'edit'
-    entityId?: string | number
-    keyPrefix?: string
-    hasInitialContent: boolean
+    mode: "create" | "edit";
+    entityId?: string | number;
+    keyPrefix?: string;
+    hasInitialContent: boolean;
   },
 ) {
-  const keyPrefix = opts.keyPrefix ?? 'blog:draft'
+  const keyPrefix = opts.keyPrefix ?? "blog:draft";
 
   const autoSaveKey = computed(() =>
-    opts.mode === 'edit' && opts.entityId
+    opts.mode === "edit" && opts.entityId
       ? `${keyPrefix}:${opts.entityId}`
       : `${keyPrefix}:new`,
-  )
+  );
 
-  const lastAutoSaved = ref<Date | null>(null)
+  const lastAutoSaved = ref<Date | null>(null);
   const autoSavedLabel = computed(() => {
-    if (!lastAutoSaved.value) return ''
+    if (!lastAutoSaved.value) return "";
     return `已自动保存 ${lastAutoSaved.value.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`
-  })
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+  });
 
-  const showDraftRestore = ref(false)
-  const savedDraft = ref<DraftData | null>(null)
-  const hasUnsavedChanges = ref(false)
+  const showDraftRestore = ref(false);
+  const savedDraft = ref<DraftData | null>(null);
+  const hasUnsavedChanges = ref(false);
 
   const doAutoSave = () => {
-    if (!formData.value.title && !formData.value.content) return
+    if (!formData.value.title && !formData.value.content) return;
     try {
       localStorage.setItem(
         autoSaveKey.value,
@@ -53,49 +53,51 @@ export function useEditorDraft(
           excerpt: formData.value.excerpt,
           savedAt: new Date().toISOString(),
         }),
-      )
-      lastAutoSaved.value = new Date()
+      );
+      lastAutoSaved.value = new Date();
     } catch {
       // localStorage may be unavailable in restricted browser contexts.
     }
-  }
+  };
 
   const restoreDraft = () => {
-    if (!savedDraft.value) return
-    if (savedDraft.value.title) formData.value.title = savedDraft.value.title
-    if (savedDraft.value.content) formData.value.content = savedDraft.value.content
-    if (savedDraft.value.excerpt) formData.value.excerpt = savedDraft.value.excerpt
-    showDraftRestore.value = false
-    localStorage.removeItem(autoSaveKey.value)
-  }
+    if (!savedDraft.value) return;
+    if (savedDraft.value.title) formData.value.title = savedDraft.value.title;
+    if (savedDraft.value.content)
+      formData.value.content = savedDraft.value.content;
+    if (savedDraft.value.excerpt)
+      formData.value.excerpt = savedDraft.value.excerpt;
+    showDraftRestore.value = false;
+    localStorage.removeItem(autoSaveKey.value);
+  };
 
   const discardDraft = () => {
-    localStorage.removeItem(autoSaveKey.value)
-    showDraftRestore.value = false
-  }
+    localStorage.removeItem(autoSaveKey.value);
+    showDraftRestore.value = false;
+  };
 
   const markSaved = () => {
-    hasUnsavedChanges.value = false
+    hasUnsavedChanges.value = false;
     try {
-      localStorage.removeItem(autoSaveKey.value)
+      localStorage.removeItem(autoSaveKey.value);
     } catch {
       // localStorage may be unavailable in restricted browser contexts.
     }
-  }
+  };
 
-  let autoSaveTimer: ReturnType<typeof setInterval>
+  let autoSaveTimer: ReturnType<typeof setInterval>;
 
   const startAutoSave = () => {
     // Check for an existing draft on mount (only when the server had no content,
     // so we never shadow a freshly-loaded post with a stale local copy).
     if (!opts.hasInitialContent) {
       try {
-        const saved = localStorage.getItem(autoSaveKey.value)
+        const saved = localStorage.getItem(autoSaveKey.value);
         if (saved) {
-          const draft = JSON.parse(saved)
+          const draft = JSON.parse(saved);
           if (draft.title || draft.content) {
-            savedDraft.value = draft
-            showDraftRestore.value = true
+            savedDraft.value = draft;
+            showDraftRestore.value = true;
           }
         }
       } catch {
@@ -103,10 +105,10 @@ export function useEditorDraft(
       }
     }
 
-    autoSaveTimer = setInterval(doAutoSave, AUTO_SAVE_INTERVAL)
-  }
+    autoSaveTimer = setInterval(doAutoSave, AUTO_SAVE_INTERVAL);
+  };
 
-  onUnmounted(() => clearInterval(autoSaveTimer))
+  onUnmounted(() => clearInterval(autoSaveTimer));
 
   return {
     autoSaveKey,
@@ -118,5 +120,5 @@ export function useEditorDraft(
     discardDraft,
     markSaved,
     startAutoSave,
-  }
+  };
 }

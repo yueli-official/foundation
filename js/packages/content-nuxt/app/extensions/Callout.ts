@@ -1,111 +1,141 @@
-import { Node, mergeAttributes, type CommandProps } from '@tiptap/core'
-import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import EditorCalloutNode from '../components/EditorCalloutNode.vue'
+import {
+  Node,
+  mergeAttributes,
+  type CommandProps,
+  type JSONContent,
+  type MarkdownParseHelpers,
+  type MarkdownRendererHelpers,
+  type MarkdownToken,
+} from "@tiptap/core";
+import { VueNodeViewRenderer } from "@tiptap/vue-3";
+import EditorCalloutNode from "../components/EditorCalloutNode.vue";
+import { asNodeViewComponent } from "./nodeViewComponent";
 
-// GitHub-style callout / admonition blocks (> [!NOTE] …) (editor E6). Ported from
-// the donor admin editor. Intercepts the blockquote markdown token to distinguish
-// callouts from plain blockquotes; the reading side renders via marked-alert.
-export type CalloutType = 'note' | 'tip' | 'important' | 'warning' | 'caution'
+// GitHub 风格提示块（> [!NOTE] …）接管 blockquote token，并在解析时区分
+// 普通引用和提示块；阅读侧由 marked-alert 使用同一 Markdown 语义渲染。
+export type CalloutType = "note" | "tip" | "important" | "warning" | "caution";
 
-const CALLOUT_RE = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i
+const CALLOUT_RE = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i;
 
-declare module '@tiptap/core' {
+declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     callout: {
-      setCallout: (attrs?: { type?: CalloutType }) => ReturnType
-    }
+      setCallout: (attrs?: { type?: CalloutType }) => ReturnType;
+    };
   }
 }
 
 export const Callout = Node.create({
-  name: 'callout',
-  group: 'block',
-  content: 'block+',
+  name: "callout",
+  group: "block",
+  content: "block+",
   defining: true,
 
   addAttributes() {
     return {
-      type: { default: 'note' as CalloutType },
-    }
+      type: { default: "note" as CalloutType },
+    };
   },
 
   parseHTML() {
-    return [{
-      tag: 'div[data-callout]',
-      getAttrs: (el: string | HTMLElement) => ({
-        type: (typeof el === 'string' ? 'note' : el.getAttribute('data-callout')) || 'note',
-      }),
-    }]
+    return [
+      {
+        tag: "div[data-callout]",
+        getAttrs: (el: string | HTMLElement) => ({
+          type:
+            (typeof el === "string"
+              ? "note"
+              : el.getAttribute("data-callout")) || "note",
+        }),
+      },
+    ];
   },
 
-  renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
-    return ['div', mergeAttributes({ 'data-callout': HTMLAttributes.type, class: `callout callout-${HTMLAttributes.type}` }, HTMLAttributes), 0]
+  renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, unknown> }) {
+    return [
+      "div",
+      mergeAttributes(
+        {
+          "data-callout": HTMLAttributes.type,
+          class: `callout callout-${HTMLAttributes.type}`,
+        },
+        HTMLAttributes,
+      ),
+      0,
+    ];
   },
 
   addNodeView() {
-    return VueNodeViewRenderer(EditorCalloutNode as any)
+    return VueNodeViewRenderer(asNodeViewComponent(EditorCalloutNode));
   },
 
-  // Intercept the built-in blockquote token (same pattern as CodeBlockWithLang using 'code')
-  // This avoids custom tokenizer registration issues — marked.js's blockquote tokenizer
-  // reliably captures "> [!NOTE]" content, and we distinguish callouts from regular blockquotes
-  // in parseMarkdown.
-  markdownTokenName: 'blockquote',
+  // 复用 marked.js 稳定的 blockquote tokenizer，再在 parseMarkdown 中区分提示块。
+  markdownTokenName: "blockquote",
 
-  parseMarkdown: (token: any, helpers: any) => {
-    const text = token.text || ''
-    const match = text.match(CALLOUT_RE)
+  parseMarkdown: (token: MarkdownToken, helpers: MarkdownParseHelpers) => {
+    const text = token.text || "";
+    const match = text.match(CALLOUT_RE);
 
     if (!match) {
-      // Regular blockquote — we must handle it here since we intercept the token
-      const parseBlockChildren = helpers.parseBlockChildren ?? helpers.parseChildren
-      return helpers.createNode('blockquote', {}, parseBlockChildren(token.tokens || []))
+      // 接管 token 后，普通引用也必须在这里还原。
+      const parseBlockChildren =
+        helpers.parseBlockChildren ?? helpers.parseChildren;
+      return helpers.createNode(
+        "blockquote",
+        {},
+        parseBlockChildren(token.tokens || []),
+      );
     }
 
-    // It's a callout: > [!TYPE]
-    const calloutType = match[1]!.toLowerCase() as CalloutType
-    const parseBlockChildren = helpers.parseBlockChildren ?? helpers.parseChildren
+    const calloutType = match[1]!.toLowerCase() as CalloutType;
+    const parseBlockChildren =
+      helpers.parseBlockChildren ?? helpers.parseChildren;
 
-    // Parse all inner tokens as-is first, then strip the [!TYPE] prefix
-    // from the resulting ProseMirror JSON (safer than mutating marked tokens)
-    const children = parseBlockChildren(token.tokens || []) as any[] | null
+    // 先解析内部 token，再从 ProseMirror JSON 移除前缀，避免修改 marked token。
+    const children = parseBlockChildren(token.tokens || []);
 
     if (children?.length) {
-      const first = children[0]
-      if (first.type === 'paragraph' && first.content?.length) {
-        const firstText = first.content[0]
-        if (firstText.type === 'text' && firstText.text) {
-          const prefixMatch = firstText.text.match(CALLOUT_RE)
+      const first = children[0];
+      if (first?.type === "paragraph" && first.content?.length) {
+        const firstText = first.content[0];
+        if (firstText?.type === "text" && firstText.text) {
+          const prefixMatch = firstText.text.match(CALLOUT_RE);
           if (prefixMatch) {
-            firstText.text = firstText.text.slice(prefixMatch[0].length)
+            firstText.text = firstText.text.slice(prefixMatch[0].length);
             if (!firstText.text) {
-              first.content.shift()
-              // Also strip any leading hardBreak left by the \n after [!TYPE]
-              if (first.content.length && first.content[0].type === 'hardBreak') {
-                first.content.shift()
+              first.content.shift();
+              // 同时移除 [!TYPE] 后换行留下的首个 hardBreak。
+              if (
+                first.content.length &&
+                first.content[0]?.type === "hardBreak"
+              ) {
+                first.content.shift();
               }
             }
           }
         }
-        // Remove first paragraph if it's empty after stripping
+        // 前缀移除后首段为空则一并删除。
         if (!first.content?.length) {
-          children.shift()
+          children.shift();
         }
       }
     }
 
-    const content = children?.length ? children : [{ type: 'paragraph' }]
-    return helpers.createNode('callout', { type: calloutType }, content)
+    const content = children?.length ? children : [{ type: "paragraph" }];
+    return helpers.createNode("callout", { type: calloutType }, content);
   },
 
-  renderMarkdown: (node: any, h: any) => {
-    const type = (node.attrs?.type || 'note').toUpperCase()
+  renderMarkdown: (node: JSONContent, helpers: MarkdownRendererHelpers) => {
+    const type = String(node.attrs?.type || "note").toUpperCase();
     if (!node.content) {
-      return `> [!${type}]\n> `
+      return `> [!${type}]\n> `;
     }
-    const children = h.renderChildren(node.content)
-    const lines = children.split('\n').map((line: string) => `> ${line}`).join('\n')
-    return `> [!${type}]\n${lines}`
+    const children = helpers.renderChildren(node.content);
+    const lines = children
+      .split("\n")
+      .map((line: string) => `> ${line}`)
+      .join("\n");
+    return `> [!${type}]\n${lines}`;
   },
 
   addCommands() {
@@ -115,10 +145,10 @@ export const Callout = Node.create({
         ({ commands }: CommandProps) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { type: attrs?.type ?? 'note' },
-            content: [{ type: 'paragraph' }],
-          })
+            attrs: { type: attrs?.type ?? "note" },
+            content: [{ type: "paragraph" }],
+          });
         },
-    }
+    };
   },
-})
+});

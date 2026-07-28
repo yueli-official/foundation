@@ -1,64 +1,74 @@
-import { Node, mergeAttributes } from '@tiptap/core'
-import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import EditorMathBlockNode from '../components/EditorMathBlockNode.vue'
+import {
+  Node,
+  mergeAttributes,
+  type JSONContent,
+  type MarkdownParseHelpers,
+  type MarkdownToken,
+} from "@tiptap/core";
+import { VueNodeViewRenderer } from "@tiptap/vue-3";
+import EditorMathBlockNode from "../components/EditorMathBlockNode.vue";
+import { asNodeViewComponent } from "./nodeViewComponent";
 
-// Block-level LaTeX math ($$…$$) rendered with KaTeX (editor E4). Ported from
-// the donor admin editor. Inline math ($…$) is handled by @tiptap/extension-mathematics.
-declare module '@tiptap/core' {
+// 块级 LaTeX 公式（$$…$$）由 KaTeX 渲染；行内公式（$…$）交给
+// @tiptap/extension-mathematics。
+declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mathBlock: {
-      setMathBlock: (attrs?: { latex?: string }) => ReturnType
-    }
+      setMathBlock: (attrs?: { latex?: string }) => ReturnType;
+    };
   }
 }
 
 export const MathBlock = Node.create({
-  name: 'blockMath',
-  group: 'block',
+  name: "blockMath",
+  group: "block",
   atom: true,
   selectable: true,
   draggable: true,
 
   addAttributes() {
     return {
-      latex: { default: '' },
-    }
+      latex: { default: "" },
+    };
   },
 
   parseHTML() {
-    return [{ tag: 'div[data-type="block-math"]' }]
+    return [{ tag: 'div[data-type="block-math"]' }];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'block-math' })]
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, { "data-type": "block-math" }),
+    ];
   },
 
-  // @tiptap/markdown integration
-  markdownTokenName: 'blockMath',
+  // @tiptap/markdown 集成。
+  markdownTokenName: "blockMath",
   markdownTokenizer: {
-    name: 'blockMath',
-    level: 'block' as const,
-    start: '$$',
+    name: "blockMath",
+    level: "block" as const,
+    start: "$$",
     tokenize(src: string) {
-      const match = src.match(/^\$\$([\s\S]+?)\$\$/)
-      if (!match) return undefined
+      const match = src.match(/^\$\$([\s\S]+?)\$\$/);
+      if (!match) return undefined;
       return {
-        type: 'blockMath',
+        type: "blockMath",
         raw: match[0],
-        text: (match[1] ?? '').trim(),
-      }
+        text: (match[1] ?? "").trim(),
+      };
     },
   },
-  parseMarkdown: (token: any, helpers: any) => {
-    return helpers.createNode('blockMath', { latex: token.text || '' })
+  parseMarkdown: (token: MarkdownToken, helpers: MarkdownParseHelpers) => {
+    return helpers.createNode("blockMath", { latex: token.text || "" });
   },
-  renderMarkdown: (node: any) => {
-    const latex = node.attrs?.latex || ''
-    return `$$\n${latex}\n$$`
+  renderMarkdown: (node: JSONContent) => {
+    const latex = String(node.attrs?.latex || "");
+    return `$$\n${latex}\n$$`;
   },
 
   addNodeView() {
-    return VueNodeViewRenderer(EditorMathBlockNode as any)
+    return VueNodeViewRenderer(asNodeViewComponent(EditorMathBlockNode));
   },
 
   addCommands() {
@@ -68,13 +78,13 @@ export const MathBlock = Node.create({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { latex: attrs?.latex ?? '' },
-          })
+            attrs: { latex: attrs?.latex ?? "" },
+          });
         },
-    }
+    };
   },
 
   addInputRules() {
-    return []
+    return [];
   },
-})
+});

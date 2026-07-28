@@ -1,64 +1,73 @@
-import { Node, mergeAttributes } from '@tiptap/core'
-import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import EditorMermaidBlockNode from '../components/EditorMermaidBlockNode.vue'
+import {
+  Node,
+  mergeAttributes,
+  type JSONContent,
+  type MarkdownParseHelpers,
+  type MarkdownToken,
+} from "@tiptap/core";
+import { VueNodeViewRenderer } from "@tiptap/vue-3";
+import EditorMermaidBlockNode from "../components/EditorMermaidBlockNode.vue";
+import { asNodeViewComponent } from "./nodeViewComponent";
 
-// Mermaid diagram block (```mermaid fences) with a live SVG preview (editor E5).
-// Ported from the donor admin editor.
-declare module '@tiptap/core' {
+// Mermaid 图表块使用 ```mermaid 围栏，并在编辑器中提供实时 SVG 预览。
+declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mermaidBlock: {
-      setMermaidBlock: (attrs?: { code?: string }) => ReturnType
-    }
+      setMermaidBlock: (attrs?: { code?: string }) => ReturnType;
+    };
   }
 }
 
 export const MermaidBlock = Node.create({
-  name: 'mermaidBlock',
-  group: 'block',
+  name: "mermaidBlock",
+  group: "block",
   atom: true,
   selectable: true,
   draggable: true,
 
   addAttributes() {
     return {
-      code: { default: '' },
-    }
+      code: { default: "" },
+    };
   },
 
   parseHTML() {
-    return [{ tag: 'div[data-type="mermaid-block"]' }]
+    return [{ tag: 'div[data-type="mermaid-block"]' }];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'mermaid-block' })]
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, { "data-type": "mermaid-block" }),
+    ];
   },
 
-  // @tiptap/markdown integration
-  markdownTokenName: 'mermaidBlock',
+  // @tiptap/markdown 集成。
+  markdownTokenName: "mermaidBlock",
   markdownTokenizer: {
-    name: 'mermaidBlock',
-    level: 'block' as const,
-    start: '```mermaid',
+    name: "mermaidBlock",
+    level: "block" as const,
+    start: "```mermaid",
     tokenize(src: string) {
-      const match = src.match(/^```mermaid\n([\s\S]+?)```/)
-      if (!match) return undefined
+      const match = src.match(/^```mermaid\n([\s\S]+?)```/);
+      if (!match) return undefined;
       return {
-        type: 'mermaidBlock',
+        type: "mermaidBlock",
         raw: match[0],
-        text: (match[1] ?? '').trim(),
-      }
+        text: (match[1] ?? "").trim(),
+      };
     },
   },
-  parseMarkdown: (token: any, helpers: any) => {
-    return helpers.createNode('mermaidBlock', { code: token.text || '' })
+  parseMarkdown: (token: MarkdownToken, helpers: MarkdownParseHelpers) => {
+    return helpers.createNode("mermaidBlock", { code: token.text || "" });
   },
-  renderMarkdown: (node: any) => {
-    const code = node.attrs?.code || ''
-    return `\`\`\`mermaid\n${code}\n\`\`\``
+  renderMarkdown: (node: JSONContent) => {
+    const code = String(node.attrs?.code || "");
+    return `\`\`\`mermaid\n${code}\n\`\`\``;
   },
 
   addNodeView() {
-    return VueNodeViewRenderer(EditorMermaidBlockNode as any)
+    return VueNodeViewRenderer(asNodeViewComponent(EditorMermaidBlockNode));
   },
 
   addCommands() {
@@ -68,13 +77,13 @@ export const MermaidBlock = Node.create({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { code: attrs?.code ?? '' },
-          })
+            attrs: { code: attrs?.code ?? "" },
+          });
         },
-    }
+    };
   },
 
   addInputRules() {
-    return []
+    return [];
   },
-})
+});
