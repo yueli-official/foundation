@@ -1,0 +1,38 @@
+name: Release Foundation JS
+
+on:
+  push:
+    tags:
+      - "js-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  discovery-nuxt:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: js/packages/discovery-nuxt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+      - name: Pack discovery Nuxt adapter
+        run: |
+          mkdir -p "${RUNNER_TEMP}/release"
+          pnpm pack --pack-destination "${RUNNER_TEMP}/release"
+      - name: Publish release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "${GITHUB_REF_NAME}"
+          "${RUNNER_TEMP}/release/yueli-discovery-nuxt-0.1.0.tgz"
+          --repo "${GITHUB_REPOSITORY}"
+          --title "Foundation JS ${GITHUB_REF_NAME#js-v}"
+          --generate-notes
