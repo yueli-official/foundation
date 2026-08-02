@@ -1,6 +1,6 @@
 {
   "name": "@yueli/discovery-nuxt",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -8,6 +8,10 @@
     "directory": "js/packages/discovery-nuxt"
   },
   "type": "module",
+  "files": [
+    "src",
+    "README.md"
+  ],
   "exports": {
     ".": "./src/module.ts",
     "./runtime": "./src/runtime/composable.ts",

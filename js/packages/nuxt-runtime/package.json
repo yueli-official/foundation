@@ -1,7 +1,6 @@
 {
   "name": "@yueli/nuxt-runtime",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -9,6 +8,10 @@
     "directory": "js/packages/nuxt-runtime"
   },
   "type": "module",
+  "files": [
+    "src",
+    "README.md"
+  ],
   "exports": {
     ".": "./src/module.ts",
     "./runtime": "./src/runtime/composables.ts",
@@ -20,14 +23,15 @@
   },
   "dependencies": {
     "@nuxt/kit": "catalog:",
-    "@yueli/http-runtime": "workspace:*",
     "h3": "catalog:"
   },
   "peerDependencies": {
+    "@yueli/http-runtime": "^0.1.0",
     "nuxt": "^4.4.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@yueli/http-runtime": "workspace:*",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
