@@ -11,6 +11,8 @@ var (
 	ErrInvalidType          = errors.New("auth: invalid token type")
 	ErrMissingKeyID         = errors.New("auth: missing signing key ID")
 	ErrKeyUnavailable       = errors.New("auth: signing key unavailable")
+	ErrKeyAlgorithmMissing  = errors.New("auth: signing key algorithm is required")
+	ErrKeyAlgorithmMismatch = errors.New("auth: signing key algorithm does not match token")
 	ErrBadSignature         = errors.New("auth: invalid token signature")
 	ErrInvalidClaims        = errors.New("auth: invalid token claims")
 	ErrMissingExpiry        = errors.New("auth: token expiry is required")

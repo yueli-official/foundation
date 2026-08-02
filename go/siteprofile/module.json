@@ -15,7 +15,11 @@
   "runtimeDependencies": [],
   "evidence": {
     "docs": ["siteprofile/README.md", "siteprofile/CONTEXT.md"],
-    "tests": ["siteprofile/*_test.go", "siteprofile/httpadapter/*_test.go", "siteprofile/siteprofiletest/conformance.go"],
+    "tests": [
+      "siteprofile/*_test.go",
+      "siteprofile/httpadapter/*_test.go",
+      "siteprofile/siteprofiletest/conformance.go"
+    ],
     "consumers": [
       "platform/products/resource/api",
       "platform/products/shop/api",

@@ -15,7 +15,10 @@
   "runtimeDependencies": [],
   "evidence": {
     "docs": ["urllifecycle/README.md", "urllifecycle/CONTEXT.md"],
-    "tests": ["urllifecycle/*_test.go", "urllifecycle/urllifecycletest/conformance.go"],
+    "tests": [
+      "urllifecycle/*_test.go",
+      "urllifecycle/urllifecycletest/conformance.go"
+    ],
     "consumers": [
       "platform/products/blog/api",
       "platform/products/resource/api",

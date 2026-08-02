@@ -1,6 +1,7 @@
 # Local consumption
 
-Foundation can be consumed directly from a sibling checkout before npm and Go releases exist. This is a development-only seam: consumers import the public package/module names, while workspace configuration redirects those names to local source.
+Foundation 可以在开发期从相邻 checkout 消费。正式 Go 与 JS 制品已经存在，因此这只是一条本地联调 seam：
+消费者仍导入公共 package/module 名称，由 workspace 配置把它们临时重定向到本地源码。
 
 Assume this layout:
 
@@ -71,4 +72,5 @@ go test ./...
 
 ## Current limitation
 
-Local consumption is supported and used by Platform, but it is not a substitute for a published version. CI or deployment environments that do not check out the sibling repository must wait for npm prereleases and the `go/v*` module tag.
+本地消费不能替代正式制品。CI、部署和发布验收必须移除本地 workspace/`replace`，分别安装已发布的 GitHub
+Release tarball 和 `go/v*` module tag；具体命令见 [消费者接入指南](consumer-integration.md)。

@@ -17,10 +17,7 @@
   ],
   "evidence": {
     "docs": ["privacy/README.md", "privacy/CONTEXT.md"],
-    "tests": [
-      "privacy/*_test.go",
-      "privacy/privacytest/conformance.go"
-    ],
+    "tests": ["privacy/*_test.go", "privacy/privacytest/conformance.go"],
     "consumers": [
       "platform/services/identity",
       "platform/services/notification",

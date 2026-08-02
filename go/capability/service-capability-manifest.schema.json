@@ -4,7 +4,16 @@
   "title": "Service Capability Manifest v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["apiVersion", "kind", "service", "generatedAt", "redaction", "capabilities", "providers", "links"],
+  "required": [
+    "apiVersion",
+    "kind",
+    "service",
+    "generatedAt",
+    "redaction",
+    "capabilities",
+    "providers",
+    "links"
+  ],
   "properties": {
     "apiVersion": {
       "const": "platform.yueli.dev/service-capability-manifest/v1"

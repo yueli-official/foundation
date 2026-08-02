@@ -58,7 +58,7 @@ function toggleControls() {
       data-collection-bulk
       role="region"
       :aria-label="bulkLabel"
-      class="flex min-h-11 items-center justify-between gap-3 overflow-x-auto border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
+      class="sticky top-0 z-20 flex min-h-11 items-center justify-between gap-3 overflow-x-auto border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
     >
       <slot name="bulk" />
     </div>

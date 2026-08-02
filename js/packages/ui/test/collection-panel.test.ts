@@ -139,7 +139,7 @@ describe("CollectionPanel", () => {
     expect(wrapper.text()).toContain("1-2/2");
   });
 
-  it("keeps columns visible and renders bulk actions in normal document flow", async () => {
+  it("keeps columns visible and pins bulk actions within normal document flow", async () => {
     const wrapper = mount(CollectionPanel, {
       props: {
         label: "Records",
@@ -183,6 +183,7 @@ describe("CollectionPanel", () => {
     expect(wrapper.get("[data-collection-bulk]").text()).toContain(
       "1 selected",
     );
+    expect(wrapper.get("[data-collection-bulk]").classes()).toContain("sticky");
     expect(wrapper.get("[data-collection-bulk]").text()).toContain("Archive");
   });
 

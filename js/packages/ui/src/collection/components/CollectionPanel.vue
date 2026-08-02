@@ -169,11 +169,7 @@ function toggle(item: TItem, key: TKey) {
             size="xs"
             @click="toggleControls"
           />
-          <div
-            v-if="$slots.view"
-            data-collection-mobile-view
-            class="shrink-0"
-          >
+          <div v-if="$slots.view" data-collection-mobile-view class="shrink-0">
             <slot name="view" />
           </div>
         </div>
@@ -438,6 +434,7 @@ function toggle(item: TItem, key: TKey) {
             :page="page"
             :total="total"
             :items-per-page="pageSize"
+            :aria-label="messages.pagination || messages.pageSize"
             :show-edges="false"
             :sibling-count="1"
             size="xs"

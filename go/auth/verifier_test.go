@@ -92,6 +92,72 @@ func TestJWKSStaticSourceSatisfiesAuthKeySource(t *testing.T) {
 	}
 }
 
+func TestAccessTokenVerifierRequiresAudienceTypeAndBoundAlgorithm(t *testing.T) {
+	private := testPrivateKey(14)
+	boundKey := jose.JSONWebKey{Key: private.Public(), KeyID: testKeyID, Use: "sig", Algorithm: "EdDSA"}
+	keys := keySourceFunc(func(context.Context, string) (any, error) { return boundKey, nil })
+	if _, err := auth.NewAccessTokenVerifier(auth.Config{Keys: keys, Issuer: testIssuer}); err == nil {
+		t.Fatal("NewAccessTokenVerifier() accepted missing audience")
+	}
+	if _, err := auth.NewAccessTokenVerifier(auth.Config{
+		Keys: keys, Issuer: testIssuer, Audiences: []string{"resource-api"}, Types: []string{"JWT"},
+	}); err == nil {
+		t.Fatal("NewAccessTokenVerifier() accepted a generic JWT type")
+	}
+
+	verifier, err := auth.NewAccessTokenVerifier(auth.Config{
+		Keys: keys, Issuer: testIssuer, Audiences: []string{"resource-api"},
+		Algorithms: []jose.SignatureAlgorithm{jose.EdDSA},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC()
+	claims := jwt.Claims{
+		Issuer: testIssuer, Subject: "user", Audience: jwt.Audience{"resource-api"},
+		Expiry: jwt.NewNumericDate(now.Add(time.Minute)),
+	}
+	if _, err := verifier.Verify(context.Background(), sign(t, private, jose.EdDSA, testKeyID, "", claims, nil)); !errors.Is(err, auth.ErrInvalidType) {
+		t.Fatalf("missing type error = %v", err)
+	}
+	if _, err := verifier.Verify(context.Background(), sign(t, private, jose.EdDSA, testKeyID, "at+jwt", claims, nil)); err != nil {
+		t.Fatalf("valid access token error = %v", err)
+	}
+}
+
+func TestAccessTokenVerifierRejectsMissingOrMismatchedKeyAlgorithm(t *testing.T) {
+	private := testPrivateKey(15)
+	now := time.Now().UTC()
+	raw := sign(t, private, jose.EdDSA, testKeyID, "at+jwt", jwt.Claims{
+		Issuer: testIssuer, Subject: "user", Audience: jwt.Audience{"resource-api"},
+		Expiry: jwt.NewNumericDate(now.Add(time.Minute)),
+	}, nil)
+	tests := []struct {
+		name string
+		key  any
+		want error
+	}{
+		{name: "raw key", key: private.Public(), want: auth.ErrKeyAlgorithmMissing},
+		{name: "JWK without alg", key: jose.JSONWebKey{Key: private.Public(), KeyID: testKeyID, Use: "sig"}, want: auth.ErrKeyAlgorithmMissing},
+		{name: "mismatched alg", key: jose.JSONWebKey{Key: private.Public(), KeyID: testKeyID, Use: "sig", Algorithm: "RS256"}, want: auth.ErrKeyAlgorithmMismatch},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			verifier, err := auth.NewAccessTokenVerifier(auth.Config{
+				Keys:   keySourceFunc(func(context.Context, string) (any, error) { return test.key, nil }),
+				Issuer: testIssuer, Audiences: []string{"resource-api"},
+				Algorithms: []jose.SignatureAlgorithm{jose.EdDSA},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := verifier.Verify(context.Background(), raw); !errors.Is(err, test.want) {
+				t.Fatalf("Verify() error = %v, want %v", err, test.want)
+			}
+		})
+	}
+}
+
 func TestVerifierRejectsInvalidConfiguration(t *testing.T) {
 	validKeys := keySourceFunc(func(context.Context, string) (any, error) { return testPrivateKey(2).Public(), nil })
 	tests := []struct {

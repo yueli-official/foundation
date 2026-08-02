@@ -56,9 +56,7 @@ export default createBffHandler({
   credential: {
     resolve: async ({ event, signal }) => {
       const token = await resolveAppOwnedToken(event, signal);
-      return token
-        ? { kind: "bearer", token }
-        : { kind: "anonymous" };
+      return token ? { kind: "bearer", token } : { kind: "anonymous" };
     },
   },
 });

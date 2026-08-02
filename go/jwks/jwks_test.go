@@ -28,7 +28,7 @@ func TestStaticSourceValidatesAndResolvesPublicKeys(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(resolved, key.Key) {
+	if !sameJWK(resolved, key) {
 		t.Fatalf("resolved key does not match: %#v", resolved)
 	}
 	if _, err := source.PublicKey(context.Background(), "missing"); !errors.Is(err, jwks.ErrUnknownKey) {
@@ -98,7 +98,7 @@ func TestRemoteSourceCoalescesConcurrentInitialRefresh(t *testing.T) {
 			defer group.Done()
 			<-start
 			resolved, err := source.PublicKey(context.Background(), "rotating")
-			if err == nil && !reflect.DeepEqual(resolved, key.Key) {
+			if err == nil && !sameJWK(resolved, key) {
 				err = errors.New("resolved key did not match")
 			}
 			errorsFound <- err
@@ -177,7 +177,7 @@ func TestRemoteSourceRefreshesOnKeyRotation(t *testing.T) {
 	rotated.Store(true)
 	time.Sleep(10 * time.Millisecond)
 	resolved, err := source.PublicKey(context.Background(), "new")
-	if err != nil || !reflect.DeepEqual(resolved, newKey.Key) {
+	if err != nil || !sameJWK(resolved, newKey) {
 		t.Fatalf("rotated lookup = %#v, %v", resolved, err)
 	}
 	if _, err := source.PublicKey(context.Background(), "old"); !errors.Is(err, jwks.ErrUnknownKey) {
@@ -209,7 +209,7 @@ func TestRemoteSourceServesStaleKnownKeyDuringFailedRefresh(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	resolved, err := source.PublicKey(context.Background(), "known")
-	if err != nil || !reflect.DeepEqual(resolved, key.Key) {
+	if err != nil || !sameJWK(resolved, key) {
 		t.Fatalf("stale lookup = %#v, %v", resolved, err)
 	}
 	select {
@@ -218,7 +218,7 @@ func TestRemoteSourceServesStaleKnownKeyDuringFailedRefresh(t *testing.T) {
 		t.Fatal("background stale refresh did not run")
 	}
 	resolved, err = source.PublicKey(context.Background(), "known")
-	if err != nil || !reflect.DeepEqual(resolved, key.Key) {
+	if err != nil || !sameJWK(resolved, key) {
 		t.Fatalf("stale fallback = %#v, %v", resolved, err)
 	}
 }
@@ -274,7 +274,7 @@ func TestRemoteSourceRefreshOutlivesInitiatingCallerWithinBound(t *testing.T) {
 	secondResult := make(chan error, 1)
 	go func() {
 		resolved, err := source.PublicKey(context.Background(), "shared")
-		if err == nil && !reflect.DeepEqual(resolved, key.Key) {
+		if err == nil && !sameJWK(resolved, key) {
 			err = errors.New("resolved key did not match")
 		}
 		secondResult <- err
@@ -341,4 +341,11 @@ func writeSet(t *testing.T, writer http.ResponseWriter, keys ...jose.JSONWebKey)
 	if err := json.NewEncoder(writer).Encode(jose.JSONWebKeySet{Keys: keys}); err != nil {
 		t.Errorf("encode JWKS: %v", err)
 	}
+}
+
+func sameJWK(value any, expected jose.JSONWebKey) bool {
+	resolved, ok := value.(jose.JSONWebKey)
+	return ok && resolved.KeyID == expected.KeyID &&
+		resolved.Algorithm == expected.Algorithm && resolved.Use == expected.Use &&
+		reflect.DeepEqual(resolved.Key, expected.Key)
 }

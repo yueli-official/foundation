@@ -18,10 +18,7 @@
   ],
   "evidence": {
     "docs": ["audit/README.md", "audit/CONTEXT.md"],
-    "tests": [
-      "audit/*_test.go",
-      "audit/audittest/conformance.go"
-    ],
+    "tests": ["audit/*_test.go", "audit/audittest/conformance.go"],
     "consumers": [
       "foundation/authorization",
       "platform/products/docs/api",

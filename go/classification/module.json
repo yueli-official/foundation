@@ -14,10 +14,7 @@
   ],
   "runtimeDependencies": [],
   "evidence": {
-    "docs": [
-      "classification/README.md",
-      "classification/CONTEXT.md"
-    ],
+    "docs": ["classification/README.md", "classification/CONTEXT.md"],
     "tests": [
       "classification/*_test.go",
       "classification/classificationtest/conformance.go"
@@ -29,4 +26,3 @@
     ]
   }
 }
-

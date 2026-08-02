@@ -52,6 +52,7 @@ export interface CollectionPanelMessages {
   readonly retry: string;
   readonly showing: (first: number, last: number, total: number) => string;
   readonly pageSize: string;
+  readonly pagination?: string;
   readonly pageSizeControl: string;
   readonly pageSizeOption: (size: number) => string;
 }

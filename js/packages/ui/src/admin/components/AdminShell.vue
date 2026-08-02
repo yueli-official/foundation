@@ -17,6 +17,9 @@ withDefaults(
     storageKey?: string;
     sidebarId?: string;
     mainId?: string;
+    sidebarLabel?: string;
+    navigationLabel?: string;
+    secondaryNavigationLabel?: string;
     resizable?: boolean;
     collapsible?: boolean;
     defaultSize?: number;
@@ -29,6 +32,9 @@ withDefaults(
     storageKey: "yueli-admin",
     sidebarId: "primary",
     mainId: "admin-main",
+    sidebarLabel: "",
+    navigationLabel: "",
+    secondaryNavigationLabel: "",
     resizable: true,
     collapsible: true,
     defaultSize: 16,
@@ -57,6 +63,12 @@ const slots = useSlots();
     <UDashboardSidebar
       :id="sidebarId"
       v-model:open="open"
+      role="complementary"
+      :aria-label="
+        sidebarLabel ||
+        navigationLabel ||
+        String(navigation[0]?.label || messages.search)
+      "
       :resizable="resizable"
       :collapsible="collapsible"
       :default-size="defaultSize"
@@ -82,6 +94,9 @@ const slots = useSlots();
         <UNavigationMenu
           :collapsed="collapsed"
           :items="navigation.slice()"
+          :aria-label="
+            navigationLabel || String(navigation[0]?.label || messages.search)
+          "
           orientation="vertical"
           tooltip
           popover
@@ -91,6 +106,10 @@ const slots = useSlots();
           v-if="secondaryNavigation.length"
           :collapsed="collapsed"
           :items="secondaryNavigation.slice()"
+          :aria-label="
+            secondaryNavigationLabel ||
+            String(secondaryNavigation[0]?.label || messages.search)
+          "
           orientation="vertical"
           tooltip
           class="mt-auto"

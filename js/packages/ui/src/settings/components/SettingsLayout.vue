@@ -38,7 +38,7 @@ function selectSection(key: string) {
 
 <template>
   <div class="space-y-5 pb-28">
-    <header
+    <div
       v-if="showHeader"
       class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
     >
@@ -54,7 +54,7 @@ function selectSection(key: string) {
         </p>
       </div>
       <div v-if="$slots.actions" class="shrink-0"><slot name="actions" /></div>
-    </header>
+    </div>
 
     <div
       v-if="showSectionNavigation && sections.length >= 5"

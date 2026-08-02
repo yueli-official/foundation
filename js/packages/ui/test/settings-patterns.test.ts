@@ -35,6 +35,7 @@ describe("settings Patterns", () => {
       global: { components: { UButton: passiveStub, USelect: passiveStub } },
     });
     expect(layout.get("h1").text()).toBe("Workspace");
+    expect(layout.find("header").exists()).toBe(false);
     expect(layout.get('nav[aria-label="Settings sections"]')).toBeTruthy();
 
     await layout.setProps({ showHeader: false });

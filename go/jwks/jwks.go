@@ -49,7 +49,7 @@ type KeySource interface {
 
 // StaticSource resolves keys from an immutable in-memory set.
 type StaticSource struct {
-	keys map[string]any
+	keys map[string]jose.JSONWebKey
 }
 
 // NewStaticSource validates and copies the usable public signature keys in set.
@@ -107,7 +107,7 @@ type RemoteSource struct {
 	now          func() time.Time
 
 	mu          sync.Mutex
-	keys        map[string]any
+	keys        map[string]jose.JSONWebKey
 	fetchedAt   time.Time
 	lastAttempt time.Time
 	flight      *refreshFlight
@@ -293,8 +293,8 @@ func positiveOrDefault(name string, value, fallback time.Duration) (time.Duratio
 	return value, nil
 }
 
-func indexKeys(set jose.JSONWebKeySet) (map[string]any, error) {
-	keys := make(map[string]any, len(set.Keys))
+func indexKeys(set jose.JSONWebKeySet) (map[string]jose.JSONWebKey, error) {
+	keys := make(map[string]jose.JSONWebKey, len(set.Keys))
 	for index := range set.Keys {
 		key := &set.Keys[index]
 		if !key.Valid() {
@@ -312,7 +312,7 @@ func indexKeys(set jose.JSONWebKeySet) (map[string]any, error) {
 		if _, exists := keys[key.KeyID]; exists {
 			return nil, fmt.Errorf("%w: %s", ErrDuplicateKeyID, key.KeyID)
 		}
-		keys[key.KeyID] = key.Key
+		keys[key.KeyID] = *key
 	}
 	if len(keys) == 0 {
 		return nil, ErrNoUsableKeys

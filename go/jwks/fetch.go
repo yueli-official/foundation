@@ -11,7 +11,7 @@ import (
 	jose "github.com/go-jose/go-jose/v4"
 )
 
-func fetch(ctx context.Context, client *http.Client, endpoint string, maxBodyBytes int64) (map[string]any, error) {
+func fetch(ctx context.Context, client *http.Client, endpoint string, maxBodyBytes int64) (map[string]jose.JSONWebKey, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("jwks: create request: %w", err)

@@ -12,8 +12,9 @@ Yueli Foundation 是面向 Yueli 各类站点、应用与其他程序的公开�
 - `go/`：ordinary Go core 与显式 GoFrame Adapter；迁移前逐 Module review。
 - `docs/`：架构、兼容矩阵、迁移和发布说明。
 
-JS package 与 Go module 共用仓库和跨语言 contract，但拥有独立依赖、CI、SemVer、changelog 与 release tag；
-仓库没有统一版本。
+JS package 与 Go module 共用仓库和跨语言 contract，但拥有独立依赖与版本线；仓库没有统一版本。Go 当前以
+`go/` 下的单一 module 发布，JS 当前以带清单和校验和的 GitHub Release 完整 bundle 交付，package 自身的
+`version` 仍是消费者兼容性的版本真相。
 
 ## Current status
 
@@ -31,7 +32,8 @@ signatures and secret rotation, transaction-bound fan-out, durable delivery
 and attempt history, Work-based retry/replay, inbound verification receipts,
 and DNS-rebinding-resistant outbound HTTP.
 
-No prerelease has been published. Package names and compatibility remain experimental; do not consume repository source paths directly.
+已经发布的公共制品包括 Go `go/v0.1.0`，以及 JS `js-v0.1.0` 至 `js-v0.4.1` 的 GitHub Release tarball。
+现有版本仍处于 `v0`，允许有迁移说明的接口调整，但不得绕过版本、制品验收或消费者迁移。不要直接依赖仓库源码路径。
 
 Useful local gates:
 
@@ -43,6 +45,8 @@ cd go && go test -race ./... && go vet ./...
 ```
 
 See [Local consumption](docs/local-consumption.md) for using the JS packages and Go module from a sibling checkout without copying source.
+新站点、App 或服务应先阅读 [消费者接入指南](docs/consumer-integration.md)；维护者的版本与发布规则见
+[发布策略](docs/release-policy.md)。
 
 ## License
 

@@ -23,11 +23,13 @@ const slots = useSlots();
   <UDashboardPanel
     :id="id"
     :resizable="resizable"
+    role="main"
+    :aria-label="title"
     class="min-w-0"
     :ui="{ body: 'gap-0 overflow-hidden p-0 sm:p-0' }"
   >
     <template #header>
-      <UDashboardNavbar :title="title" :icon="icon">
+      <UDashboardNavbar data-admin-page-navbar :title="title" :icon="icon">
         <template #leading>
           <slot name="leading">
             <UDashboardSidebarCollapse />
@@ -42,6 +44,7 @@ const slots = useSlots();
 
       <UDashboardToolbar
         v-if="slots.toolbar || slots['toolbar-left'] || slots['toolbar-right']"
+        data-admin-page-toolbar
       >
         <template v-if="slots['toolbar-left']" #left
           ><slot name="toolbar-left"
@@ -54,14 +57,14 @@ const slots = useSlots();
     </template>
 
     <template #body>
-      <main
+      <div
         :id="mainId"
         tabindex="-1"
         class="flex-1 overflow-y-auto p-4 outline-none sm:p-6"
         :class="bodyClass"
       >
         <slot />
-      </main>
+      </div>
     </template>
 
     <template v-if="slots.footer" #footer><slot name="footer" /></template>

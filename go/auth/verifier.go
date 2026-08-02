@@ -18,16 +18,19 @@ const (
 	defaultMaxTokenSize = 16 << 10
 )
 
+var accessTokenTypes = []string{"at+jwt", "application/at+jwt"}
+
 // KeySource resolves a public verification key. Package jwks sources satisfy
 // this Interface without auth depending on a particular transport package.
 type KeySource interface {
 	PublicKey(ctx context.Context, kid string) (any, error)
 }
 
-// Config defines access-token verification policy. Issuer and Keys are
-// required. Empty Algorithms selects RS256. Configured Audiences use any-match
-// semantics. Empty Types disables typ checking; set []string{"at+jwt"} when the
-// issuer follows RFC 9068 to prevent cross-JWT confusion.
+// Config defines signed-JWT verification policy. Issuer and Keys are required.
+// Empty Algorithms selects RS256. Configured Audiences use any-match semantics.
+// Empty Types disables typ checking for NewVerifier. Prefer
+// NewAccessTokenVerifier for OAuth access tokens; it requires an audience, an
+// RFC 9068 token type, and an algorithm-bound JWK.
 type Config struct {
 	Keys       KeySource
 	Issuer     string
@@ -59,11 +62,34 @@ type Verifier struct {
 	maxTokenBytes  int
 	maxLifetime    time.Duration
 	allowActorless bool
+	requireKeyAlg  bool
 	now            func() time.Time
 }
 
 // NewVerifier validates and copies policy from config.
 func NewVerifier(config Config) (*Verifier, error) {
+	return newVerifier(config, false)
+}
+
+// NewAccessTokenVerifier constructs an RFC 9068-style OAuth access-token
+// verifier. It requires at least one resource audience, accepts only at+jwt
+// media types, and rejects verification keys without matching JWK alg metadata.
+func NewAccessTokenVerifier(config Config) (*Verifier, error) {
+	if len(config.Audiences) == 0 {
+		return nil, errors.New("auth: access-token Audiences is required")
+	}
+	if len(config.Types) == 0 {
+		config.Types = append([]string{}, accessTokenTypes...)
+	}
+	for _, tokenType := range config.Types {
+		if !stringEqualFoldAny(tokenType, accessTokenTypes) {
+			return nil, fmt.Errorf("auth: access-token type %q is not allowed", tokenType)
+		}
+	}
+	return newVerifier(config, true)
+}
+
+func newVerifier(config Config, requireKeyAlgorithm bool) (*Verifier, error) {
 	if config.Keys == nil {
 		return nil, errors.New("auth: Keys is required")
 	}
@@ -118,6 +144,7 @@ func NewVerifier(config Config) (*Verifier, error) {
 		maxTokenBytes:  maxTokenBytes,
 		maxLifetime:    config.MaxLifetime,
 		allowActorless: config.AllowActorless,
+		requireKeyAlg:  requireKeyAlgorithm,
 		now:            clock,
 	}, nil
 }
@@ -161,6 +188,10 @@ func (verifier *Verifier) Verify(ctx context.Context, raw string) (*Principal, e
 	}
 	if key == nil {
 		return nil, ErrKeyUnavailable
+	}
+	key, err = verificationKeyMaterial(key, jose.SignatureAlgorithm(algorithm), verifier.requireKeyAlg)
+	if err != nil {
+		return nil, err
 	}
 
 	var payload json.RawMessage
@@ -260,6 +291,41 @@ func typeAllowed(header jose.Header, allowed []string) bool {
 	if !ok {
 		return false
 	}
+	return stringEqualFoldAny(value, allowed)
+}
+
+func verificationKeyMaterial(value any, tokenAlgorithm jose.SignatureAlgorithm, requireAlgorithm bool) (any, error) {
+	var key jose.JSONWebKey
+	switch candidate := value.(type) {
+	case jose.JSONWebKey:
+		key = candidate
+	case *jose.JSONWebKey:
+		if candidate == nil {
+			return nil, ErrKeyUnavailable
+		}
+		key = *candidate
+	default:
+		if requireAlgorithm {
+			return nil, ErrKeyAlgorithmMissing
+		}
+		return value, nil
+	}
+	if key.Key == nil {
+		return nil, ErrKeyUnavailable
+	}
+	if strings.TrimSpace(key.Algorithm) == "" {
+		if requireAlgorithm {
+			return nil, ErrKeyAlgorithmMissing
+		}
+		return key.Key, nil
+	}
+	if !strings.EqualFold(key.Algorithm, string(tokenAlgorithm)) {
+		return nil, ErrKeyAlgorithmMismatch
+	}
+	return key.Key, nil
+}
+
+func stringEqualFoldAny(value string, allowed []string) bool {
 	for _, candidate := range allowed {
 		if strings.EqualFold(value, candidate) {
 			return true

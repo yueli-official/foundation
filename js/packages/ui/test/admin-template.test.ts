@@ -17,10 +17,11 @@ const passthrough = (name: string, tag = "div") =>
 
 const dashboardSidebar = defineComponent({
   name: "UDashboardSidebar",
+  inheritAttrs: false,
   setup:
-    (_props, { slots }) =>
+    (_props, { attrs, slots }) =>
     () =>
-      h("aside", { "data-sidebar": "" }, [
+      h("aside", { ...attrs, "data-sidebar": "" }, [
         slots.header?.({ collapsed: false }),
         slots.default?.({ collapsed: false }),
         slots.footer?.({ collapsed: false }),
@@ -28,14 +29,18 @@ const dashboardSidebar = defineComponent({
 });
 const navigationMenu = defineComponent({
   name: "UNavigationMenu",
+  inheritAttrs: false,
   props: { items: { type: Array, default: () => [] } },
-  setup: (props) => () =>
-    h(
-      "nav",
-      (props.items as Array<{ label?: string }>).map((item) =>
-        h("a", item.label),
+  setup:
+    (props, { attrs }) =>
+    () =>
+      h(
+        "nav",
+        attrs,
+        (props.items as Array<{ label?: string }>).map((item) =>
+          h("a", item.label),
+        ),
       ),
-    ),
 });
 const dashboardSearchButton = defineComponent({
   name: "UDashboardSearchButton",
@@ -51,10 +56,11 @@ const dashboardSearch = defineComponent({
 });
 const dashboardPanel = defineComponent({
   name: "UDashboardPanel",
+  inheritAttrs: false,
   setup:
-    (_props, { slots }) =>
+    (_props, { attrs, slots }) =>
     () =>
-      h("section", { "data-panel": "" }, [
+      h("section", { ...attrs, "data-panel": "" }, [
         slots.header?.(),
         slots.body?.(),
         slots.footer?.(),
@@ -133,6 +139,9 @@ describe("admin template", () => {
     expect(wrapper.text()).toContain("Home");
     expect(wrapper.text()).toContain("Help");
     expect(wrapper.text()).toContain("Account");
+    expect(wrapper.get('[role="complementary"]')).toBeTruthy();
+    expect(wrapper.get('nav[aria-label="Home"]')).toBeTruthy();
+    expect(wrapper.get('nav[aria-label="Help"]')).toBeTruthy();
     expect(wrapper.get("[data-search-button]").text()).toBe("Search");
     expect(wrapper.get("[data-search-placeholder]").attributes()).toMatchObject(
       { "data-search-placeholder": "Search pages" },
@@ -156,11 +165,15 @@ describe("admin template", () => {
     });
 
     expect(wrapper.get("[data-panel]")).toBeTruthy();
+    expect(wrapper.get('[role="main"][aria-label="Documents"]')).toBeTruthy();
     expect(wrapper.get("[data-navbar]").text()).toContain("Documents");
+    expect(wrapper.get("[data-admin-page-navbar]")).toBeTruthy();
     expect(wrapper.get("[data-navbar]").text()).toContain("Create");
     expect(wrapper.get("[data-toolbar]").text()).toContain("Filters");
     expect(wrapper.get("[data-toolbar]").text()).toContain("Display");
+    expect(wrapper.get("[data-admin-page-toolbar]")).toBeTruthy();
     expect(wrapper.get("#documents-main").text()).toBe("Results");
+    expect(wrapper.get("#documents-main").element.tagName).toBe("DIV");
     expect(wrapper.get("#documents-main").classes()).toContain(
       "overflow-y-auto",
     );

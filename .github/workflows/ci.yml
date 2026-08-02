@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go/go.mod
+          cache-dependency-path: go/go.sum
+      - name: 校验模块依赖
+        working-directory: go
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+      - name: 运行竞态测试
+        working-directory: go
+        run: go test -race ./...
+      - name: 运行静态检查
+        working-directory: go
+        run: go vet ./...
+      - name: 扫描可达漏洞
+        working-directory: go
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+
+  js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10.28.2
+          run_install: false
+      - uses: actions/setup-node@49933ea5288ca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.18.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+      - name: 验证 JS 工作区
+        run: pnpm verify:js
+      - name: 扫描生产依赖
+        run: pnpm audit --prod --audit-level moderate
+      - name: 检查全部公共包内容
+        run: pnpm --filter "./js/packages/*" --recursive pack --dry-run
+      - name: 验证独立 UI 制品消费者
+        run: pnpm --filter @yueli/ui test:pack
+      - name: 安装 CLI Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: 运行 CLI Playwright 验收
+        run: |
+          pnpm --filter @yueli/http-runtime-conformance test:e2e
+          pnpm --filter @yueli/ui-foundation-conformance test:e2e

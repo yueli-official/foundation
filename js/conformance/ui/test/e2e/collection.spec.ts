@@ -66,10 +66,12 @@ test("public admin chrome exposes navigation, page ownership and remote search",
   await settle(page);
 
   await expect(page.getByText("Yueli UI", { exact: true })).toBeVisible();
-  await expect(page.getByRole("navigation")).toContainText("内容集合");
+  await expect(
+    page.getByRole("navigation", { name: "内容集合" }),
+  ).toContainText("内容集合");
   await expect(page.locator("#main-content")).toBeVisible();
 
-  const owner = page.getByRole("combobox", { name: "按负责人筛选" });
+  const owner = page.getByRole("button", { name: "按负责人筛选" });
   await owner.click();
   await page.getByPlaceholder("搜索负责人").fill("API");
   await expect(page.getByRole("option", { name: /API Team/ })).toBeVisible();
@@ -175,19 +177,17 @@ test("bulk actions stay pinned below the page header while scrolling", async ({
       return box?.y ?? -1;
     })
     .toBeGreaterThanOrEqual(0);
-  const geometry = await page.evaluate(() => {
-    const header = document
-      .querySelector("body > div header")
-      ?.getBoundingClientRect();
-    const toolbar = document
-      .querySelector('[aria-label="批量操作"]')
-      ?.getBoundingClientRect();
-    return {
-      headerBottom: header?.bottom ?? 0,
-      toolbarTop: toolbar?.top ?? -1,
-    };
-  });
+  const pageToolbar = page.locator("[data-admin-page-toolbar]");
+  const headerBox = await pageToolbar.boundingBox();
+  const toolbarBox = await toolbar.boundingBox();
+  expect(headerBox).not.toBeNull();
+  expect(toolbarBox).not.toBeNull();
+  const geometry = {
+    headerBottom: headerBox!.y + headerBox!.height,
+    toolbarTop: toolbarBox!.y,
+  };
   expect(geometry.toolbarTop).toBeGreaterThanOrEqual(0);
+  expect(geometry.toolbarTop).toBeGreaterThanOrEqual(geometry.headerBottom);
   await expectNoHorizontalOverflow(page);
   await page.screenshot({
     path: testInfo.outputPath("collection-bulk-sticky.png"),
@@ -214,6 +214,9 @@ test("light and dark collection states have no detectable axe violations", async
   await expect
     .poll(() => page.locator("html").getAttribute("class"))
     .toContain("dark");
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menuitem", { name: "退出登录" })).toBeHidden();
   results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
   await page.screenshot({
