@@ -20,4 +20,5 @@ var (
 	ErrInvalidAudience      = errors.New("auth: invalid audience")
 	ErrInvalidLifetime      = errors.New("auth: invalid token lifetime")
 	ErrMissingActor         = errors.New("auth: token subject or client ID is required")
+	ErrInvalidSubjectKind   = errors.New("auth: token subject kind is missing or invalid")
 )

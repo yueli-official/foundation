@@ -41,10 +41,11 @@ func TestVerifierReturnsTypedPrincipal(t *testing.T) {
 		IssuedAt: jwt.NewNumericDate(now),
 		Expiry:   jwt.NewNumericDate(now.Add(5 * time.Minute)),
 	}, map[string]any{
-		"scope":     "openid profile profile",
-		"roles":     []string{"editor", "editor"},
-		"client_id": "web-client",
-		"tenant_id": "tenant-1",
+		"scope":        "openid profile profile",
+		"roles":        []string{"editor", "editor"},
+		"client_id":    "web-client",
+		"subject_kind": "user",
+		"tenant_id":    "tenant-1",
 	})
 
 	principal, err := verifier.Verify(context.Background(), raw)
@@ -53,6 +54,9 @@ func TestVerifierReturnsTypedPrincipal(t *testing.T) {
 	}
 	if principal.ActorKey() != "user-1" || principal.ClientID != "web-client" {
 		t.Fatalf("principal actor = %q, client = %q", principal.ActorKey(), principal.ClientID)
+	}
+	if !principal.IsUser() || principal.SubjectKind != auth.SubjectUser {
+		t.Fatalf("principal subject kind = %q", principal.SubjectKind)
 	}
 	if !principal.HasScope("profile") || len(principal.Scopes) != 2 {
 		t.Fatalf("scopes = %#v", principal.Scopes)
@@ -128,6 +132,49 @@ func TestVerifierRequiresExpiryAndActorByDefault(t *testing.T) {
 	}, nil)
 	if _, err := verifier.Verify(context.Background(), missingActor); !errors.Is(err, auth.ErrMissingActor) {
 		t.Fatalf("missing actor error = %v", err)
+	}
+}
+
+func TestVerifierRequiresSubjectKindForActors(t *testing.T) {
+	private := testPrivateKey(12)
+	verifier := newVerifier(t, private.Public(), auth.Config{Algorithms: []jose.SignatureAlgorithm{jose.EdDSA}})
+	now := time.Now().UTC().Truncate(time.Second)
+	claims := jwt.Claims{
+		Issuer: testIssuer, Subject: "user-1", Expiry: jwt.NewNumericDate(now.Add(time.Minute)),
+	}
+
+	tests := []struct {
+		name  string
+		extra map[string]any
+	}{
+		{name: "missing kind", extra: map[string]any{"subject_kind": nil}},
+		{name: "unknown kind", extra: map[string]any{"subject_kind": "robot"}},
+		{name: "client kind without client ID", extra: map[string]any{"subject_kind": "client"}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			raw := sign(t, private, jose.EdDSA, testKeyID, "", claims, test.extra)
+			if _, err := verifier.Verify(context.Background(), raw); !errors.Is(err, auth.ErrInvalidSubjectKind) {
+				t.Fatalf("Verify() error = %v, want %v", err, auth.ErrInvalidSubjectKind)
+			}
+		})
+	}
+}
+
+func TestClientActorKeyDoesNotUseTokenSubject(t *testing.T) {
+	private := testPrivateKey(13)
+	verifier := newVerifier(t, private.Public(), auth.Config{Algorithms: []jose.SignatureAlgorithm{jose.EdDSA}})
+	now := time.Now().UTC().Truncate(time.Second)
+	raw := sign(t, private, jose.EdDSA, testKeyID, "", jwt.Claims{
+		Issuer: testIssuer, Subject: "client-subject-that-is-not-a-user", Expiry: jwt.NewNumericDate(now.Add(time.Minute)),
+	}, map[string]any{"subject_kind": "client", "client_id": "worker-client"})
+
+	principal, err := verifier.Verify(context.Background(), raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if principal.ActorKey() != "worker-client" || principal.IsUser() {
+		t.Fatalf("client actor = %q, isUser = %v", principal.ActorKey(), principal.IsUser())
 	}
 }
 
@@ -290,6 +337,16 @@ func sign(t *testing.T, private ed25519.PrivateKey, algorithm jose.SignatureAlgo
 	signer, err := jose.NewSigner(jose.SigningKey{Algorithm: algorithm, Key: private}, options)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if extra == nil {
+		extra = map[string]any{}
+	}
+	if _, declared := extra["subject_kind"]; !declared {
+		if strings.TrimSpace(claims.Subject) != "" {
+			extra["subject_kind"] = "user"
+		} else if clientID, _ := extra["client_id"].(string); strings.TrimSpace(clientID) != "" {
+			extra["subject_kind"] = "client"
+		}
 	}
 	builder := jwt.Signed(signer).Claims(claims)
 	if extra != nil {

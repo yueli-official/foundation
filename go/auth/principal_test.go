@@ -17,8 +17,8 @@ func TestPrincipalNilHelpersAreSafe(t *testing.T) {
 	}
 }
 
-func TestPrincipalActorKeyFallsBackToClient(t *testing.T) {
-	principal := &auth.Principal{ClientID: "machine-client"}
+func TestPrincipalActorKeyUsesDeclaredClient(t *testing.T) {
+	principal := &auth.Principal{SubjectKind: auth.SubjectClient, ClientID: "machine-client"}
 	if got := principal.ActorKey(); got != "machine-client" {
 		t.Fatalf("ActorKey() = %q", got)
 	}

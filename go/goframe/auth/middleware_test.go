@@ -25,7 +25,7 @@ func (function verifierFunc) Verify(ctx context.Context, raw string) (*coreauth.
 
 func TestMiddlewareValidatesConfiguration(t *testing.T) {
 	verifier := verifierFunc(func(context.Context, string) (*coreauth.Principal, error) {
-		return &coreauth.Principal{Subject: "user"}, nil
+		return &coreauth.Principal{Subject: "user", SubjectKind: coreauth.SubjectUser}, nil
 	})
 	writer := goframehttp.MustWriter(goframehttp.WriterOptions{})
 	kind := problem.MustKind("auth.unauthorized", http.StatusUnauthorized)
@@ -121,7 +121,7 @@ func startServer(t *testing.T) (*ghttp.Server, string) {
 		if raw != "valid" {
 			return nil, errors.New("invalid token details must not leak")
 		}
-		return &coreauth.Principal{Subject: "user-1"}, nil
+		return &coreauth.Principal{Subject: "user-1", SubjectKind: coreauth.SubjectUser}, nil
 	})
 	writer := goframehttp.MustWriter(goframehttp.WriterOptions{})
 	middleware, err := goframeauth.NewMiddleware(goframeauth.Options{

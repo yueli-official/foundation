@@ -169,9 +169,10 @@ func (verifier *Verifier) Verify(ctx context.Context, raw string) (*Principal, e
 	}
 	var standard jwt.Claims
 	var extension struct {
-		Scope    string   `json:"scope"`
-		Roles    []string `json:"roles"`
-		ClientID string   `json:"client_id"`
+		Scope       string   `json:"scope"`
+		Roles       []string `json:"roles"`
+		ClientID    string   `json:"client_id"`
+		SubjectKind string   `json:"subject_kind"`
 	}
 	var claims map[string]any
 	if err := json.Unmarshal(payload, &standard); err != nil {
@@ -202,17 +203,34 @@ func (verifier *Verifier) Verify(ctx context.Context, raw string) (*Principal, e
 	if !verifier.allowActorless && strings.TrimSpace(standard.Subject) == "" && strings.TrimSpace(extension.ClientID) == "" {
 		return nil, ErrMissingActor
 	}
+	subjectKind := SubjectKind(strings.TrimSpace(extension.SubjectKind))
+	actorPresent := strings.TrimSpace(standard.Subject) != "" || strings.TrimSpace(extension.ClientID) != ""
+	if actorPresent {
+		switch subjectKind {
+		case SubjectUser, SubjectGuest:
+			if strings.TrimSpace(standard.Subject) == "" {
+				return nil, ErrInvalidSubjectKind
+			}
+		case SubjectClient:
+			if strings.TrimSpace(extension.ClientID) == "" {
+				return nil, ErrInvalidSubjectKind
+			}
+		default:
+			return nil, ErrInvalidSubjectKind
+		}
+	}
 
 	return &Principal{
-		Subject:   standard.Subject,
-		ClientID:  extension.ClientID,
-		Issuer:    standard.Issuer,
-		Audience:  append([]string{}, standard.Audience...),
-		Scopes:    uniqueStrings(strings.Fields(extension.Scope)),
-		Roles:     uniqueStrings(extension.Roles),
-		IssuedAt:  numericDateTime(standard.IssuedAt),
-		ExpiresAt: standard.Expiry.Time(),
-		claims:    claims,
+		Subject:     standard.Subject,
+		SubjectKind: subjectKind,
+		ClientID:    extension.ClientID,
+		Issuer:      standard.Issuer,
+		Audience:    append([]string{}, standard.Audience...),
+		Scopes:      uniqueStrings(strings.Fields(extension.Scope)),
+		Roles:       uniqueStrings(extension.Roles),
+		IssuedAt:    numericDateTime(standard.IssuedAt),
+		ExpiresAt:   standard.Expiry.Time(),
+		claims:      claims,
 	}, nil
 }
 
