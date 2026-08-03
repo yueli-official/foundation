@@ -22,6 +22,7 @@ const ALLOWED_METHODS = new Set([
   "PUT",
 ]);
 const PAYLOAD_METHODS = new Set(["DELETE", "PATCH", "POST", "PUT"]);
+const RETRYABLE_METHODS = new Set(["GET", "HEAD"]);
 
 const REQUEST_HEADER_ALLOWLIST = [
   "accept",
@@ -157,18 +158,18 @@ export function createBffHandler(
         target.origin,
       );
 
-      let response: Response;
-      try {
-        response = await fetch(targetURL, {
+      const response = await fetchDownstream(
+        targetURL,
+        {
           body: body ? Uint8Array.from(body).buffer : undefined,
           headers,
           method: event.method,
           redirect: "manual",
           signal: controller.signal,
-        });
-      } catch {
-        throw gatewayError(controller.signal.aborted ? 504 : 502);
-      }
+        },
+        event.method,
+        controller.signal,
+      );
 
       const responseHeaders = copyAllowedResponseHeaders(
         response.headers,
@@ -195,6 +196,24 @@ export function createBffHandler(
       clearTimeout(timer);
     }
   });
+}
+
+async function fetchDownstream(
+  targetURL: URL,
+  init: RequestInit,
+  method: string,
+  signal: AbortSignal,
+): Promise<Response> {
+  const attempts = RETRYABLE_METHODS.has(method) ? 2 : 1;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await fetch(targetURL, init);
+    } catch {
+      if (signal.aborted) throw gatewayError(504);
+      if (attempt === attempts - 1) throw gatewayError(502);
+    }
+  }
+  throw gatewayError(502);
 }
 
 async function resolvePrivateTarget(

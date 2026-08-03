@@ -101,6 +101,51 @@ async function rawRequest(
 }
 
 describe("createBffHandler", () => {
+  it("retries one transient downstream connection reset for GET", async () => {
+    let downstreamRequests = 0;
+    const downstream = await listen(
+      createServer((_request, response) => {
+        downstreamRequests += 1;
+        if (downstreamRequests === 1) {
+          response.socket?.destroy();
+          return;
+        }
+        response.setHeader("content-type", "image/webp");
+        response.end("image-bytes");
+      }),
+    );
+    const bff = await startBff({
+      downstreamOrigin: downstream.origin,
+      profile: "asset",
+    });
+
+    const response = await fetch(`${bff.origin}/api/bff/content/image.webp`);
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("image-bytes");
+    expect(downstreamRequests).toBe(2);
+  });
+
+  it("does not retry a downstream connection reset for POST", async () => {
+    let downstreamRequests = 0;
+    const downstream = await listen(
+      createServer((_request, response) => {
+        downstreamRequests += 1;
+        response.socket?.destroy();
+      }),
+    );
+    const bff = await startBff({ downstreamOrigin: downstream.origin });
+
+    const response = await fetch(`${bff.origin}/api/bff/content/items`, {
+      body: JSON.stringify({ name: "public" }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    });
+
+    expect(response.status).toBe(502);
+    expect(downstreamRequests).toBe(1);
+  });
+
   it("uses the private target, safe path/query, allowlisted headers, and adapter credential", async () => {
     let observed: Record<string, unknown> | undefined;
     const downstream = await listen(
