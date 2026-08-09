@@ -56,7 +56,7 @@ jobs:
       - name: 验证独立 UI 制品消费者
         run: pnpm --filter @yueli/ui test:pack
       - name: 安装 CLI Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter @yueli/http-runtime-conformance exec playwright install --with-deps chromium
       - name: 运行 CLI Playwright 验收
         run: |
           pnpm --filter @yueli/http-runtime-conformance test:e2e
