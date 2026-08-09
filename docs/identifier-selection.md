@@ -6,16 +6,16 @@ Foundation 的 Go `go/identifier` 与 JavaScript/TypeScript `@yueli/identifier` 
 生成入口。二者遵循同一份 `contracts/identifier` wire contract；UUID 分别由 `github.com/google/uuid` 与
 `uuid` 实现。Foundation 只固定组织级 writer、严格解析、公开 Key Profile 和分配语义，不自行维护 UUID 位布局。
 
-| 场景 | 选择 |
-|---|---|
-| 数据库实体、事件、任务、投递 | Go `New()` / JS `newUUID()`，RFC UUIDv7 |
-| 8 位公开 URL 地址 | `CompactURLV1` + `Allocate()` / `allocateKey()` |
-| 6 位高密度公开路由 | `ShortLocatorV1` + `Allocate()` / `allocateKey()` |
-| 人工输入的非授权码 | `HumanCodeV1` + `Allocate()` / `allocateKey()` |
-| 长期公开不透明引用 | `OpaquePublicV1` + `Allocate()` / `allocateKey()` |
-| 确定性跨系统映射 | `Derive()` / `deriveUUID()`，UUIDv5 |
-| 持有即授权的邀请/兑换/重置值 | capability/token Module，不属于 Identifier |
-| Trace、幂等、人类编号、handle/slug、cursor | 各自拥有的 Module |
+| 场景                                       | 选择                                              |
+| ------------------------------------------ | ------------------------------------------------- |
+| 数据库实体、事件、任务、投递               | Go `New()` / JS `newUUID()`，RFC UUIDv7           |
+| 8 位公开 URL 地址                          | `CompactURLV1` + `Allocate()` / `allocateKey()`   |
+| 6 位高密度公开路由                         | `ShortLocatorV1` + `Allocate()` / `allocateKey()` |
+| 人工输入的非授权码                         | `HumanCodeV1` + `Allocate()` / `allocateKey()`    |
+| 长期公开不透明引用                         | `OpaquePublicV1` + `Allocate()` / `allocateKey()` |
+| 确定性跨系统映射                           | `Derive()` / `deriveUUID()`，UUIDv5               |
+| 持有即授权的邀请/兑换/重置值               | capability/token Module，不属于 Identifier        |
+| Trace、幂等、人类编号、handle/slug、cursor | 各自拥有的 Module                                 |
 
 ## 排除算法
 

@@ -30,7 +30,11 @@ export type IdentifierErrorCode =
 export class IdentifierError extends Error {
   readonly code: IdentifierErrorCode;
 
-  constructor(code: IdentifierErrorCode, message: string, options?: ErrorOptions) {
+  constructor(
+    code: IdentifierErrorCode,
+    message: string,
+    options?: ErrorOptions,
+  ) {
     super(message, options);
     this.name = "IdentifierError";
     this.code = code;
@@ -149,7 +153,10 @@ export function parseKey(profile: KeyProfile, text: string): string {
   }
   for (const character of text) {
     if (!definition.alphabet.includes(character)) {
-      throw new IdentifierError("invalid_key", "identifier: invalid public key");
+      throw new IdentifierError(
+        "invalid_key",
+        "identifier: invalid public key",
+      );
     }
   }
   return text;
@@ -197,7 +204,8 @@ function profileDefinition(profile: KeyProfile): KeyProfileDefinition {
 
 function fillRandom(target: Uint8Array<ArrayBuffer>): void {
   try {
-    if (!globalThis.crypto?.getRandomValues) throw new Error("Web Crypto unavailable");
+    if (!globalThis.crypto?.getRandomValues)
+      throw new Error("Web Crypto unavailable");
     globalThis.crypto.getRandomValues(target);
   } catch (cause) {
     throw new IdentifierError(

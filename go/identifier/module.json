@@ -13,8 +13,17 @@
   ],
   "runtimeDependencies": ["github.com/google/uuid"],
   "evidence": {
-    "docs": ["identifier/README.md", "identifier/CONTEXT.md", "../contracts/identifier/README.md"],
+    "docs": [
+      "identifier/README.md",
+      "identifier/CONTEXT.md",
+      "../contracts/identifier/README.md"
+    ],
     "tests": ["identifier/*_test.go"],
-    "consumers": ["foundation/search", "foundation/work", "foundation/webhook", "site-group Go products"]
+    "consumers": [
+      "foundation/search",
+      "foundation/work",
+      "foundation/webhook",
+      "site-group Go products"
+    ]
   }
 }
