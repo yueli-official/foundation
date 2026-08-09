@@ -47,7 +47,7 @@ func Export(cfg ExportConfig) error {
 		return fmt.Errorf("start OpenAPI export server: %w", err)
 	}
 	defer cfg.Server.Shutdown()
-	document, err := json.MarshalIndent(cfg.Server.GetOpenApi(), "", "  ")
+	document, err := marshalCanonicalJSON(cfg.Server.GetOpenApi())
 	if err != nil {
 		return fmt.Errorf("marshal OpenAPI: %w", err)
 	}
@@ -75,4 +75,20 @@ func Export(cfg ExportConfig) error {
 		}
 	}
 	return os.Rename(temporaryName, output)
+}
+
+// marshalCanonicalJSON normalizes custom JSON marshalers through ordinary
+// string-keyed maps before indenting. GoFrame's OpenAPI schema types preserve
+// insertion order for some objects, while those objects may be populated from
+// Go maps. Normalizing here keeps generated contracts byte-for-byte stable.
+func marshalCanonicalJSON(value any) ([]byte, error) {
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+	var normalized any
+	if err := json.Unmarshal(raw, &normalized); err != nil {
+		return nil, err
+	}
+	return json.MarshalIndent(normalized, "", "  ")
 }

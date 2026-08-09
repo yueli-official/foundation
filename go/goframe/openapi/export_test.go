@@ -55,3 +55,20 @@ func TestExportRejectsMissingInputs(t *testing.T) {
 		t.Fatal("empty output accepted")
 	}
 }
+
+type insertionOrderedJSON struct{}
+
+func (insertionOrderedJSON) MarshalJSON() ([]byte, error) {
+	return []byte(`{"z":1,"a":{"y":2,"b":3}}`), nil
+}
+
+func TestMarshalCanonicalJSONSortsCustomMarshalerObjects(t *testing.T) {
+	got, err := marshalCanonicalJSON(insertionOrderedJSON{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "{\n  \"a\": {\n    \"b\": 3,\n    \"y\": 2\n  },\n  \"z\": 1\n}"
+	if string(got) != want {
+		t.Fatalf("canonical JSON = %s", got)
+	}
+}
