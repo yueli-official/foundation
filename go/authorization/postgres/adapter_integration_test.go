@@ -158,6 +158,77 @@ func TestPostgresAdapterRestartRestoresDomainTruth(t *testing.T) {
 	}
 }
 
+func TestPostgresDecisionAndIdempotentScopeRegistrationDoNotRewriteProjection(t *testing.T) {
+	database := openPostgresTestDatabase(t)
+	definition := postgresTestDefinition()
+	definition.Scopes.Types[0].Children = []authorization.ScopeType{"document"}
+	definition.Scopes.Types = append(definition.Scopes.Types, authorization.ScopeTypeDefinition{Key: "document"})
+	catalog := authorization.MustCompile(definition)
+	admin := authorization.SubjectRef{Kind: authorization.SubjectUser, ID: "admin"}
+	ctx := context.Background()
+	options := authorizationpostgres.Options{
+		DB: database, InstanceKey: "decision-fast-path",
+		Memory: authorization.MemoryOptions{
+			RootScopeID: "site", ProtectedSubjects: []authorization.SubjectRef{admin},
+		},
+	}
+	adapter, err := authorizationpostgres.New(ctx, catalog, options)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	if _, err := database.Exec(`
+		CREATE FUNCTION reject_authorization_grant_rewrite()
+		RETURNS trigger LANGUAGE plpgsql AS $$
+		BEGIN
+			RAISE EXCEPTION 'authorization grant rewrite is forbidden';
+		END;
+		$$;
+		CREATE TRIGGER reject_authorization_grant_rewrite
+		BEFORE INSERT OR UPDATE OR DELETE ON authorization_grants
+		FOR EACH STATEMENT EXECUTE FUNCTION reject_authorization_grant_rewrite();
+	`); err != nil {
+		t.Fatalf("install grant rewrite guard error = %v", err)
+	}
+	if _, err := adapter.RegisterScope(ctx, authorization.RegisterScopeCommand{
+		ID: "document:1", Type: "document", ParentID: "site",
+	}); err != nil {
+		t.Fatalf("RegisterScope() new error = %v", err)
+	}
+	if _, err := adapter.RegisterScope(ctx, authorization.RegisterScopeCommand{
+		ID: "document:1", Type: "document", ParentID: "site",
+	}); err != nil {
+		t.Fatalf("RegisterScope() idempotent error = %v", err)
+	}
+	first, err := adapter.Decide(ctx, authorization.DecisionRequest{
+		Subject: admin, Capability: authorization.CapabilityManage, ScopeID: "document:1",
+	})
+	if err != nil || !first.Allowed {
+		t.Fatalf("Decide() = %#v, %v; want allowed", first, err)
+	}
+
+	options.Memory.ProtectedSubjects = nil
+	restarted, err := authorizationpostgres.New(ctx, catalog, options)
+	if err != nil {
+		t.Fatalf("New() restart error = %v", err)
+	}
+	second, err := restarted.Decide(ctx, authorization.DecisionRequest{
+		Subject: admin, Capability: authorization.CapabilityManage, ScopeID: "document:1",
+	})
+	if err != nil || !second.Allowed {
+		t.Fatalf("Decide() restart = %#v, %v; want allowed", second, err)
+	}
+	if second.ID == first.ID {
+		t.Fatalf("Decide() restart ID = %q, want a persisted monotonic cursor after %q", second.ID, first.ID)
+	}
+	page, err := restarted.SearchDecisionAudit(ctx, authorization.DecisionAuditQuery{})
+	if err != nil {
+		t.Fatalf("SearchDecisionAudit() error = %v", err)
+	}
+	if page.Total != 2 {
+		t.Fatalf("SearchDecisionAudit() total = %d, want 2", page.Total)
+	}
+}
+
 func TestPostgresAdapterSerializesCompetingApplicationApproval(t *testing.T) {
 	database := openPostgresTestDatabase(t)
 	definition := postgresTestDefinition()

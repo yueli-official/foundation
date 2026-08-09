@@ -2,14 +2,14 @@ package search
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"math"
 	"slices"
 	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/yueli-official/foundation/go/identifier"
 )
 
 type memoryRecord struct {
@@ -489,7 +489,5 @@ func countLive(documents map[DocumentKey]memoryRecord) uint64 {
 }
 
 func randomID() string {
-	var value [12]byte
-	_, _ = rand.Read(value[:])
-	return hex.EncodeToString(value[:])
+	return identifier.MustNew().String()
 }

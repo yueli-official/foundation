@@ -2,6 +2,7 @@ package httpadapter_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -31,6 +32,11 @@ func TestConditionalHTTPContract(t *testing.T) {
 		t.Fatalf("bootstrap status=%d body=%s", bootstrapResult.Code, bootstrapResult.Body.String())
 	}
 	etag := bootstrapResult.Header().Get("ETag")
+	canonical, err := module.Get(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonicalBody := encode(t, map[string]any{"profile": canonical.Profile})
 
 	public := httptest.NewRequest(http.MethodGet, "/public", nil)
 	public.Header.Set("If-None-Match", etag)
@@ -55,7 +61,7 @@ func TestConditionalHTTPContract(t *testing.T) {
 		t.Fatalf("stale status=%d", staleResult.Code)
 	}
 
-	update := httptest.NewRequest(http.MethodPut, "/admin", bytes.NewReader(body))
+	update := httptest.NewRequest(http.MethodPut, "/admin", bytes.NewReader(canonicalBody))
 	update.Header.Set("If-Match", etag)
 	updateResult := httptest.NewRecorder()
 	handler.Admin(updateResult, update)

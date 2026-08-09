@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -52,26 +53,26 @@ func (adapter *Adapter) RebuildProjection(ctx context.Context) error {
 }
 
 var (
-	_ authorization.Authorizer            = (*Adapter)(nil)
-	_ authorization.QueryPlanner          = (*Adapter)(nil)
-	_ authorization.AccessReader          = (*Adapter)(nil)
-	_ authorization.ScopeManager          = (*Adapter)(nil)
-	_ authorization.ResourceScopeRegistry = (*Adapter)(nil)
+	_ authorization.Authorizer             = (*Adapter)(nil)
+	_ authorization.QueryPlanner           = (*Adapter)(nil)
+	_ authorization.AccessReader           = (*Adapter)(nil)
+	_ authorization.ScopeManager           = (*Adapter)(nil)
+	_ authorization.ResourceScopeRegistry  = (*Adapter)(nil)
 	_ authorization.ResourceScopeRelocator = (*Adapter)(nil)
-	_ authorization.ScopeReader           = (*Adapter)(nil)
-	_ authorization.RoleManager           = (*Adapter)(nil)
-	_ authorization.RoleReader            = (*Adapter)(nil)
-	_ authorization.GrantManager          = (*Adapter)(nil)
-	_ authorization.GrantReader           = (*Adapter)(nil)
-	_ authorization.GroupManager          = (*Adapter)(nil)
-	_ authorization.GroupReader           = (*Adapter)(nil)
-	_ authorization.WorkflowManager       = (*Adapter)(nil)
-	_ authorization.WorkflowReader        = (*Adapter)(nil)
-	_ authorization.Reconciler            = (*Adapter)(nil)
-	_ authorization.PolicyManager         = (*Adapter)(nil)
-	_ authorization.PolicyReader          = (*Adapter)(nil)
-	_ authorization.AuditReader           = (*Adapter)(nil)
-	_ authorization.DecisionAuditReader   = (*Adapter)(nil)
+	_ authorization.ScopeReader            = (*Adapter)(nil)
+	_ authorization.RoleManager            = (*Adapter)(nil)
+	_ authorization.RoleReader             = (*Adapter)(nil)
+	_ authorization.GrantManager           = (*Adapter)(nil)
+	_ authorization.GrantReader            = (*Adapter)(nil)
+	_ authorization.GroupManager           = (*Adapter)(nil)
+	_ authorization.GroupReader            = (*Adapter)(nil)
+	_ authorization.WorkflowManager        = (*Adapter)(nil)
+	_ authorization.WorkflowReader         = (*Adapter)(nil)
+	_ authorization.Reconciler             = (*Adapter)(nil)
+	_ authorization.PolicyManager          = (*Adapter)(nil)
+	_ authorization.PolicyReader           = (*Adapter)(nil)
+	_ authorization.AuditReader            = (*Adapter)(nil)
+	_ authorization.DecisionAuditReader    = (*Adapter)(nil)
 )
 
 func New(ctx context.Context, catalog *authorization.Catalog, options Options) (*Adapter, error) {
@@ -161,13 +162,13 @@ func New(ctx context.Context, catalog *authorization.Catalog, options Options) (
 }
 
 func (adapter *Adapter) Decide(ctx context.Context, request authorization.DecisionRequest) (authorization.Decision, error) {
-	return mutate(ctx, adapter, func(memory *authorization.Memory) (authorization.Decision, error) {
+	return decide(ctx, adapter, func(memory *authorization.Memory) (authorization.Decision, error) {
 		return memory.Decide(ctx, request)
 	})
 }
 
 func (adapter *Adapter) BatchDecide(ctx context.Context, requests []authorization.DecisionRequest) ([]authorization.Decision, error) {
-	return mutate(ctx, adapter, func(memory *authorization.Memory) ([]authorization.Decision, error) {
+	return decide(ctx, adapter, func(memory *authorization.Memory) ([]authorization.Decision, error) {
 		return memory.BatchDecide(ctx, requests)
 	})
 }
@@ -274,7 +275,7 @@ func (adapter *Adapter) RegisterScope(
 	ctx context.Context,
 	command authorization.RegisterScopeCommand,
 ) (authorization.Scope, error) {
-	return mutate(ctx, adapter, func(memory *authorization.Memory) (authorization.Scope, error) {
+	return registerScope(ctx, adapter, func(memory *authorization.Memory) (authorization.Scope, error) {
 		return memory.RegisterScope(ctx, command)
 	})
 }
@@ -474,14 +475,19 @@ func mutate[T any](
 	if err != nil {
 		return zero, err
 	}
+	before := clone.RepositorySnapshot()
 	result, err := operation(clone)
 	if err != nil {
 		return zero, err
 	}
+	snapshot := clone.RepositorySnapshot()
+	if reflect.DeepEqual(before, snapshot) {
+		return result, nil
+	}
 	if err := clone.RebuildCasbinProjection(); err != nil {
 		return zero, err
 	}
-	snapshot := clone.RepositorySnapshot()
+	snapshot = clone.RepositorySnapshot()
 	if err := adapter.store.save(ctx, adapter.catalog.Version(), adapter.catalog.Digest(), snapshot, func(ctx context.Context, tx *sql.Tx) error {
 		return adapter.audit.append(ctx, tx, snapshot.Audit, snapshot.DecisionAudit)
 	}); err != nil {
@@ -492,6 +498,77 @@ func mutate[T any](
 	clean, err := adapter.memoryFromSnapshot(snapshot)
 	if err != nil {
 		return zero, err
+	}
+	adapter.memory = clean
+	return result, nil
+}
+
+func decide[T any](
+	ctx context.Context,
+	adapter *Adapter,
+	operation func(*authorization.Memory) (T, error),
+) (T, error) {
+	adapter.mu.Lock()
+	defer adapter.mu.Unlock()
+	var zero T
+	clone, err := adapter.cloneMemory()
+	if err != nil {
+		return zero, err
+	}
+	result, err := operation(clone)
+	if err != nil {
+		return zero, err
+	}
+	snapshot := clone.RepositorySnapshot()
+	if err := adapter.store.saveAudit(ctx, snapshot.NextID, func(ctx context.Context, tx *sql.Tx) error {
+		return adapter.audit.append(ctx, tx, snapshot.Audit, snapshot.DecisionAudit)
+	}); err != nil {
+		return zero, unavailable("commit decision audit", err)
+	}
+	snapshot.Audit = nil
+	snapshot.DecisionAudit = nil
+	clean, err := adapter.memoryFromSnapshot(snapshot)
+	if err != nil {
+		return zero, err
+	}
+	adapter.memory = clean
+	return result, nil
+}
+
+func registerScope(
+	ctx context.Context,
+	adapter *Adapter,
+	operation func(*authorization.Memory) (authorization.Scope, error),
+) (authorization.Scope, error) {
+	adapter.mu.Lock()
+	defer adapter.mu.Unlock()
+	clone, err := adapter.cloneMemory()
+	if err != nil {
+		return authorization.Scope{}, err
+	}
+	before := clone.RepositorySnapshot()
+	result, err := operation(clone)
+	if err != nil {
+		return authorization.Scope{}, err
+	}
+	snapshot := clone.RepositorySnapshot()
+	if reflect.DeepEqual(before, snapshot) {
+		return result, nil
+	}
+	if err := clone.RebuildCasbinProjection(); err != nil {
+		return authorization.Scope{}, err
+	}
+	snapshot = clone.RepositorySnapshot()
+	if err := adapter.store.saveRegisteredScope(ctx, snapshot, string(result.ID), func(ctx context.Context, tx *sql.Tx) error {
+		return adapter.audit.append(ctx, tx, snapshot.Audit, snapshot.DecisionAudit)
+	}); err != nil {
+		return authorization.Scope{}, unavailable("register scope", err)
+	}
+	snapshot.Audit = nil
+	snapshot.DecisionAudit = nil
+	clean, err := adapter.memoryFromSnapshot(snapshot)
+	if err != nil {
+		return authorization.Scope{}, err
 	}
 	adapter.memory = clean
 	return result, nil

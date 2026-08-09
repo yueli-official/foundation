@@ -2,15 +2,15 @@ package webhook
 
 import (
 	"crypto/hmac"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/yueli-official/foundation/go/identifier"
 )
 
 const (
@@ -75,14 +75,11 @@ func VerifyV1(id, timestamp string, body []byte, signatures []string, secrets []
 }
 
 func NewID() (string, error) {
-	var value [16]byte
-	if _, err := rand.Read(value[:]); err != nil {
+	value, err := identifier.New()
+	if err != nil {
 		return "", unavailable("generate id", err)
 	}
-	value[6] = (value[6] & 0x0f) | 0x40
-	value[8] = (value[8] & 0x3f) | 0x80
-	text := hex.EncodeToString(value[:])
-	return fmt.Sprintf("%s-%s-%s-%s-%s", text[:8], text[8:12], text[12:16], text[16:20], text[20:]), nil
+	return value.String(), nil
 }
 
 func digestBytes(value []byte) string {

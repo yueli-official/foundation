@@ -7,13 +7,12 @@ import (
 	"fmt"
 	"net/mail"
 	"net/url"
-	"regexp"
 	"slices"
 	"strings"
 	"unicode/utf8"
-)
 
-var stableIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,119}$`)
+	"github.com/yueli-official/foundation/go/identifier"
+)
 
 func normalizeProfile(in Profile) Profile {
 	in.Identity.Name = strings.TrimSpace(in.Identity.Name)
@@ -40,7 +39,7 @@ func normalizeProfile(in Profile) Profile {
 	}
 	for index := range in.Support.Contacts {
 		item := &in.Support.Contacts[index]
-		item.ID = strings.TrimSpace(item.ID)
+		item.ID = normalizeStableID(item.ID)
 		item.Label = strings.TrimSpace(item.Label)
 		item.Value = strings.TrimSpace(item.Value)
 		item.Icon = strings.TrimSpace(item.Icon)
@@ -52,7 +51,7 @@ func normalizeProfile(in Profile) Profile {
 	}
 	for groupIndex := range in.Footer.LinkGroups {
 		group := &in.Footer.LinkGroups[groupIndex]
-		group.ID = strings.TrimSpace(group.ID)
+		group.ID = normalizeStableID(group.ID)
 		group.Title = strings.TrimSpace(group.Title)
 		if group.Links == nil {
 			group.Links = []Link{}
@@ -66,7 +65,7 @@ func normalizeProfile(in Profile) Profile {
 	}
 	for index := range in.Footer.Social {
 		item := &in.Footer.Social[index]
-		item.ID = strings.TrimSpace(item.ID)
+		item.ID = normalizeStableID(item.ID)
 		item.Platform = strings.TrimSpace(item.Platform)
 		item.Label = strings.TrimSpace(item.Label)
 		item.URL = strings.TrimSpace(item.URL)
@@ -83,7 +82,7 @@ func normalizeProfile(in Profile) Profile {
 	}
 	for index := range in.Footer.Compliance.Records {
 		item := &in.Footer.Compliance.Records[index]
-		item.ID = strings.TrimSpace(item.ID)
+		item.ID = normalizeStableID(item.ID)
 		item.Kind = strings.TrimSpace(item.Kind)
 		item.Label = strings.TrimSpace(item.Label)
 		item.Number = strings.TrimSpace(item.Number)
@@ -110,19 +109,28 @@ func normalizeLinkPointer(in *Link) *Link {
 	if in == nil {
 		return nil
 	}
-	out := normalizeLink(*in)
-	if out.ID == "" && out.Label == "" && out.Href == "" && out.Icon == "" {
+	out := *in
+	if strings.TrimSpace(out.ID) == "" && strings.TrimSpace(out.Label) == "" && strings.TrimSpace(out.Href) == "" && strings.TrimSpace(out.Icon) == "" {
 		return nil
 	}
+	out = normalizeLink(out)
 	return &out
 }
 
 func normalizeLink(in Link) Link {
-	in.ID = strings.TrimSpace(in.ID)
+	in.ID = normalizeStableID(in.ID)
 	in.Label = strings.TrimSpace(in.Label)
 	in.Href = strings.TrimSpace(in.Href)
 	in.Icon = strings.TrimSpace(in.Icon)
 	return in
+}
+
+func normalizeStableID(text string) string {
+	value, err := identifier.Parse(strings.TrimSpace(text))
+	if err == nil && value.Version() == 7 {
+		return value.String()
+	}
+	return identifier.MustNew().String()
 }
 
 func encodeProfile(profile Profile) ([]byte, Digest, error) {
@@ -299,8 +307,9 @@ func validateLink(path string, link Link, definition Definition) []Diagnostic {
 }
 
 func validateStableID(path, id string, seen map[string]struct{}) []Diagnostic {
-	if !stableIDPattern.MatchString(id) {
-		return []Diagnostic{{Code: "id_invalid", Path: path, Message: "stable ID is invalid"}}
+	value, err := identifier.Parse(id)
+	if err != nil || value.Version() != 7 {
+		return []Diagnostic{{Code: "id_invalid", Path: path, Message: "stable ID must be a canonical UUIDv7"}}
 	}
 	if _, exists := seen[id]; exists {
 		return []Diagnostic{{Code: "id_duplicate", Path: path, Message: "stable ID is duplicated"}}

@@ -402,8 +402,8 @@ const controls = computed<readonly CollectionControl[]>(() => [
     id: "direction",
     label: "排序方向",
     value: query.value.direction,
-    ascendingLabel: "当前正序，切换为倒序",
-    descendingLabel: "当前倒序，切换为正序",
+    ascendingLabel: "升序",
+    descendingLabel: "降序",
   },
 ]);
 

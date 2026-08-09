@@ -54,6 +54,9 @@ catalogs:
     typescript:
       specifier: 6.0.3
       version: 6.0.3
+    uuid:
+      specifier: 11.1.1
+      version: 11.1.1
     vitest:
       specifier: 4.1.10
       version: 4.1.10
@@ -264,6 +267,22 @@ importers:
       ajv:
         specifier: "catalog:"
         version: 8.20.0
+      typescript:
+        specifier: "catalog:"
+        version: 6.0.3
+      vitest:
+        specifier: "catalog:"
+        version: 4.1.10(@types/node@24.13.3)(happy-dom@20.10.6)(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
+
+  js/packages/identifier:
+    dependencies:
+      uuid:
+        specifier: "catalog:"
+        version: 11.1.1
+    devDependencies:
+      "@types/node":
+        specifier: "catalog:"
+        version: 24.13.3
       typescript:
         specifier: "catalog:"
         version: 6.0.3

@@ -116,12 +116,20 @@ export function createBffHandler(
 
   return defineEventHandler(async (event) => {
     const requestURL = getRequestURL(event);
+    const requestPaths = [
+      event.node.req.originalUrl,
+      event.node.req.url,
+      requestURL.pathname,
+    ]
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.split("?", 1)[0] ?? requestURL.pathname);
+    const mountedRequestPath = requestPaths.find(
+      (path) => path === mountPath || path.startsWith(`${mountPath}/`),
+    );
+    const strippedRequestPath = requestPaths[0] ?? requestURL.pathname;
     const rawRequestPath =
-      (
-        event.node.req.originalUrl ??
-        event.node.req.url ??
-        requestURL.pathname
-      ).split("?", 1)[0] ?? requestURL.pathname;
+      mountedRequestPath ??
+      `${mountPath}${strippedRequestPath === "/" ? "" : strippedRequestPath}`;
     const downstreamPath = extractDownstreamPath(rawRequestPath, mountPath);
     if (!ALLOWED_METHODS.has(event.method)) {
       throw createError({

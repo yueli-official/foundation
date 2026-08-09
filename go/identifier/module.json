@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "identifier",
+  "entrypoint": "github.com/yueli-official/foundation/go/identifier",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Issue and parse organization-standard UUIDv7, versioned public locator profiles, bounded atomic allocation, and deterministic UUIDv5 identifiers.",
+  "nonResponsibilities": [
+    "product database schemas and transaction adapters",
+    "authentication or bearer capability secrets",
+    "telemetry trace identifiers and idempotency replay semantics",
+    "human business numbering, naming aliases, cursors, and reversible integer encoding"
+  ],
+  "runtimeDependencies": ["github.com/google/uuid"],
+  "evidence": {
+    "docs": ["identifier/README.md", "identifier/CONTEXT.md", "../contracts/identifier/README.md"],
+    "tests": ["identifier/*_test.go"],
+    "consumers": ["foundation/search", "foundation/work", "foundation/webhook", "site-group Go products"]
+  }
+}

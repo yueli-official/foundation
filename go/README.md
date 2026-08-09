@@ -8,6 +8,9 @@ or wrap successful endpoint DTOs in a generic envelope.
 
 ## Packages
 
+- `identifier`: RFC UUIDv7/v5, strict UUID parsing, immutable public-key Profiles
+  and bounded atomic allocation; capability secrets, business numbering and
+  product persistence remain outside the Module.
 - `problem`: strict RFC 9457 wire value, immutable `Kind`, immutable application
   `Error`, validation violations, bounded codec and safe error mapping.
 - `goframe/http`: bounded Problem writer and GoFrame error adapter. Successful

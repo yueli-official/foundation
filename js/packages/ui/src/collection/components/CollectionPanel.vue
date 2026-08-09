@@ -86,6 +86,7 @@ const pageSizeItems = computed(() =>
 const pageSelection = computed(() =>
   props.pageSelected ? true : props.pageIndeterminate ? "indeterminate" : false,
 );
+const hasControls = computed(() => props.controls.length > 0);
 
 function submitSearch() {
   emit("search", search.value.trim());
@@ -153,9 +154,13 @@ function toggle(item: TItem, key: TKey) {
         />
       </form>
 
-      <div class="mt-3 flex items-center justify-between gap-2 sm:hidden">
+      <div
+        v-if="hasControls || $slots.view"
+        class="mt-3 flex items-center justify-between gap-2 sm:hidden"
+      >
         <div class="flex min-w-0 items-center gap-2">
           <UButton
+            v-if="hasControls"
             icon="i-tabler-adjustments-horizontal"
             :label="
               activeFilterCount
@@ -177,7 +182,7 @@ function toggle(item: TItem, key: TKey) {
       </div>
     </template>
 
-    <template #controls>
+    <template v-if="hasControls || $slots.view" #controls>
       <template v-for="control in controls" :key="control.id">
         <USelectMenu
           v-if="control.kind === 'select' && control.searchPlaceholder"
@@ -229,7 +234,11 @@ function toggle(item: TItem, key: TKey) {
         size="xs"
         @click="emit('clearFilters')"
       />
-      <div v-if="$slots.view" data-collection-desktop-view class="ml-auto">
+      <div
+        v-if="$slots.view"
+        data-collection-desktop-view
+        class="ml-auto hidden sm:block"
+      >
         <slot name="view" />
       </div>
     </template>

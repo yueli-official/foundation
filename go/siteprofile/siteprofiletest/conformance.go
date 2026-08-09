@@ -53,7 +53,7 @@ func Run(t *testing.T, factory Factory) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		profile := validProfile()
+		profile := first.Snapshot.Profile
 		profile.Identity.Name = "Example Site"
 		second, err := module.Replace(context.Background(), siteprofile.ReplaceCommand{
 			ExpectedRevision: first.Snapshot.Revision,

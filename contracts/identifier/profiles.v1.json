@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    {
+      "id": "compact-url-v1",
+      "alphabet": "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
+      "length": 8,
+      "case": "sensitive",
+      "purpose": "public-locator",
+      "allocation": "atomic-unique-claim"
+    },
+    {
+      "id": "human-code-v1",
+      "alphabet": "0123456789ABCDEFGHJKMNPQRSTVWXYZ",
+      "length": 10,
+      "case": "canonical-uppercase",
+      "purpose": "public-locator",
+      "allocation": "atomic-unique-claim"
+    },
+    {
+      "id": "opaque-public-v1",
+      "alphabet": "0123456789ABCDEFGHJKMNPQRSTVWXYZ",
+      "length": 16,
+      "case": "canonical-uppercase",
+      "purpose": "public-locator",
+      "allocation": "atomic-unique-claim"
+    }
+  ]
+}

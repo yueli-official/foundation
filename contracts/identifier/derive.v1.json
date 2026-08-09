@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "uuid-v5",
+  "vectors": [
+    {
+      "namespace": "2f1fb888-699f-48f6-80f0-8c37d3fa6af7",
+      "canonicalNameUTF8": "identity.user|v1|external:42",
+      "identifier": "28a84079-8ff7-5e51-93ad-2e54d6255597"
+    }
+  ]
+}

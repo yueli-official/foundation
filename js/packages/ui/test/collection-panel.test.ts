@@ -238,7 +238,7 @@ describe("CollectionPanel", () => {
     ).toBeTruthy();
   });
 
-  it("keeps the caller-owned view switch reachable beside mobile filters", () => {
+  it("keeps the caller-owned view switch reachable without inventing filters", () => {
     const wrapper = mount(CollectionPanel, {
       props: {
         label: "Records",
@@ -269,5 +269,43 @@ describe("CollectionPanel", () => {
 
     expect(wrapper.get("[data-collection-mobile-view]").text()).toBe("Grid");
     expect(wrapper.get("[data-collection-desktop-view]").text()).toBe("Grid");
+    expect(wrapper.get("[data-collection-desktop-view]").classes()).toContain(
+      "hidden",
+    );
+    expect(
+      wrapper.findAll("button").some((button) => button.text() === "Filters"),
+    ).toBe(false);
+  });
+
+  it("does not render an empty filter region when no controls or view are supplied", () => {
+    const wrapper = mount(CollectionPanel, {
+      props: {
+        label: "Records",
+        items: [],
+        itemKey: () => "record",
+        itemLabel: () => "Record",
+        messages,
+        total: 0,
+        page: 1,
+        pageSize: 10,
+      },
+      global: {
+        components: {
+          UInput,
+          UButton,
+          UCheckbox,
+          USelect: passiveStub,
+          USelectMenu: passiveStub,
+          UPagination: passiveStub,
+          USkeleton: passiveStub,
+          UIcon: passiveStub,
+        },
+      },
+    });
+
+    expect(
+      wrapper.findAll("button").some((button) => button.text() === "Filters"),
+    ).toBe(false);
+    expect(wrapper.find('[id^="y-collection-controls-"]').exists()).toBe(false);
   });
 });

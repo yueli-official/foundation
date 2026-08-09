@@ -1,7 +1,7 @@
 import { createServer, request as nodeRequest, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 
-import { createApp, toNodeListener } from "h3";
+import { createApp, defineEventHandler, toNodeListener } from "h3";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
@@ -101,6 +101,38 @@ async function rawRequest(
 }
 
 describe("createBffHandler", () => {
+  it("keeps the full mounted path when upstream middleware rewrites originalUrl", async () => {
+    let observedPath = "";
+    const downstream = await listen(
+      createServer((request, response) => {
+        observedPath = request.url ?? "";
+        response.setHeader("content-type", "application/json");
+        response.end(JSON.stringify({ ok: true }));
+      }),
+    );
+    const handler = createBffHandler({
+      mountPath: "/api/bff/content",
+      resolveTarget: () => ({
+        origin: downstream.origin,
+        pathPrefix: "/internal/v1",
+      }),
+    });
+    const app = createApp();
+    app.use(
+      "/api/bff/content",
+      defineEventHandler((event) => {
+        event.node.req.originalUrl = "/items/42";
+        return handler(event);
+      }),
+    );
+    const bff = await listen(createServer(toNodeListener(app)));
+
+    const response = await fetch(`${bff.origin}/api/bff/content/items/42`);
+
+    expect(response.status).toBe(200);
+    expect(observedPath).toBe("/internal/v1/items/42");
+  });
+
   it("retries one transient downstream connection reset for GET", async () => {
     let downstreamRequests = 0;
     const downstream = await listen(

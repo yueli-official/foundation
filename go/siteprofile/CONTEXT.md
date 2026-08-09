@@ -12,7 +12,7 @@
 - A valid persisted state has one canonical normalized document and digest.
 - Revision starts at one and changes only when the normalized document changes.
 - Every write is conditional; there is no unconditional overwrite path.
-- Stable IDs identify repeated contacts, links, groups, and compliance records.
+- Stable IDs identify repeated contacts, links, groups, and compliance records. They are canonical UUIDv7 values assigned by this Module through Foundation Identifier; client draft keys and semantic kinds never become persisted IDs.
 - Links reject unsafe schemes; request Host never participates in validation or
   public URL construction.
 - Scheduled announcements are projected against an explicit clock and reveal

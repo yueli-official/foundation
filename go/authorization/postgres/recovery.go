@@ -3,12 +3,12 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/yueli-official/foundation/go/authorization"
 	"github.com/yueli-official/foundation/go/authorization/internal/repository"
+	"github.com/yueli-official/foundation/go/identifier"
 )
 
 type RecoveryCommand struct {
@@ -104,8 +104,8 @@ func RecoverProtectedAdministrator(
 		return result, nil
 	}
 	nextID += 2
-	grantID := authorization.GrantID(fmt.Sprintf("grant-%d", nextID-1))
-	auditID := authorization.AuditID(fmt.Sprintf("audit-%d", nextID))
+	grantID := authorization.GrantID(identifier.MustNew().String())
+	auditID := authorization.AuditID(identifier.MustNew().String())
 	now := time.Now().UTC()
 	if _, err := tx.ExecContext(ctx, `
 		INSERT INTO authorization_grants (

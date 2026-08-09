@@ -2,7 +2,6 @@ package work
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"github.com/yueli-official/foundation/go/identifier"
 )
 
 const DefinitionVersion uint64 = 1
@@ -476,15 +476,11 @@ func normalizeJSON(value json.RawMessage, limit int, field string) (json.RawMess
 }
 
 func NewJobID() (JobID, error) {
-	var value [16]byte
-	if _, err := rand.Read(value[:]); err != nil {
+	value, err := identifier.New()
+	if err != nil {
 		return "", &Error{Kind: ErrorUnavailable, Field: "job_id", Message: "cannot generate", Cause: err}
 	}
-	// UUID v4 layout without introducing a public dependency.
-	value[6] = (value[6] & 0x0f) | 0x40
-	value[8] = (value[8] & 0x3f) | 0x80
-	text := hex.EncodeToString(value[:])
-	return JobID(fmt.Sprintf("%s-%s-%s-%s-%s", text[:8], text[8:12], text[12:16], text[16:20], text[20:])), nil
+	return JobID(value.String()), nil
 }
 
 func (catalog *Catalog) Backoff(id JobID, attempt int) time.Duration {

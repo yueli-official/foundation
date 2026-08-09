@@ -36,6 +36,163 @@ func (store stateStore) save(
 	return nil
 }
 
+func (store stateStore) saveAudit(
+	ctx context.Context,
+	nextID uint64,
+	appendAudit func(context.Context, *sql.Tx) error,
+) error {
+	transaction, err := store.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return fmt.Errorf("authorization/postgres: begin audit transaction: %w", err)
+	}
+	defer func() { _ = transaction.Rollback() }()
+	result, err := transaction.ExecContext(ctx, `
+		UPDATE authorization_instances
+		SET next_id = $2, updated_at = $3
+		WHERE instance_key = $1
+	`, store.instanceKey, nextID, time.Now().UTC())
+	if err != nil {
+		return fmt.Errorf("authorization/postgres: save decision cursor: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("authorization/postgres: read decision cursor result: %w", err)
+	}
+	if affected != 1 {
+		return fmt.Errorf("authorization/postgres: authorization instance %q is missing", store.instanceKey)
+	}
+	if appendAudit != nil {
+		if err := appendAudit(ctx, transaction); err != nil {
+			return fmt.Errorf("authorization/postgres: append decision audit: %w", err)
+		}
+	}
+	if err := transaction.Commit(); err != nil {
+		return fmt.Errorf("authorization/postgres: commit audit transaction: %w", err)
+	}
+	return nil
+}
+
+func (store stateStore) saveRegisteredScope(
+	ctx context.Context,
+	snapshot repository.Snapshot,
+	scopeID string,
+	appendAudit func(context.Context, *sql.Tx) error,
+) error {
+	var scope repository.Scope
+	found := false
+	for _, candidate := range snapshot.Scopes {
+		if candidate.ID == scopeID {
+			scope = candidate
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("authorization/postgres: registered scope %q is missing from snapshot", scopeID)
+	}
+	path, depth, err := scopePath(snapshot.Scopes, scope.ID)
+	if err != nil {
+		return err
+	}
+	transaction, err := store.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return fmt.Errorf("authorization/postgres: begin scope transaction: %w", err)
+	}
+	defer func() { _ = transaction.Rollback() }()
+	result, err := transaction.ExecContext(ctx, `
+		UPDATE authorization_instances
+		SET next_id = $2, updated_at = $3
+		WHERE instance_key = $1
+	`, store.instanceKey, snapshot.NextID, time.Now().UTC())
+	if err != nil {
+		return fmt.Errorf("authorization/postgres: save scope cursor: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("authorization/postgres: read scope cursor result: %w", err)
+	}
+	if affected != 1 {
+		return fmt.Errorf("authorization/postgres: authorization instance %q is missing", store.instanceKey)
+	}
+	if _, err := transaction.ExecContext(ctx, `
+		INSERT INTO authorization_scopes (
+			instance_key, id, scope_type, parent_id, path, depth, status, created_at
+		) VALUES ($1, $2, $3, $4, $5, $6, 'active', $7)
+		ON CONFLICT (instance_key, id) DO UPDATE SET
+			scope_type = EXCLUDED.scope_type,
+			parent_id = EXCLUDED.parent_id,
+			path = EXCLUDED.path,
+			depth = EXCLUDED.depth,
+			status = 'active',
+			retired_at = NULL
+	`, store.instanceKey, scope.ID, scope.Type, nullString(scope.ParentID), path, depth, time.Now().UTC()); err != nil {
+		return fmt.Errorf("authorization/postgres: save registered scope %q: %w", scope.ID, err)
+	}
+	if err := store.insertScopeProjectionTx(ctx, transaction, snapshot, scope.ID); err != nil {
+		return err
+	}
+	if appendAudit != nil {
+		if err := appendAudit(ctx, transaction); err != nil {
+			return fmt.Errorf("authorization/postgres: append scope audit: %w", err)
+		}
+	}
+	if err := transaction.Commit(); err != nil {
+		return fmt.Errorf("authorization/postgres: commit scope transaction: %w", err)
+	}
+	return nil
+}
+
+func (store stateStore) insertScopeProjectionTx(
+	ctx context.Context,
+	transaction *sql.Tx,
+	snapshot repository.Snapshot,
+	scopeID string,
+) error {
+	var active *repository.Policy
+	for index := range snapshot.Policies {
+		if snapshot.Policies[index].Revision.Number == snapshot.ActivePolicy {
+			active = &snapshot.Policies[index]
+			break
+		}
+	}
+	if active == nil {
+		return fmt.Errorf("authorization/postgres: active policy %d is missing", snapshot.ActivePolicy)
+	}
+	activeRoles := make(map[string]repository.Role, len(active.Roles))
+	for _, role := range active.Roles {
+		if role.Status == "active" {
+			activeRoles[role.ID] = role
+		}
+	}
+	groupMembers := make(map[string][]repository.Subject, len(snapshot.Groups))
+	for _, group := range snapshot.Groups {
+		groupMembers[group.ID] = group.Members
+	}
+	for _, grant := range snapshot.Grants {
+		if _, exists := activeRoles[grant.RoleID]; !exists ||
+			!scopeContainsRecords(snapshot.Scopes, grant.ScopeID, scopeID) {
+			continue
+		}
+		subjects := []repository.Subject{grant.Target}
+		if grant.Target.Kind == "group" {
+			subjects = groupMembers[grant.Target.ID]
+		}
+		for _, subject := range subjects {
+			provenance := map[string]string{"grant_id": grant.ID}
+			if grant.Target.Kind == "group" {
+				provenance["group_id"] = grant.Target.ID
+			}
+			if err := store.insertProjectionRule(
+				ctx, transaction, snapshot.ActivePolicy, "membership",
+				subject.Kind+":"+subject.ID, grant.RoleID, "", scopeID, provenance,
+			); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (store stateStore) saveTx(
 	ctx context.Context,
 	transaction *sql.Tx,

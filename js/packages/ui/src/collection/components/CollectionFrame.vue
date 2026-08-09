@@ -43,6 +43,7 @@ function toggleControls() {
       />
 
       <div
+        v-if="$slots.controls"
         :id="controlsId"
         :class="[
           controlsOpen ? 'flex' : 'hidden sm:flex',

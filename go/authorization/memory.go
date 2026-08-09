@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/yueli-official/foundation/go/identifier"
 )
 
 // MemoryOptions configures the reference in-memory Adapter.
@@ -2314,9 +2316,9 @@ func (module *Memory) rootScopeIDLocked() ScopeID {
 	return ""
 }
 
-func (module *Memory) newIDLocked(prefix string) string {
+func (module *Memory) newIDLocked(_ string) string {
 	module.nextID++
-	return fmt.Sprintf("%s-%d", prefix, module.nextID)
+	return identifier.MustNew().String()
 }
 
 func validateDecisionSubject(subject SubjectRef) error {
