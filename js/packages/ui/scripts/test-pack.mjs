@@ -116,6 +116,7 @@ try {
     "package/src/feedback/minimum-loading.ts",
     "package/src/feedback/notice.ts",
     "package/src/feedback/pattern.ts",
+    "package/src/icon-delivery.ts",
     "package/src/image/browser.ts",
     "package/src/image/index.ts",
     "package/src/manifest.ts",
@@ -158,6 +159,8 @@ try {
         pnpm: { onlyBuiltDependencies: ["esbuild", "vue-demi"] },
         scripts: { build: "nuxt build" },
         dependencies: {
+          "@iconify-json/tabler": "1.2.35",
+          "@nuxt/icon": "2.4.1",
           "@nuxt/ui": "4.9.0",
           "@yueli/ui": toFileSpecifier(tarball),
           nuxt: "4.4.8",

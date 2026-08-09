@@ -14,6 +14,7 @@ import {
   newKey,
   newUUID,
   OpaquePublicV1,
+  ShortLocatorV1,
   allocateKey,
   parseKey,
   parseUUID,
@@ -33,6 +34,7 @@ describe("Identifier", () => {
     expect(contract.schemaVersion).toBe(1);
     expect(contract.profiles).toEqual([
       keyProfile(CompactURLV1),
+      keyProfile(ShortLocatorV1),
       keyProfile(HumanCodeV1),
       keyProfile(OpaquePublicV1),
     ]);
@@ -84,6 +86,7 @@ describe("Identifier", () => {
 
   it.each([
     [CompactURLV1, 8, /^[1-9A-HJ-NP-Za-km-z]{8}$/],
+    [ShortLocatorV1, 6, /^[1-9A-HJ-NP-Za-km-z]{6}$/],
     [HumanCodeV1, 10, /^[0-9A-HJKMNP-TV-Z]{10}$/],
     [OpaquePublicV1, 16, /^[0-9A-HJKMNP-TV-Z]{16}$/],
   ] as const)("issues and parses %s", (profile, length, pattern) => {

@@ -12,9 +12,19 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "alphabet", "length", "case", "purpose", "allocation"],
+        "required": [
+          "id",
+          "alphabet",
+          "length",
+          "case",
+          "purpose",
+          "allocation"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*-v[1-9][0-9]*$" },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*-v[1-9][0-9]*$"
+          },
           "alphabet": { "type": "string", "minLength": 2, "maxLength": 255 },
           "length": { "type": "integer", "minimum": 1, "maximum": 128 },
           "case": { "enum": ["sensitive", "canonical-uppercase"] },

@@ -4,13 +4,14 @@
 
 ## 1. 先选公开边界
 
-| 需求                                      | 推荐入口                                      | 不应由 Foundation 承担         |
-| ----------------------------------------- | --------------------------------------------- | ------------------------------ |
-| Go HTTP Problem、JWT/JWKS、健康检查、遥测 | `github.com/yueli-official/foundation/go/...` | 业务 DTO、路由拓扑、域名、凭据 |
-| Go 授权、审计、任务、Webhook 等领域模块   | 对应 ordinary-Go core；框架只接显式 adapter   | 产品数据库所有权、产品权限命名 |
-| Nuxt BFF 与 Problem 解码                  | `@yueli/http-runtime`、`@yueli/nuxt-runtime`  | 私有 origin、cookie/凭据策略   |
-| 公共 UI 工作流/Pattern                    | `@yueli/ui` 的显式 subpath export             | 产品文案、路由、权限和业务动作 |
-| 内容、Discovery、Site Profile             | 对应 Nuxt adapter/package                     | 产品数据源和发布目标           |
+| 需求                                      | 推荐入口                                      | 不应由 Foundation 承担          |
+| ----------------------------------------- | --------------------------------------------- | ------------------------------- |
+| Go HTTP Problem、JWT/JWKS、健康检查、遥测 | `github.com/yueli-official/foundation/go/...` | 业务 DTO、路由拓扑、域名、凭据  |
+| Go 授权、审计、任务、Webhook 等领域模块   | 对应 ordinary-Go core；框架只接显式 adapter   | 产品数据库所有权、产品权限命名  |
+| Go/JS 普通实体与公开定位符                | `go/identifier`、`@yueli/identifier`          | secret、Trace、幂等键、业务编号 |
+| Nuxt BFF 与 Problem 解码                  | `@yueli/http-runtime`、`@yueli/nuxt-runtime`  | 私有 origin、cookie/凭据策略    |
+| 公共 UI 工作流/Pattern                    | `@yueli/ui` 的显式 subpath export             | 产品文案、路由、权限和业务动作  |
+| 内容、Discovery、Site Profile             | 对应 Nuxt adapter/package                     | 产品数据源和发布目标            |
 
 优先依赖最窄的公开 export。不要从 `src/`、未声明 subpath、其他产品仓库或 Foundation 内部相对路径导入。
 
@@ -60,13 +61,16 @@ require github.com/yueli-official/foundation/go v0.1.0
 | `@yueli/content-nuxt`   | `0.1.0`      | `js-v0.3.0` |
 | `@yueli/discovery-nuxt` | `0.1.0`      | `js-v0.4.1` |
 
+`@yueli/identifier@0.1.0` 已在源码中完成，但尚未进入正式 JS Release；消费者不得自行拼接下载 URL。
+
 示例：
 
 ```sh
 pnpm add "https://github.com/yueli-official/foundation/releases/download/js-v0.2.0/yueli-http-runtime-0.1.0.tgz"
 ```
 
-不要自行拼接尚未发布的 URL。下一次 bundle 起，Release 会同时包含六个公共 tarball、
+不要自行拼接尚未发布的 URL。下一次 bundle 起，Release 会同时包含七个公共 tarball（含
+`@yueli/identifier`）、
 `foundation-js-release-manifest.v1.json`、`SHA256SUMS` 和 GitHub artifact attestation；消费者以 Release 实际资产为准。
 
 Nuxt 应用按各 package README 注册 module/CSS。服务端私有 origin 与凭据转发只放在消费者 runtime config；浏览器只看到公开 BFF 路径和目标名。

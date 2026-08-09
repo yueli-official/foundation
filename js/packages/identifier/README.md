@@ -13,6 +13,7 @@ import {
   Claimed,
   Collision,
   CompactURLV1,
+  ShortLocatorV1,
   allocateKey,
   newUUID,
 } from "@yueli/identifier";
@@ -22,6 +23,8 @@ const publicKey = await allocateKey(CompactURLV1, async (candidate) => {
   const inserted = await insertWithUniqueConstraint(candidate);
   return inserted ? Claimed : Collision;
 });
+
+const shortRoute = await allocateKey(ShortLocatorV1, claimShortRoute);
 ```
 
 Secret、Trace、幂等语义、业务编号、handle、slug 和临时 DOM key 不属于本包。

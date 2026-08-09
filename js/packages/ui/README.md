@@ -39,8 +39,26 @@ Enable the Nuxt module and package Tailwind source:
 ```ts
 export default defineNuxtConfig({
   modules: ["@nuxt/ui", "@yueli/ui"],
+  yueliUi: {
+    // Only names that can arrive from persisted data or an API belong here.
+    // Literal i-tabler-* names in application and @yueli source are scanned.
+    tablerIcons: ["i-tabler-palette", "i-tabler-photo"],
+  },
 });
 ```
+
+The module owns deterministic local Tabler delivery for every consumer: it
+pins the Nuxt Icon peer, bundles the Foundation core icons plus scanned source
+icons and the finite `tablerIcons` allowlist, and disables runtime API fallback.
+Persisted icon values must be validated against the same application-owned
+allowlist; do not add the whole Tabler collection to the client bundle.
+
+### Upgrading to 0.2.0
+
+Install the pinned `@nuxt/icon@2.4.1` and `@iconify-json/tabler@1.2.35` peers,
+then list every Tabler name that can arrive from persisted data in
+`yueliUi.tablerIcons`. Runtime icon API fallback is intentionally disabled, so
+an unlisted dynamic name is a contract error instead of a late network fetch.
 
 ```css
 @import "tailwindcss";

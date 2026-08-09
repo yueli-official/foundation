@@ -23,6 +23,7 @@ CI 必须执行：
 - Go：`go mod tidy` diff、`go test -race ./...`、`go vet ./...`、`govulncheck ./...`；
 - JS：frozen install、format/lint/typecheck/unit/build、生产依赖 audit、全部公共 package pack dry-run；
 - 制品：至少一个独立 tarball 消费者；覆盖 Web 的 conformance 必须使用 CLI Playwright；
+- Identifier：Go/JS conformance 向量、最终 tarball 隔离消费者和站群跨仓静态门禁；
 - 发布相关 Action 使用完整 commit SHA，Dependabot 负责提出更新。
 
 ## JS bundle 发布

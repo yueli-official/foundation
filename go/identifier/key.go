@@ -47,6 +47,10 @@ const (
 	// addresses. It has about 47 bits of space and therefore requires Allocate.
 	CompactURLV1
 
+	// ShortLocatorV1 is a six-character Base58 locator for high-density public
+	// routes. It has about 35 bits of space and therefore requires Allocate.
+	ShortLocatorV1
+
 	// HumanCodeV1 is a ten-character, case-sensitive canonical Crockford Base32
 	// locator for values that people may transcribe. It is not a bearer token.
 	HumanCodeV1
@@ -60,6 +64,8 @@ func (p KeyProfile) definition() (keyProfileDefinition, bool) {
 	switch p {
 	case CompactURLV1:
 		return keyProfileDefinition{name: "compact-url-v1", alphabet: base58Alphabet, length: 8}, true
+	case ShortLocatorV1:
+		return keyProfileDefinition{name: "short-locator-v1", alphabet: base58Alphabet, length: 6}, true
 	case HumanCodeV1:
 		return keyProfileDefinition{name: "human-code-v1", alphabet: base32Alphabet, length: 10}, true
 	case OpaquePublicV1:
