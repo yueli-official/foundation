@@ -35,16 +35,16 @@
     "katex": "0.16.45",
     "marked": "17.0.6",
     "marked-alert": "2.1.2",
-    "mermaid": "11.15.0"
+    "mermaid": "11.16.1"
   },
   "peerDependencies": {
     "@nuxt/ui": "^4.9.0",
-    "nuxt": "^4.4.0",
+    "nuxt": "^4.5.1",
     "vue": "^3.5.0"
   },
   "devDependencies": {
     "@nuxt/ui": "4.9.0",
-    "nuxt": "4.4.8",
+    "nuxt": "catalog:",
     "vue": "3.5.39"
   }
 }
