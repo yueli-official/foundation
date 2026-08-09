@@ -1,11 +1,13 @@
 import { validate as validateUUID, v5, v7, version as uuidVersion } from "uuid";
 
 export const CompactURLV1 = "compact-url-v1" as const;
+export const ShortLocatorV1 = "short-locator-v1" as const;
 export const HumanCodeV1 = "human-code-v1" as const;
 export const OpaquePublicV1 = "opaque-public-v1" as const;
 
 export type KeyProfile =
   | typeof CompactURLV1
+  | typeof ShortLocatorV1
   | typeof HumanCodeV1
   | typeof OpaquePublicV1;
 
@@ -50,6 +52,14 @@ const definitions: Readonly<Record<KeyProfile, KeyProfileDefinition>> =
       id: CompactURLV1,
       alphabet: "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
       length: 8,
+      case: "sensitive",
+      purpose: "public-locator",
+      allocation: "atomic-unique-claim",
+    }),
+    [ShortLocatorV1]: Object.freeze({
+      id: ShortLocatorV1,
+      alphabet: "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
+      length: 6,
       case: "sensitive",
       purpose: "public-locator",
       allocation: "atomic-unique-claim",

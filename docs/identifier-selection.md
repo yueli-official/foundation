@@ -10,6 +10,7 @@ Foundation 的 Go `go/identifier` 与 JavaScript/TypeScript `@yueli/identifier` 
 |---|---|
 | 数据库实体、事件、任务、投递 | Go `New()` / JS `newUUID()`，RFC UUIDv7 |
 | 8 位公开 URL 地址 | `CompactURLV1` + `Allocate()` / `allocateKey()` |
+| 6 位高密度公开路由 | `ShortLocatorV1` + `Allocate()` / `allocateKey()` |
 | 人工输入的非授权码 | `HumanCodeV1` + `Allocate()` / `allocateKey()` |
 | 长期公开不透明引用 | `OpaquePublicV1` + `Allocate()` / `allocateKey()` |
 | 确定性跨系统映射 | `Derive()` / `deriveUUID()`，UUIDv5 |

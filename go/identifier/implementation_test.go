@@ -52,11 +52,12 @@ func TestRepositoryContractMatchesPublishedProfiles(t *testing.T) {
 	if err := json.Unmarshal(raw, &contract); err != nil {
 		t.Fatalf("decode contract: %v", err)
 	}
-	if contract.SchemaVersion != 1 || len(contract.Profiles) != 3 {
+	if contract.SchemaVersion != 1 || len(contract.Profiles) != 4 {
 		t.Fatalf("contract version=%d profiles=%d", contract.SchemaVersion, len(contract.Profiles))
 	}
 	want := []keyProfileDefinition{
 		{name: CompactURLV1.Name(), alphabet: base58Alphabet, length: 8},
+		{name: ShortLocatorV1.Name(), alphabet: base58Alphabet, length: 6},
 		{name: HumanCodeV1.Name(), alphabet: base32Alphabet, length: 10},
 		{name: OpaquePublicV1.Name(), alphabet: base32Alphabet, length: 16},
 	}

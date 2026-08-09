@@ -74,6 +74,7 @@ func TestPublishedKeyProfilesGenerateAndParseTheirCanonicalShape(t *testing.T) {
 		length  int
 	}{
 		{name: "compact URL", profile: identifier.CompactURLV1, pattern: `^[1-9A-HJ-NP-Za-km-z]{8}$`, length: 8},
+		{name: "short locator", profile: identifier.ShortLocatorV1, pattern: `^[1-9A-HJ-NP-Za-km-z]{6}$`, length: 6},
 		{name: "human code", profile: identifier.HumanCodeV1, pattern: `^[0-9A-HJKMNP-TV-Z]{10}$`, length: 10},
 		{name: "opaque public", profile: identifier.OpaquePublicV1, pattern: `^[0-9A-HJKMNP-TV-Z]{16}$`, length: 16},
 	}
@@ -107,6 +108,7 @@ func TestKeyProfileRejectsWrongOrNonCanonicalText(t *testing.T) {
 		values  []string
 	}{
 		{identifier.CompactURLV1, []string{"", "1234567", "123456789", "0ABCDEFG", "OABCDEFG"}},
+		{identifier.ShortLocatorV1, []string{"", "12345", "1234567", "0ABCDE", "OABCDE"}},
 		{identifier.HumanCodeV1, []string{"", "ABCD2345", "ABCD2345678", "abcd234567", "ABCI234567"}},
 		{identifier.OpaquePublicV1, []string{"", "ABCD2345", "abcd23456789abcd", "ABCO23456789ABCD"}},
 	} {

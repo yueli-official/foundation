@@ -9,6 +9,7 @@
 - `Parse()`：只接受规范小写、连字符分隔的 UUID 文本。
 - `Derive()`：以稳定 namespace 和 canonical bytes 创建 UUIDv5。
 - `CompactURLV1`：8 位 Base58 公开 URL 定位符，约 47 bit 空间。
+- `ShortLocatorV1`：6 位 Base58 高密度公开路由定位符，约 35 bit 空间。
 - `HumanCodeV1`：10 位无歧义 Base32 人工码，50 bit 空间。
 - `OpaquePublicV1`：16 位无歧义 Base32 公开引用，80 bit 空间。
 - `Allocate()`：通过产品拥有的原子 claim Adapter 完成最多八次碰撞重试。
@@ -37,4 +38,3 @@ publicKey, err := identifier.Allocate(ctx, identifier.CompactURLV1,
 - handle、slug、分页 cursor 和 Sqids 整数编码。
 
 这些值可能也是字符串，但拥有不同的保密、生命周期、存储和错误语义，不能复用公开 Identifier Interface。
-
