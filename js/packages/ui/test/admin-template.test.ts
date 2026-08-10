@@ -139,6 +139,16 @@ describe("admin template", () => {
     expect(wrapper.text()).toContain("Home");
     expect(wrapper.text()).toContain("Help");
     expect(wrapper.text()).toContain("Account");
+    expect(wrapper.get("[data-admin-sidebar-brand]").text()).toBe(
+      "Neutral Admin",
+    );
+    expect(wrapper.get("[data-admin-sidebar-primary]").text()).toContain(
+      "Home",
+    );
+    expect(wrapper.get("[data-admin-sidebar-support]").text()).toContain(
+      "Help",
+    );
+    expect(wrapper.get("[data-admin-sidebar-account]").text()).toBe("Account");
     expect(wrapper.get('[role="complementary"]')).toBeTruthy();
     expect(wrapper.get('nav[aria-label="Home"]')).toBeTruthy();
     expect(wrapper.get('nav[aria-label="Help"]')).toBeTruthy();
@@ -149,6 +159,69 @@ describe("admin template", () => {
     expect(wrapper.get("[data-main-id]").attributes("data-main-id")).toBe(
       "workspace-main",
     );
+  });
+
+  it("offers an opt-in commercial sidebar without framing brand and account", () => {
+    const wrapper = mount(AdminShell, {
+      props: {
+        navigation: [{ label: "Home", to: "/" }],
+        sidebarAppearance: "commercial",
+        messages: {
+          skipToContent: "Skip to content",
+          search: "Search",
+          searchPlaceholder: "Search pages",
+        },
+      },
+      slots: {
+        brand: "Commercial Admin",
+        "sidebar-footer": "Account",
+      },
+      global,
+    });
+
+    expect(
+      wrapper.get('[data-admin-sidebar-appearance="commercial"]'),
+    ).toBeTruthy();
+    expect(wrapper.get("[data-admin-sidebar-brand]").classes()).toContain(
+      "w-full",
+    );
+    expect(wrapper.get("[data-admin-sidebar-brand]").classes()).not.toContain(
+      "ring",
+    );
+    expect(wrapper.get("[data-admin-sidebar-account]").classes()).not.toContain(
+      "ring",
+    );
+  });
+
+  it("derives active and initially open state for a two-level navigation group", () => {
+    const wrapper = mount(AdminShell, {
+      props: {
+        navigation: [
+          {
+            label: "Settings",
+            type: "trigger",
+            children: [
+              { label: "Profile", to: "/settings/profile" },
+              {
+                label: "Appearance",
+                to: "/settings/appearance",
+                active: true,
+              },
+            ],
+          },
+        ],
+        messages: {
+          skipToContent: "Skip to content",
+          search: "Search",
+          searchPlaceholder: "Search pages",
+        },
+      },
+      global,
+    });
+
+    expect(
+      wrapper.findComponent({ name: "UNavigationMenu" }).props("items")[0],
+    ).toMatchObject({ active: true, defaultOpen: true, type: "trigger" });
   });
 
   it("keeps page navbar, toolbar, body and footer under one panel", () => {

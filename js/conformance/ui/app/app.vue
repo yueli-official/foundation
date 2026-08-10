@@ -4,10 +4,12 @@ import type {
   AccountMenuAppearanceValue,
   AccountMenuMessages,
 } from "@yueli/ui/account-menu/pattern";
-import type {
-  AdminNavigationItem,
-  AdminSearchGroup,
-  AdminShellMessages,
+import {
+  createAdminNavigationSearchItems,
+  normalizeAdminNavigation,
+  type AdminNavigationItem,
+  type AdminSearchGroup,
+  type AdminShellMessages,
 } from "@yueli/ui/admin";
 import {
   createCollectionRouteQueryCodec,
@@ -162,17 +164,39 @@ const adminMessages: AdminShellMessages = {
   search: "搜索",
   searchPlaceholder: "搜索页面与操作",
 };
-const navigation: readonly AdminNavigationItem[] = [
-  {
-    label: "内容集合",
-    icon: "i-tabler-files",
-    active: true,
-  },
-  {
-    label: "设置工作流",
-    icon: "i-tabler-settings",
-  },
-];
+const adminRoute = useRoute();
+const navigation = computed<readonly AdminNavigationItem[]>(() =>
+  normalizeAdminNavigation([
+    {
+      label: "内容集合",
+      icon: "i-tabler-files",
+      to: "/",
+      active: adminRoute.query.section === undefined,
+    },
+    {
+      label: "站点设置",
+      icon: "i-tabler-settings",
+      type: "trigger",
+      children: [
+        {
+          label: "首页",
+          to: "/?section=home",
+          active: adminRoute.query.section === "home",
+        },
+        {
+          label: "页脚",
+          to: "/?section=footer",
+          active: adminRoute.query.section === "footer",
+        },
+        {
+          label: "基础",
+          to: "/?section=site",
+          active: adminRoute.query.section === "site",
+        },
+      ],
+    },
+  ]),
+);
 const secondaryNavigation: readonly AdminNavigationItem[] = [
   {
     label: "使用文档",
@@ -181,16 +205,15 @@ const secondaryNavigation: readonly AdminNavigationItem[] = [
     target: "_blank",
   },
 ];
-const searchGroups: readonly AdminSearchGroup[] = [
+const searchGroups = computed<readonly AdminSearchGroup[]>(() => [
   {
     id: "pages",
     label: "页面",
-    items: [
-      { id: "content", label: "内容集合", icon: "i-tabler-files" },
-      { id: "settings", label: "设置工作流", icon: "i-tabler-settings" },
-    ],
+    items: createAdminNavigationSearchItems(navigation.value, {
+      idPrefix: "conformance-page",
+    }),
   },
-];
+]);
 const owners: readonly RemoteSelectOption<string>[] = [
   {
     value: "owner-lin",
@@ -450,6 +473,7 @@ function saveSettings() {
     <YAdminShell
       storage-key="ui-conformance-admin"
       main-id="main-content"
+      sidebar-appearance="commercial"
       :navigation="navigation"
       :secondary-navigation="secondaryNavigation"
       :search-groups="searchGroups"

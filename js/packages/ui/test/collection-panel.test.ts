@@ -57,6 +57,18 @@ const passiveStub = defineComponent({
     () =>
       h("div", attrs, slots.default?.()),
 });
+const UPopover = defineComponent({
+  name: "UPopover",
+  props: { open: Boolean },
+  emits: ["update:open"],
+  setup:
+    (props, { slots }) =>
+    () =>
+      h("div", { "data-popover": "" }, [
+        slots.default?.(),
+        props.open ? slots.content?.() : undefined,
+      ]),
+});
 
 const messages: CollectionPanelMessages = {
   searchPlaceholder: "Search records",
@@ -113,6 +125,7 @@ describe("CollectionPanel", () => {
           UCheckbox,
           USelect: passiveStub,
           USelectMenu: passiveStub,
+          UPopover,
           UPagination: passiveStub,
           USkeleton: passiveStub,
           UIcon: passiveStub,
@@ -139,7 +152,7 @@ describe("CollectionPanel", () => {
     expect(wrapper.text()).toContain("1-2/2");
   });
 
-  it("keeps columns visible and pins bulk actions within normal document flow", async () => {
+  it("keeps columns visible and replaces the toolbar in selection mode", async () => {
     const wrapper = mount(CollectionPanel, {
       props: {
         label: "Records",
@@ -166,6 +179,7 @@ describe("CollectionPanel", () => {
           UCheckbox,
           USelect: passiveStub,
           USelectMenu: passiveStub,
+          UPopover,
           UPagination: passiveStub,
           USkeleton: passiveStub,
           UIcon: passiveStub,
@@ -173,18 +187,24 @@ describe("CollectionPanel", () => {
       },
     });
 
-    expect(wrapper.find("[data-collection-modebar]").exists()).toBe(false);
     expect(wrapper.find("[data-collection-columns]").exists()).toBe(true);
-    expect(wrapper.find("[data-collection-bulk]").exists()).toBe(false);
+    expect(wrapper.find("[data-collection-table-default]").exists()).toBe(true);
+    expect(wrapper.find("[data-collection-table-selection]").exists()).toBe(
+      false,
+    );
 
     await wrapper.setProps({ selectionCount: 1 });
-    expect(wrapper.find("[data-collection-modebar]").exists()).toBe(false);
     expect(wrapper.find("[data-collection-columns]").exists()).toBe(true);
-    expect(wrapper.get("[data-collection-bulk]").text()).toContain(
+    expect(wrapper.find("[data-collection-table-default]").exists()).toBe(
+      false,
+    );
+    expect(wrapper.get("[data-collection-table-selection]").text()).toContain(
       "1 selected",
     );
-    expect(wrapper.get("[data-collection-bulk]").classes()).toContain("sticky");
-    expect(wrapper.get("[data-collection-bulk]").text()).toContain("Archive");
+    expect(wrapper.html()).not.toMatch(/\b(?:sticky|fixed)\b/);
+    expect(wrapper.get("[data-collection-table-selection]").text()).toContain(
+      "Archive",
+    );
   });
 
   it("uses a searchable Nuxt UI control only when caller text is supplied", () => {
@@ -198,6 +218,7 @@ describe("CollectionPanel", () => {
         total: 0,
         page: 1,
         pageSize: 10,
+        filtersOpen: true,
         controls: [
           {
             kind: "select",
@@ -226,6 +247,7 @@ describe("CollectionPanel", () => {
                 )?.placeholder,
               }),
           }),
+          UPopover,
           UPagination: passiveStub,
           USkeleton: passiveStub,
           UIcon: passiveStub,
@@ -238,7 +260,7 @@ describe("CollectionPanel", () => {
     ).toBeTruthy();
   });
 
-  it("keeps the caller-owned view switch reachable without inventing filters", () => {
+  it("keeps one caller-owned view switch reachable without inventing filters", () => {
     const wrapper = mount(CollectionPanel, {
       props: {
         label: "Records",
@@ -260,6 +282,7 @@ describe("CollectionPanel", () => {
           UCheckbox,
           USelect: passiveStub,
           USelectMenu: passiveStub,
+          UPopover,
           UPagination: passiveStub,
           USkeleton: passiveStub,
           UIcon: passiveStub,
@@ -267,11 +290,10 @@ describe("CollectionPanel", () => {
       },
     });
 
-    expect(wrapper.get("[data-collection-mobile-view]").text()).toBe("Grid");
-    expect(wrapper.get("[data-collection-desktop-view]").text()).toBe("Grid");
-    expect(wrapper.get("[data-collection-desktop-view]").classes()).toContain(
-      "hidden",
+    expect(wrapper.get("[data-collection-table-utilities]").text()).toBe(
+      "Grid",
     );
+    expect(wrapper.findAll('[aria-label="Grid"]')).toHaveLength(1);
     expect(
       wrapper.findAll("button").some((button) => button.text() === "Filters"),
     ).toBe(false);
@@ -296,6 +318,7 @@ describe("CollectionPanel", () => {
           UCheckbox,
           USelect: passiveStub,
           USelectMenu: passiveStub,
+          UPopover,
           UPagination: passiveStub,
           USkeleton: passiveStub,
           UIcon: passiveStub,

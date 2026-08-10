@@ -12,6 +12,7 @@ export interface UiIconMap {
   readonly check: string;
   readonly chevronDoubleLeft: string;
   readonly chevronDoubleRight: string;
+  readonly chevronUpDown: string;
   readonly chevronDown: string;
   readonly chevronLeft: string;
   readonly chevronRight: string;
@@ -20,7 +21,10 @@ export interface UiIconMap {
   readonly ellipsis: string;
   readonly external: string;
   readonly loading: string;
+  readonly menu: string;
   readonly minus: string;
+  readonly panelClose: string;
+  readonly panelOpen: string;
   readonly plus: string;
   readonly search: string;
   readonly light: string;

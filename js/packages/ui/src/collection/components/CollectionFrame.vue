@@ -32,40 +32,44 @@ function toggleControls() {
     v-bind="$attrs"
     :aria-label="labelledby ? undefined : label"
     :aria-labelledby="labelledby"
-    class="@container/collection overflow-clip rounded-xl border border-default bg-default shadow-sm"
+    class="@container/collection overflow-clip rounded-xl border border-default bg-default"
   >
-    <div class="border-b border-default p-3 sm:p-4">
-      <slot
-        name="search"
-        :controls-id="controlsId"
-        :controls-open="controlsOpen"
-        :toggle-controls="toggleControls"
-      />
+    <slot v-if="$slots.toolbar" name="toolbar" />
+    <template v-else>
+      <div class="border-b border-default p-3 sm:p-4">
+        <slot
+          name="search"
+          :controls-id="controlsId"
+          :controls-open="controlsOpen"
+          :toggle-controls="toggleControls"
+        />
+
+        <div
+          v-if="$slots.controls"
+          :id="controlsId"
+          :class="[
+            controlsOpen ? 'flex' : 'hidden sm:flex',
+            'mt-3 flex-wrap items-center gap-2',
+          ]"
+        >
+          <slot name="controls" />
+        </div>
+      </div>
 
       <div
-        v-if="$slots.controls"
-        :id="controlsId"
-        :class="[
-          controlsOpen ? 'flex' : 'hidden sm:flex',
-          'mt-3 flex-wrap items-center gap-2',
-        ]"
+        v-if="bulkVisible"
+        data-collection-bulk
+        role="region"
+        :aria-label="bulkLabel"
+        class="flex min-h-11 items-center justify-between gap-3 overflow-x-auto border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
       >
-        <slot name="controls" />
+        <slot name="bulk" />
       </div>
-    </div>
-
+    </template>
     <div
-      v-if="bulkVisible"
-      data-collection-bulk
-      role="region"
-      :aria-label="bulkLabel"
-      class="sticky top-0 z-20 flex min-h-11 items-center justify-between gap-3 overflow-x-auto border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
-    >
-      <slot name="bulk" />
-    </div>
-    <div
+      v-if="$slots.columns"
       data-collection-columns
-      class="flex min-h-11 items-center border-b border-default bg-muted/30 px-3 py-2 sm:px-4"
+      class="flex min-h-10 items-center border-b border-default px-3 py-2 sm:px-4"
     >
       <slot name="columns" />
     </div>
@@ -74,7 +78,10 @@ function toggleControls() {
       <slot />
     </div>
 
-    <footer class="border-t border-default bg-muted/20 px-3 py-3 sm:px-4">
+    <footer
+      v-if="$slots.footer"
+      class="border-t border-default px-3 py-3 sm:px-4"
+    >
       <slot name="footer" />
     </footer>
   </section>

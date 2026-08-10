@@ -13,6 +13,7 @@ import type {
 } from "../panel";
 import type { CollectionKey } from "../workflow";
 import CollectionFrame from "./CollectionFrame.vue";
+import CollectionTableToolbar from "./CollectionTableToolbar.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -86,11 +87,20 @@ const pageSizeItems = computed(() =>
 const pageSelection = computed(() =>
   props.pageSelected ? true : props.pageIndeterminate ? "indeterminate" : false,
 );
-const hasControls = computed(() => props.controls.length > 0);
-
-function submitSearch() {
-  emit("search", search.value.trim());
-}
+const filterControls = computed(() =>
+  props.controls.filter(
+    (control): control is Extract<CollectionControl, { kind: "select" }> =>
+      control.kind === "select",
+  ),
+);
+const directionControls = computed(() =>
+  props.controls.filter(
+    (control): control is Extract<CollectionControl, { kind: "direction" }> =>
+      control.kind === "direction",
+  ),
+);
+const hasFilters = computed(() => filterControls.value.length > 0);
+const hasUtilities = computed(() => directionControls.value.length > 0);
 
 function changeControl(id: string, value: unknown) {
   if (typeof value === "string" || typeof value === "number") {
@@ -124,158 +134,138 @@ function toggle(item: TItem, key: TKey) {
 </script>
 
 <template>
-  <CollectionFrame
-    v-model:controls-open="filtersOpen"
-    :label="label"
-    :labelledby="labelledby"
-    :bulk-label="messages.bulkRegion"
-    :bulk-visible="selectable && selectionCount > 0"
-  >
-    <template #search="{ controlsId, controlsOpen, toggleControls }">
-      <form
-        class="grid grid-cols-[minmax(0,1fr)_auto] gap-2"
-        role="search"
-        @submit.prevent="submitSearch"
+  <CollectionFrame :label="label" :labelledby="labelledby">
+    <template #toolbar>
+      <CollectionTableToolbar
+        v-model:search="search"
+        v-model:filters-open="filtersOpen"
+        :label="label || messages.searchPlaceholder"
+        :search-placeholder="messages.searchPlaceholder"
+        :search-action="messages.searchAction || undefined"
+        :filter-label="messages.filtersAction"
+        :filter-count="activeFilterCount"
+        :selection-count="selectable ? selectionCount : 0"
+        @search="emit('search', $event)"
       >
-        <UInput
-          v-model="search"
-          icon="i-tabler-search"
-          size="sm"
-          :placeholder="messages.searchPlaceholder"
-          class="min-w-0"
-        />
-        <UButton
-          type="submit"
-          icon="i-tabler-search"
-          :label="messages.searchAction"
-          color="neutral"
-          variant="outline"
-          size="sm"
-        />
-      </form>
+        <template v-if="hasFilters" #filters>
+          <div class="grid w-72 max-w-[calc(100vw-2rem)] gap-3">
+            <div
+              v-for="control in filterControls"
+              :key="control.id"
+              class="grid gap-1.5"
+            >
+              <span class="text-xs font-medium text-toned">{{
+                control.label
+              }}</span>
+              <USelectMenu
+                v-if="control.searchPlaceholder"
+                :model-value="control.value"
+                :items="control.options.slice()"
+                value-key="value"
+                :icon="control.icon"
+                size="sm"
+                class="w-full"
+                :search-input="{ placeholder: control.searchPlaceholder }"
+                :aria-label="control.label"
+                @update:model-value="changeControl(control.id, $event)"
+              />
+              <USelect
+                v-else
+                :model-value="control.value"
+                :items="control.options.slice()"
+                value-key="value"
+                :icon="control.icon"
+                size="sm"
+                class="w-full"
+                :aria-label="control.label"
+                @update:model-value="changeControl(control.id, $event)"
+              />
+            </div>
+          </div>
+        </template>
 
-      <div
-        v-if="hasControls || $slots.view"
-        class="mt-3 flex items-center justify-between gap-2 sm:hidden"
-      >
-        <div class="flex min-w-0 items-center gap-2">
+        <template v-if="hasUtilities || $slots.view" #utilities>
           <UButton
-            v-if="hasControls"
-            icon="i-tabler-adjustments-horizontal"
-            :label="
-              activeFilterCount
-                ? messages.activeFilters(activeFilterCount)
-                : messages.filtersAction
+            v-for="control in directionControls"
+            :key="control.id"
+            :icon="
+              control.value === 'asc'
+                ? 'i-tabler-sort-ascending'
+                : 'i-tabler-sort-descending'
             "
-            :aria-controls="controlsId"
-            :aria-expanded="controlsOpen"
+            :aria-label="
+              control.value === 'asc'
+                ? control.ascendingLabel
+                : control.descendingLabel
+            "
             color="neutral"
             variant="outline"
             size="xs"
-            @click="toggleControls"
+            square
+            @click="toggleDirection(control)"
           />
-          <div v-if="$slots.view" data-collection-mobile-view class="shrink-0">
-            <slot name="view" />
+          <slot name="view" />
+        </template>
+
+        <template #active-filters>
+          <slot name="active-filters">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-muted">{{
+                messages.activeFilters(activeFilterCount)
+              }}</span>
+              <UButton
+                :label="messages.clearFilters"
+                color="neutral"
+                variant="link"
+                size="xs"
+                @click="emit('clearFilters')"
+              />
+            </div>
+          </slot>
+        </template>
+
+        <template #selection>
+          <div
+            data-collection-selection
+            role="region"
+            :aria-label="messages.bulkRegion"
+            class="flex w-full min-w-0 items-center justify-between gap-3 overflow-x-auto"
+          >
+            <div class="flex min-w-0 items-center gap-2 text-xs">
+              <span
+                class="grid size-6 shrink-0 place-items-center rounded-md bg-primary/10 font-semibold text-primary"
+                >{{ selectionCount }}</span
+              >
+              <span class="truncate font-medium text-toned">{{
+                messages.selected(selectionCount, selectionMode)
+              }}</span>
+            </div>
+            <div
+              class="flex shrink-0 items-center justify-end gap-1 whitespace-nowrap"
+            >
+              <UButton
+                v-if="canSelectAllResults"
+                :label="messages.selectAllResults"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                @click="emit('selectAllResults')"
+              />
+              <slot name="bulk-actions" />
+              <UButton
+                :label="messages.clearSelection"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                @click="emit('clearSelection')"
+              />
+            </div>
           </div>
-        </div>
-        <span class="text-xs text-muted">{{ total }}</span>
-      </div>
+        </template>
+      </CollectionTableToolbar>
     </template>
 
-    <template v-if="hasControls || $slots.view" #controls>
-      <template v-for="control in controls" :key="control.id">
-        <USelectMenu
-          v-if="control.kind === 'select' && control.searchPlaceholder"
-          :model-value="control.value"
-          :items="control.options.slice()"
-          value-key="value"
-          :icon="control.icon"
-          size="xs"
-          :class="control.class ?? 'w-32'"
-          :search-input="{ placeholder: control.searchPlaceholder }"
-          :aria-label="control.label"
-          @update:model-value="changeControl(control.id, $event)"
-        />
-        <USelect
-          v-else-if="control.kind === 'select'"
-          :model-value="control.value"
-          :items="control.options.slice()"
-          value-key="value"
-          :icon="control.icon"
-          size="xs"
-          :class="control.class ?? 'w-32'"
-          :aria-label="control.label"
-          @update:model-value="changeControl(control.id, $event)"
-        />
-        <UButton
-          v-else
-          :icon="
-            control.value === 'asc'
-              ? 'i-tabler-sort-ascending'
-              : 'i-tabler-sort-descending'
-          "
-          :aria-label="
-            control.value === 'asc'
-              ? control.ascendingLabel
-              : control.descendingLabel
-          "
-          color="neutral"
-          variant="outline"
-          size="xs"
-          square
-          @click="toggleDirection(control)"
-        />
-      </template>
-      <UButton
-        v-if="activeFilterCount"
-        :label="messages.clearFilters"
-        color="neutral"
-        variant="ghost"
-        size="xs"
-        @click="emit('clearFilters')"
-      />
-      <div
-        v-if="$slots.view"
-        data-collection-desktop-view
-        class="ml-auto hidden sm:block"
-      >
-        <slot name="view" />
-      </div>
-    </template>
-
-    <template #bulk>
-      <div class="flex min-w-0 items-center gap-2 text-xs">
-        <span
-          class="grid size-6 place-items-center rounded-md bg-primary/10 font-semibold text-primary"
-          >{{ selectionCount }}</span
-        >
-        <span class="truncate text-toned">{{
-          messages.selected(selectionCount, selectionMode)
-        }}</span>
-      </div>
-      <div
-        class="flex shrink-0 items-center justify-end gap-1 whitespace-nowrap"
-      >
-        <UButton
-          v-if="canSelectAllResults"
-          :label="messages.selectAllResults"
-          color="neutral"
-          variant="ghost"
-          size="xs"
-          @click="emit('selectAllResults')"
-        />
-        <slot name="bulk-actions" />
-        <UButton
-          :label="messages.clearSelection"
-          color="neutral"
-          variant="ghost"
-          size="xs"
-          @click="emit('clearSelection')"
-        />
-      </div>
-    </template>
-
-    <template #columns>
+    <template v-if="selectable || $slots.columns" #columns>
       <div
         class="flex w-full min-w-0 items-center gap-0 text-xs font-medium leading-5 text-muted"
       >
@@ -402,7 +392,7 @@ function toggle(item: TItem, key: TKey) {
         class="flex min-w-0 items-center px-3 py-3 transition-colors sm:px-4"
         :class="
           selected(item, itemKey(item))
-            ? 'bg-elevated/70 hover:bg-elevated/70'
+            ? 'bg-primary/5 hover:bg-primary/5'
             : 'hover:bg-elevated/40'
         "
       >

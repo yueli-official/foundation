@@ -247,7 +247,7 @@ export const publicUiManifest = [
     entrypoint: "@yueli/ui/admin",
     owner: "foundation",
     responsibility:
-      "Compose Nuxt UI dashboard group, sidebar, search, page panel, navbar and toolbar with stable responsive ownership and caller-owned navigation/content.",
+      "Compose Nuxt UI dashboard group, sidebar, bounded two-level navigation/search projection, page panel, navbar and toolbar with stable responsive ownership and caller-owned routes/content.",
     nonResponsibilities: [
       "business dashboard regions",
       "application routes",
@@ -258,7 +258,11 @@ export const publicUiManifest = [
     runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
     evidence: {
       docs: ["README.md"],
-      tests: ["test/admin-template.test.ts", "scripts/test-pack.mjs"],
+      tests: [
+        "test/admin-navigation.test.ts",
+        "test/admin-template.test.ts",
+        "scripts/test-pack.mjs",
+      ],
       consumers: ["js/apps/ui-lab", "js/conformance/ui"],
       accessibility: ["test/admin-template.test.ts"],
     },

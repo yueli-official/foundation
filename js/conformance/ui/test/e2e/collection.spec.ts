@@ -42,7 +42,9 @@ test("mobile search remains one row and filters update the controlled URL", asyn
   await designOption.click();
   await expect(designOption).toBeHidden();
   await expect(page).toHaveURL(/category=design/);
-  await expect(page.getByText("设计", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "分类" })).toContainText(
+    "设计",
+  );
   await expectNoHorizontalOverflow(page);
   const pageSizeLabel = await page
     .getByText("每页", { exact: true })
@@ -75,6 +77,83 @@ test("public admin chrome exposes navigation, page ownership and remote search",
   await owner.click();
   await page.getByPlaceholder("搜索负责人").fill("API");
   await expect(page.getByRole("option", { name: /API Team/ })).toBeVisible();
+});
+
+test("two-level admin navigation keeps active ancestors open and exposes searchable leaves", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/?section=footer");
+  await settle(page);
+
+  const navigation = page.getByRole("navigation", { name: "内容集合" });
+  const settings = navigation.getByRole("button", { name: "站点设置" });
+  await expect(settings).toHaveAttribute("aria-expanded", "true");
+  const footer = navigation.getByRole("link", { name: "页脚" });
+  await expect(footer).toBeVisible();
+  await expect(footer).toHaveAttribute("data-active", "");
+
+  await page.locator("[data-admin-sidebar-search]").getByRole("button").click();
+  const search = page.getByPlaceholder("搜索页面与操作");
+  await search.fill("基础");
+  const result = page.getByText("站点设置 · 基础", { exact: true });
+  await expect(result).toBeVisible();
+  await result.click();
+  await expect(page).toHaveURL(/section=site/);
+  await expect(settings).toHaveAttribute("aria-expanded", "true");
+  await expect(navigation.getByRole("link", { name: "基础" })).toHaveAttribute(
+    "data-active",
+    "",
+  );
+  await page.screenshot({
+    path: testInfo.outputPath("admin-navigation-expanded.png"),
+  });
+});
+
+test("collapsed admin navigation exposes direct children in a side popover", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/?section=footer");
+  await settle(page);
+
+  const sidebar = page.getByRole("complementary");
+  await page.getByRole("button", { name: "Collapse sidebar" }).click();
+  await expect(sidebar).toHaveAttribute("data-collapsed", "true");
+  const settings = sidebar
+    .getByRole("navigation")
+    .locator('[data-slot="link"]')
+    .filter({ hasText: "站点设置" });
+  await settings.hover();
+  await expect(page.getByRole("link", { name: "页脚" })).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("admin-navigation-collapsed.png"),
+  });
+});
+
+test("mobile parent triggers expand in place and leaf navigation closes the sidebar", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/?section=footer");
+  await settle(page);
+
+  await page.getByRole("button", { name: "Open sidebar" }).click();
+  const sidebar = page.getByRole("dialog");
+  const settings = sidebar.getByRole("button", { name: "站点设置" });
+  await expect(settings).toHaveAttribute("aria-expanded", "true");
+  await settings.click();
+  await expect(settings).toHaveAttribute("aria-expanded", "false");
+  await expect(sidebar).toBeVisible();
+  await settings.click();
+  await sidebar.getByRole("link", { name: "基础" }).click();
+  await expect(page).toHaveURL(/section=site/);
+  await expect(
+    page.getByRole("button", { name: "Open sidebar" }),
+  ).toBeVisible();
+  await expect(sidebar).toBeHidden();
+  await page.screenshot({
+    path: testInfo.outputPath("admin-navigation-mobile.png"),
+  });
 });
 
 test("public account menu exposes grouped actions from an accessible trigger", async ({
@@ -158,36 +237,33 @@ test("keyboard users can submit search and operate bulk selection", async ({
   await expect(page.getByRole("region", { name: "批量操作" })).toBeHidden();
 });
 
-test("bulk actions stay pinned below the page header while scrolling", async ({
+test("bulk actions replace the default toolbar in the same collection position", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1100, height: 560 });
   await page.goto("/");
   await settle(page);
+  const toolbarContainer = page.locator("[data-collection-table-toolbar]");
+  const containerBox = await toolbarContainer.boundingBox();
+  expect(containerBox).not.toBeNull();
+  const defaultToolbar = page.locator("[data-collection-table-default]");
+  await expect(defaultToolbar).toBeVisible();
   await page.getByRole("checkbox", { name: "选择 公共内容示例 001" }).click();
 
   const toolbar = page.getByRole("region", { name: "批量操作" });
   await expect(toolbar).toContainText("已选择");
-  await page
-    .locator("#main-content")
-    .evaluate((element) => element.scrollTo({ top: 700, behavior: "instant" }));
-  await expect
-    .poll(async () => {
-      const box = await toolbar.boundingBox();
-      return box?.y ?? -1;
-    })
-    .toBeGreaterThanOrEqual(0);
-  const pageToolbar = page.locator("[data-admin-page-toolbar]");
-  const headerBox = await pageToolbar.boundingBox();
-  const toolbarBox = await toolbar.boundingBox();
-  expect(headerBox).not.toBeNull();
-  expect(toolbarBox).not.toBeNull();
-  const geometry = {
-    headerBottom: headerBox!.y + headerBox!.height,
-    toolbarTop: toolbarBox!.y,
-  };
-  expect(geometry.toolbarTop).toBeGreaterThanOrEqual(0);
-  expect(geometry.toolbarTop).toBeGreaterThanOrEqual(geometry.headerBottom);
+  await expect(defaultToolbar).toBeHidden();
+  const selectedContainerBox = await toolbarContainer.boundingBox();
+  expect(selectedContainerBox).not.toBeNull();
+  expect(
+    Math.abs(selectedContainerBox!.y - containerBox!.y),
+  ).toBeLessThanOrEqual(1);
+  await expect(
+    toolbarContainer.getByRole("region", { name: "批量操作" }),
+  ).toBeVisible();
+  expect(
+    await toolbar.evaluate((element) => getComputedStyle(element).position),
+  ).toBe("static");
   await expectNoHorizontalOverflow(page);
   await page.screenshot({
     path: testInfo.outputPath("collection-bulk-sticky.png"),

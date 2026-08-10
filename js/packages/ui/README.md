@@ -118,6 +118,45 @@ Use the admin template with Nuxt UI primitives and caller-owned domain content:
 </YAdminShell>
 ```
 
+Admin navigation is intentionally shallow. The public contract accepts flat
+navigation or one parent level with leaf children; deeper product structure
+belongs in page tabs, local navigation or breadcrumbs. A parent with children
+should normally use `type: "trigger"`, while each child owns the actual route.
+Normalize the caller-computed active state before rendering, and derive command
+palette leaves from the same permission-filtered tree:
+
+```ts
+import {
+  createAdminNavigationSearchItems,
+  normalizeAdminNavigation,
+  type AdminNavigationItem,
+} from "@yueli/ui/admin";
+
+const navigation = normalizeAdminNavigation([
+  {
+    label: "Site settings",
+    icon: "i-tabler-settings",
+    type: "trigger",
+    children: [
+      { label: "Home", to: "/manage/home", active: true },
+      { label: "Footer", to: "/manage/footer" },
+    ],
+  },
+] satisfies readonly AdminNavigationItem[]);
+
+const searchItems = createAdminNavigationSearchItems(navigation, {
+  idPrefix: "manage-page",
+});
+```
+
+`normalizeAdminNavigation` promotes an explicitly active child to its parent
+and opens that group on first render. It also makes every parent trigger-only,
+discarding parent navigation and selection callbacks so a mobile disclosure
+cannot close the Sidebar. Routes and authorization remain
+caller-owned: recursively remove unauthorized leaves before normalization, then
+use the same result for the Sidebar and search projection. Parent triggers do
+not close a mobile Sidebar; leaf navigation may close it after selection.
+
 Do not use the admin template as a generic card or analytics layout. Nuxt UI continues to own Button, Card, Table, Select and other primitives; products own metrics, permissions, routes and business actions. The deprecated DashboardLayout fixed four business regions and is not the target architecture. The structure follows the official [Nuxt UI dashboard template](https://github.com/nuxt-ui-templates/dashboard) without copying its fixtures or product pages.
 
 `AdminPage` makes its `mainId` element the page scroll container and focus target. Pass the same ID to `BackToTop` as both `target-id` and `scroll-container-id`; sticky page content can also use that stable boundary without inspecting Nuxt UI's internal DOM.
@@ -181,7 +220,7 @@ const save = useActionFeedback();
 </template>
 ```
 
-`CollectionPanel` is the default complete Pattern for card, grid and lightweight row collections: it owns responsive search, configured select/direction controls, page and result selection, an in-flow batch region, loading/error/empty states, row/grid containers and pagination. Its column header remains visible while selection is active; the batch region is never sticky or fixed. Select controls remain compact by default; callers with larger option sets can provide `searchPlaceholder` to opt into Nuxt UI's searchable `USelectMenu` while retaining caller-owned translation. Callers provide translated `CollectionPanelMessages`, query control values, items and domain slots; business HTTP and mutations remain outside the Module. `isSelectable` on the Workflow and `isItemSelectable` on the Pattern express rows such as the current administrator that must remain visible but cannot enter batch selection. Because page-local eligibility cannot describe unloaded rows, all-results selection is intentionally unavailable when that predicate is configured. For strict data-table alignment, sorting, visibility and row selection, compose the public Collection Workflow with Nuxt UI `UTable` directly; the Foundation does not reimplement or shallow-wrap its column model. `CollectionTableToolbar` supplies the reusable responsive anatomy around that direct `UTable`: containers at the standard `@3xl` size (768px) keep search, one filter Popover trigger and utilities on one row; compact containers put search first and filter/utilities second. Selection mode replaces the default controls instead of appending a sticky layer. Filter fields stay flat unless a real semantic distinction justifies sections under the [Collection toolbar standard](src/collection/toolbar-standard.md); strict table sorting remains in column headers. `CollectionFrame` remains the lower-level anatomy seam. Lightweight or domain-shaped screens may compose `CollectionToolbar`, `CollectionPagination`, `CollectionDock`, `CollectionFooter`, `CollectionLifecycleTabs`, `CollectionViewToggle`, `CollectionActiveFilters`, `CollectionPageSelection`, `CollectionRowShell` and `CollectionSortDirectionButton`.
+`CollectionPanel` is the default complete Pattern for card, grid and lightweight row collections: it owns responsive search, a single filter Popover, configured direction utilities, page and result selection, loading/error/empty states, row/grid containers and pagination. At the standard `@3xl` container size (768px), search, the filter trigger and utilities share one row; compact containers put search first and the controls on a deterministic second row. Selection replaces that default toolbar in the same position instead of appending a sticky layer, while the column header remains visible. Callers may pass an empty `searchAction` to use live search, provide an `active-filters` slot for individually removable chips, and use a control `searchPlaceholder` to opt into Nuxt UI's searchable `USelectMenu`. Callers still own translated `CollectionPanelMessages`, query semantics, business HTTP and mutations. `isSelectable` on the Workflow and `isItemSelectable` on the Pattern express rows such as the current administrator that must remain visible but cannot enter batch selection. Because page-local eligibility cannot describe unloaded rows, all-results selection is intentionally unavailable when that predicate is configured. For strict data-table alignment, sorting, visibility and row selection, compose the public Collection Workflow with Nuxt UI `UTable` directly; the Foundation does not reimplement or shallow-wrap its column model. `CollectionTableToolbar` supplies the same toolbar anatomy around that direct `UTable`. Filter fields stay flat unless a real semantic distinction justifies sections under the [Collection toolbar standard](src/collection/toolbar-standard.md); strict table sorting remains in column headers. `CollectionFrame` remains the lower-level anatomy seam. Lightweight or domain-shaped screens may compose `CollectionToolbar`, `CollectionPagination`, `CollectionDock`, `CollectionFooter`, `CollectionLifecycleTabs`, `CollectionViewToggle`, `CollectionActiveFilters`, `CollectionPageSelection`, `CollectionRowShell` and `CollectionSortDirectionButton`.
 
 Nuxt UI owns primitives. Collection patterns compose Nuxt UI controls only where the package adds stable responsive anatomy, query/selection semantics or accessibility behavior; it does not re-export generic buttons, cards or tables. DashboardLayout is a workflow-level composition of caller-owned regions, not a generic card/dashboard primitive.
 

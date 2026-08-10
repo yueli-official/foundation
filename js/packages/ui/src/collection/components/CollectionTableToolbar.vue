@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useId } from "vue";
+
 const props = withDefaults(
   defineProps<{
     label: string;
@@ -17,6 +19,7 @@ const props = withDefaults(
 const search = defineModel<string>("search", { default: "" });
 const filtersOpen = defineModel<boolean>("filtersOpen", { default: false });
 const emit = defineEmits<{ search: [value: string] }>();
+const filterPanelId = `y-collection-filter-panel-${useId().replaceAll(":", "")}`;
 
 function submitSearch() {
   emit("search", search.value.trim());
@@ -32,7 +35,7 @@ function submitSearch() {
     <div
       v-if="props.selectionCount > 0"
       data-collection-table-selection
-      class="flex min-h-14 items-center border-b border-default bg-muted/20 px-3 py-2 sm:px-4"
+      class="flex min-h-14 items-center border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
     >
       <div class="min-w-0 flex-1">
         <slot name="selection" :count="props.selectionCount" />
@@ -58,7 +61,7 @@ function submitSearch() {
           icon="i-tabler-search"
           size="sm"
           :placeholder="props.searchPlaceholder"
-          class="min-w-0"
+          class="w-full min-w-0"
         />
         <UButton
           v-if="props.searchAction"
@@ -87,10 +90,16 @@ function submitSearch() {
             color="neutral"
             variant="outline"
             size="xs"
+            :aria-controls="filterPanelId"
+            :aria-expanded="filtersOpen"
           />
 
           <template #content>
-            <div data-collection-table-filter-panel class="p-3">
+            <div
+              :id="filterPanelId"
+              data-collection-table-filter-panel
+              class="p-3"
+            >
               <slot name="filters" />
             </div>
           </template>

@@ -4,7 +4,13 @@ import type {
   NavigationMenuItem,
 } from "@nuxt/ui";
 
-export type AdminNavigationItem = NavigationMenuItem;
+export type AdminNavigationChildItem = Omit<NavigationMenuItem, "children"> & {
+  readonly children?: never;
+};
+
+export type AdminNavigationItem = Omit<NavigationMenuItem, "children"> & {
+  readonly children?: AdminNavigationChildItem[];
+};
 export type AdminSearchItem = CommandPaletteItem;
 export type AdminSearchGroup = CommandPaletteGroup<AdminSearchItem>;
 

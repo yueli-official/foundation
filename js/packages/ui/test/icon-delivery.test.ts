@@ -19,6 +19,7 @@ describe("shared Tabler delivery", () => {
     expect(delivery.serverBundle).toEqual({ collections: ["tabler"] });
     expect(delivery.clientBundle.icons).toContain("tabler:palette");
     expect(delivery.clientBundle.icons).toContain("tabler:photo");
+    expect(delivery.clientBundle.icons).toContain("tabler:selector");
     expect(delivery.clientBundle.icons).toContain("tabler:arrow-left");
     expect(new Set(delivery.clientBundle.icons).size).toBe(
       delivery.clientBundle.icons.length,

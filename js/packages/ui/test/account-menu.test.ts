@@ -16,14 +16,19 @@ const buttonStub = defineComponent({
 });
 const passiveStub = defineComponent({
   inheritAttrs: false,
-  props: ["items", "src", "text"],
+  props: ["items", "src", "text", "name"],
   setup:
     (props, { attrs, slots }) =>
     () =>
-      h("div", { ...attrs, "data-items": JSON.stringify(props.items) }, [
-        props.text,
-        slots.default?.(),
-      ]),
+      h(
+        "div",
+        {
+          ...attrs,
+          "data-items": JSON.stringify(props.items),
+          "data-icon-name": props.name,
+        },
+        [props.text, slots.default?.()],
+      ),
 });
 const messages: AccountMenuMessages = {
   currentUser: "Current user",
@@ -57,13 +62,19 @@ describe("AccountMenu", () => {
     expect(wrapper.text()).toContain("Current user");
   });
 
-  it("keeps identity, context, utility and logout actions in separate groups", () => {
+  it("keeps context separate while grouping account utilities together", () => {
     const wrapper = mount(AccountMenu, {
       props: {
         name: "Lin",
         email: "lin@example.test",
+        avatarUrl: "https://example.test/lin.png",
         contextActions: [{ label: "Workspace" }],
         utilityActions: [{ label: "Preferences", disabled: true }],
+        appearance: {
+          value: "system",
+          messages: appearanceMessages,
+          onChange: vi.fn(),
+        },
         logout: vi.fn(),
         messages,
       },
@@ -74,13 +85,19 @@ describe("AccountMenu", () => {
     expect(groups.map((group) => group.map((item) => item.label))).toEqual([
       ["Lin"],
       ["Workspace"],
-      ["Preferences"],
+      ["Preferences", "Appearance"],
       ["Sign out"],
     ]);
     expect(groups[0]?.[0]).toMatchObject({
       label: "Lin",
       description: "lin@example.test",
       type: "label",
+      avatar: {
+        src: "https://example.test/lin.png",
+        text: "L",
+        alt: "Lin",
+        size: "sm",
+      },
     });
   });
 
@@ -140,6 +157,7 @@ describe("AccountMenu", () => {
     const wrapper = mount(AccountMenu, {
       props: {
         name: "Lin",
+        email: "lin@example.test",
         triggerMode: "sidebar",
         logout: vi.fn(),
         messages,
@@ -148,6 +166,10 @@ describe("AccountMenu", () => {
     });
     expect(wrapper.get("button").classes()).toContain("w-full");
     expect(wrapper.get("button").text()).toContain("Lin");
+    expect(wrapper.get("button").text()).toContain("lin@example.test");
+    expect(
+      wrapper.find('[data-icon-name="i-tabler-selector"]').exists(),
+    ).toBe(true);
 
     await wrapper.setProps({ triggerMode: "collapsed" });
     expect(wrapper.get("button").classes()).toContain("aspect-square");

@@ -85,6 +85,7 @@ try {
     "package/src/admin/components/AdminPage.vue",
     "package/src/admin/components/AdminShell.vue",
     "package/src/admin/index.ts",
+    "package/src/admin/navigation.ts",
     "package/src/admin/types.ts",
     "package/src/collection/components/CollectionActiveFilters.vue",
     "package/src/collection/components/CollectionDock.vue",
@@ -191,6 +192,7 @@ try {
     `<script setup lang="ts">
 import { createCollectionRouteQueryCodec, createJsonCollectionQueryPolicy } from "@yueli/ui/collection";
 import type { AccountMenuAppearance, AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
+import { createAdminNavigationSearchItems, normalizeAdminNavigation } from "@yueli/ui/admin";
 import type { AdminNavigationItem, AdminSearchGroup, AdminShellMessages } from "@yueli/ui/admin";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
@@ -250,8 +252,19 @@ const shellMessages: AdminShellMessages = {
   search: "Search",
   searchPlaceholder: "Search pages",
 };
-const navigation: readonly AdminNavigationItem[] = [{ label: "Dashboard", icon: "i-tabler-layout-dashboard", to: "/" }];
-const searchGroups: readonly AdminSearchGroup[] = [{ id: "pages", label: "Pages", items: [{ label: "Dashboard", to: "/" }] }];
+const navigation = normalizeAdminNavigation([
+  { label: "Dashboard", icon: "i-tabler-layout-dashboard", to: "/" },
+  {
+    label: "Settings",
+    icon: "i-tabler-settings",
+    type: "trigger",
+    children: [
+      { label: "Profile", to: "/?section=profile", active: true },
+      { label: "Appearance", to: "/?section=appearance" },
+    ],
+  },
+] satisfies readonly AdminNavigationItem[]);
+const searchGroups: readonly AdminSearchGroup[] = [{ id: "pages", label: "Pages", items: createAdminNavigationSearchItems(navigation) }];
 const remoteMessages: RemoteSelectMessages = {
   placeholder: "Select owner",
   searchPlaceholder: "Search owners",
