@@ -118,6 +118,13 @@ Use the admin template with Nuxt UI primitives and caller-owned domain content:
 </YAdminShell>
 ```
 
+`YAdminShell` is SSR-safe and is the server-rendered application shell. Do not
+wrap the whole component in `ClientOnly` or replace it with a hydration-only
+"opening console" screen. Keep browser-only behavior at the smallest child
+boundary. Consumer acceptance should inspect the navigation response HTML for
+`data-admin-shell` and verify that repeated authenticated refreshes never
+render a whole-page placeholder.
+
 Admin navigation is intentionally shallow. The public contract accepts flat
 navigation or one parent level with leaf children; deeper product structure
 belongs in page tabs, local navigation or breadcrumbs. A parent with children
