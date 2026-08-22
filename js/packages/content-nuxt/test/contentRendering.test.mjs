@@ -77,3 +77,23 @@ test("editor toolbar controls expose names and stay in one mobile row", () => {
   assert.match(editor, /flex-nowrap[^"\n]*overflow-x-auto/u);
   assert.doesNotMatch(editor, /flex-wrap items-center/u);
 });
+
+test("article media can switch from thumbnail to a named preview rendition", async () => {
+  const { contentAssetRenditionURL } = await import(
+    "../app/utils/contentMedia.ts"
+  );
+  assert.equal(
+    contentAssetRenditionURL(
+      "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=thumbnail",
+      "content",
+    ),
+    "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=content",
+  );
+  assert.equal(
+    contentAssetRenditionURL("https://external.example/image.png", "content"),
+    "",
+  );
+  const prose = read("app/components/ContentProse.vue");
+  assert.match(prose, /data-content-preview-url/);
+  assert.match(prose, /<UModal/);
+});
