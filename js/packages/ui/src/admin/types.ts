@@ -19,3 +19,17 @@ export interface AdminShellMessages {
   readonly search: string;
   readonly searchPlaceholder: string;
 }
+
+export interface AdminShellUi {
+  readonly sidebar?: string;
+  readonly sidebarHeader?: string;
+  readonly sidebarBody?: string;
+  readonly sidebarFooter?: string;
+  readonly sidebarContent?: string;
+  readonly search?: string;
+  readonly searchButton?: string;
+  readonly navigationRoot?: string;
+  readonly navigationList?: string;
+  readonly navigationLink?: string;
+  readonly navigationIcon?: string;
+}

@@ -18,6 +18,7 @@ const passthrough = (name: string, tag = "div") =>
 const dashboardSidebar = defineComponent({
   name: "UDashboardSidebar",
   inheritAttrs: false,
+  props: { ui: { type: Object, default: () => ({}) } },
   setup:
     (_props, { attrs, slots }) =>
     () =>
@@ -30,7 +31,10 @@ const dashboardSidebar = defineComponent({
 const navigationMenu = defineComponent({
   name: "UNavigationMenu",
   inheritAttrs: false,
-  props: { items: { type: Array, default: () => [] } },
+  props: {
+    items: { type: Array, default: () => [] },
+    ui: { type: Object, default: () => ({}) },
+  },
   setup:
     (props, { attrs }) =>
     () =>
@@ -44,7 +48,7 @@ const navigationMenu = defineComponent({
 });
 const dashboardSearchButton = defineComponent({
   name: "UDashboardSearchButton",
-  props: { label: String },
+  props: { label: String, variant: String },
   setup: (props) => () =>
     h("button", { "data-search-button": "" }, props.label),
 });
@@ -165,7 +169,16 @@ describe("admin template", () => {
     const wrapper = mount(AdminShell, {
       props: {
         navigation: [{ label: "Home", to: "/" }],
+        searchGroups: [{ id: "pages", label: "Pages", items: [] }],
         sidebarAppearance: "commercial",
+        ui: {
+          sidebar: "h-svh bg-default",
+          sidebarBody: "min-h-0 overflow-y-auto",
+          search: "my-2",
+          searchButton: "bg-muted",
+          navigationLink: "rounded-xl",
+          navigationIcon: "size-8",
+        },
         messages: {
           skipToContent: "Skip to content",
           search: "Search",
@@ -191,6 +204,28 @@ describe("admin template", () => {
     expect(wrapper.get("[data-admin-sidebar-account]").classes()).not.toContain(
       "ring",
     );
+    expect(
+      wrapper.get('[data-admin-sidebar-appearance="commercial"]').classes(),
+    ).not.toContain("border-e");
+    expect(
+      String(
+        wrapper.findComponent({ name: "UDashboardSidebar" }).props("ui").footer,
+      ).split(/\s+/),
+    ).not.toContain("border-t");
+    const searchButton = wrapper.findComponent({
+      name: "UDashboardSearchButton",
+    });
+    expect(searchButton.props("variant")).toBe("soft");
+    expect(searchButton.attributes("class")).toContain("bg-muted");
+    const sidebar = wrapper.findComponent({ name: "UDashboardSidebar" });
+    expect(sidebar.attributes("class")).toContain("h-svh");
+    expect(String(sidebar.props("ui").body)).toContain("min-h-0");
+    expect(wrapper.get("[data-admin-sidebar-search]").classes()).toContain(
+      "my-2",
+    );
+    const navigation = wrapper.findComponent({ name: "UNavigationMenu" });
+    expect(String(navigation.props("ui").link)).toContain("rounded-xl");
+    expect(String(navigation.props("ui").linkLeadingIcon)).toContain("size-8");
   });
 
   it("derives active and initially open state for a two-level navigation group", () => {

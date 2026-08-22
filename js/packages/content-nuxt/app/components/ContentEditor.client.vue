@@ -2,10 +2,10 @@
 import type { Editor } from "@tiptap/vue-3";
 import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji";
 import { TextAlign } from "@tiptap/extension-text-align";
-import { InlineMath } from "@tiptap/extension-mathematics";
 import Blockquote from "@tiptap/extension-blockquote";
 import { Callout, type CalloutType } from "../extensions/Callout";
 import { CodeBlockWithLang } from "../extensions/CodeBlockWithLang";
+import { EditableInlineMath } from "../extensions/EditableInlineMath";
 import { MathBlock } from "../extensions/MathBlock";
 import { MermaidBlock } from "../extensions/MermaidBlock";
 
@@ -21,8 +21,11 @@ const props = withDefaults(
     draftEntityId?: string | number;
     draftMode?: "create" | "edit";
     hasInitialContent?: boolean;
+    draftEnabled?: boolean;
     // 各产品使用独立命名空间，避免不同内容类型的本地草稿互相覆盖。
     draftKeyPrefix?: string;
+    // 产品有独立文档标题时可从 H2 开始，其他消费者仍保留完整层级。
+    allowHeadingOne?: boolean;
   }>(),
   {
     placeholder: "开始写作…支持 Markdown 与富文本",
@@ -30,7 +33,9 @@ const props = withDefaults(
     draftEntityId: undefined,
     draftMode: "edit",
     hasInitialContent: false,
-    draftKeyPrefix: "blog:post",
+    draftEnabled: true,
+    draftKeyPrefix: "content:entry",
+    allowHeadingOne: true,
   },
 );
 
@@ -45,7 +50,7 @@ const editorExtensions = [
   // Callout 接管 blockquote token。Tiptap 运行时以 null 覆盖继承的解析器，
   // 但类型声明尚未暴露这个哨兵值，因此在此收窄为 never。
   Blockquote.extend({ parseMarkdown: null as never }),
-  InlineMath,
+  EditableInlineMath,
   MathBlock,
   MermaidBlock,
   Callout,
@@ -65,7 +70,7 @@ const {
   imageBubbleItems,
   selectedNode,
   dragHandleItems,
-} = useEditorToolbar();
+} = useEditorToolbar({ allowHeadingOne: props.allowHeadingOne });
 
 // 图片入口供工具栏和建议菜单共用。
 const editorRef = ref<{ editor?: Editor } | null>(null);
@@ -81,11 +86,18 @@ async function onFile(e: Event) {
   const input = e.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = "";
-  // 始终从 UEditor 暴露值读取实例，保证不同图片入口使用同一个编辑器。
+  if (file) await insertImageFile(file);
+}
+
+async function insertImageFile(file: File, position?: number) {
+  // 始终从 UEditor 暴露值读取实例，保证工具栏、粘贴和拖放共用同一上传 seam。
   const editor = editorRef.value?.editor;
-  if (!file || !editor || !props.imageUploader) return;
+  if (!editor || !props.imageUploader || uploading.value) return;
   uploading.value = true;
   try {
+    if (position !== undefined) {
+      editor.chain().focus().setTextSelection(position).run();
+    }
     const url = await props.imageUploader(file);
     editor.chain().focus().setImage({ src: url, alt: file.name }).run();
   } catch (error: unknown) {
@@ -99,11 +111,42 @@ async function onFile(e: Event) {
   }
 }
 
+function firstImage(files: FileList | null | undefined) {
+  return Array.from(files || []).find((file) => file.type.startsWith("image/"));
+}
+
+function onPaste(event: ClipboardEvent) {
+  const file = firstImage(event.clipboardData?.files);
+  if (!file || !props.imageUploader) return;
+  event.preventDefault();
+  void insertImageFile(file);
+}
+
+function onDrop(event: DragEvent) {
+  const file = firstImage(event.dataTransfer?.files);
+  const editor = editorRef.value?.editor;
+  if (!file || !editor || !props.imageUploader) return;
+  event.preventDefault();
+  const position = editor.view.posAtCoords({
+    left: event.clientX,
+    top: event.clientY,
+  })?.pos;
+  void insertImageFile(file, position);
+}
+
+function onDragOver(event: DragEvent) {
+  if (
+    props.imageUploader &&
+    Array.from(event.dataTransfer?.types || []).includes("Files")
+  ) {
+    event.preventDefault();
+  }
+}
+
 // 工具栏、气泡菜单和建议菜单共用命令处理器。
 const calloutHandler = (type: CalloutType) => ({
   canExecute: (editor: Editor) => editor.isEditable,
-  execute: (editor: Editor) =>
-    editor.chain().focus().setCallout({ type }).run(),
+  execute: (editor: Editor) => editor.chain().focus().setCallout({ type }),
   isActive: (editor: Editor) => editor.isActive("callout", { type }),
 });
 
@@ -124,13 +167,19 @@ const handlers = {
   "math-inline": {
     canExecute: (editor: Editor) => editor.isEditable,
     execute: (editor: Editor) =>
-      editor.chain().focus().insertContent("$E=mc^2$").run(),
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: "inlineMath",
+          attrs: { latex: "E = mc^2", editing: true },
+        }),
     isActive: (_editor: Editor) => false,
   },
   "math-block": {
     canExecute: (editor: Editor) => editor.isEditable,
     execute: (editor: Editor) =>
-      editor.chain().focus().setMathBlock({ latex: "E = mc^2" }).run(),
+      editor.chain().focus().setMathBlock({ latex: "E = mc^2", editing: true }),
     isActive: (editor: Editor) => editor.isActive("blockMath"),
   },
   "mermaid-block": {
@@ -139,8 +188,7 @@ const handlers = {
       editor
         .chain()
         .focus()
-        .setMermaidBlock({ code: "graph TD\n    A-->B" })
-        .run(),
+        .setMermaidBlock({ code: "graph TD\n    A-->B", editing: true }),
     isActive: (editor: Editor) => editor.isActive("mermaidBlock"),
   },
   "download-image": {
@@ -154,15 +202,23 @@ const handlers = {
         a.target = "_blank";
         a.click();
       }
+      return editor.chain();
     },
     isActive: (_editor: Editor) => false,
   },
   "remove-image": {
     canExecute: (editor: Editor) => editor.isActive("image"),
-    execute: (editor: Editor) => editor.chain().focus().deleteSelection().run(),
+    execute: (editor: Editor) => editor.chain().focus().deleteSelection(),
     isActive: (_editor: Editor) => false,
   },
 };
+
+// Tiptap classes contain private fields, so source-layer consumers using a
+// different compatible patch see distinct nominal types even though Vite
+// resolves and deduplicates them to one runtime instance. Erase only at the
+// Nuxt UI prop boundary; node implementations retain their full types.
+const uiEditorExtensions = editorExtensions as any;
+const uiEditorHandlers = handlers as any;
 
 // 草稿与自动保存。
 const draftFormData = ref<{ content?: string }>({ content: props.modelValue });
@@ -184,14 +240,14 @@ const {
   startAutoSave,
 } = useEditorDraft(draftFormData, {
   mode: props.draftMode,
-  entityId: props.draftEntityId,
+  entityId: () => props.draftEntityId,
   keyPrefix: props.draftKeyPrefix,
   hasInitialContent: props.hasInitialContent,
 });
 
 function onRestore() {
-  restoreDraft();
-  emit("update:modelValue", draftFormData.value.content ?? "");
+  const restored = restoreDraft();
+  if (restored) emit("update:modelValue", restored.content ?? "");
 }
 
 // 字数与预计阅读时间。
@@ -206,7 +262,9 @@ const readingMinutes = computed(() =>
   Math.max(1, Math.ceil(charCount.value / 400)),
 );
 
-onMounted(() => startAutoSave());
+onMounted(() => {
+  if (props.draftEnabled) startAutoSave();
+});
 
 defineExpose({
   editor: computed(() => editorRef.value?.editor ?? null),
@@ -217,7 +275,11 @@ defineExpose({
 </script>
 
 <template>
-  <div>
+  <div
+    @paste.capture="onPaste"
+    @dragover.capture="onDragOver"
+    @drop.capture="onDrop"
+  >
     <!-- draft restore prompt -->
     <UAlert
       v-if="showDraftRestore"
@@ -267,9 +329,9 @@ defineExpose({
         :model-value="modelValue"
         content-type="markdown"
         :placeholder="placeholder"
-        :extensions="editorExtensions"
+        :extensions="uiEditorExtensions"
         :starter-kit="{ codeBlock: false, blockquote: false }"
-        :handlers="handlers"
+        :handlers="uiEditorHandlers"
         :ui="{
           root: 'min-h-[480px]',
           content:
@@ -279,13 +341,13 @@ defineExpose({
       >
         <!-- toolbar (rounded-t to follow the frame; bg must not overflow the corner) -->
         <div
-          class="sticky top-0 z-10 flex flex-wrap items-center gap-1 overflow-hidden rounded-t-xl border-b border-default bg-default/95 px-2 py-1.5 backdrop-blur sm:flex-nowrap sm:overflow-x-auto"
+          class="sticky top-0 z-10 flex flex-nowrap items-center gap-1 overflow-x-auto rounded-t-xl border-b border-default bg-default/95 px-2 py-1.5 backdrop-blur"
         >
           <UEditorToolbar
             :editor="editor"
             :items="toolbarItems"
             layout="fixed"
-            class="min-w-0 flex-1 flex-wrap sm:flex-nowrap"
+            class="min-w-max flex-none [&_[role=group]_button]:min-h-11 [&_[role=group]_button]:min-w-11 sm:[&_[role=group]_button]:min-h-8 sm:[&_[role=group]_button]:min-w-8"
           />
           <UIcon
             v-if="uploading"

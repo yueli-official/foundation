@@ -15,8 +15,8 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "yueli-ui-pack-"));
 const consumerRoot = join(temporaryRoot, "consumer");
 const tar = process.platform === "win32" ? "tar.exe" : "tar";
+const pnpm = process.platform === "win32" ? "pnpm.exe" : "pnpm";
 const resolvedTemporaryRoot = resolve(temporaryRoot);
-const pnpmEntry = process.env.npm_execpath;
 
 if (
   dirname(resolvedTemporaryRoot) !== resolve(tmpdir()) ||
@@ -26,10 +26,6 @@ if (
     `Refusing to use unexpected temporary directory: ${resolvedTemporaryRoot}`,
   );
 }
-if (!pnpmEntry)
-  throw new Error(
-    "Run this conformance through pnpm so npm_execpath is available.",
-  );
 
 function run(command, args, options = {}) {
   return new Promise((resolveRun, rejectRun) => {
@@ -56,9 +52,7 @@ function run(command, args, options = {}) {
 }
 
 function runPnpm(args, options) {
-  if (pnpmEntry.toLowerCase().endsWith(".exe"))
-    return run(pnpmEntry, args, options);
-  return run(process.execPath, [pnpmEntry, ...args], options);
+  return run(pnpm, args, options);
 }
 
 function toFileSpecifier(path) {
@@ -113,6 +107,7 @@ try {
     "package/src/dashboard/pattern.ts",
     "package/src/feedback/action.ts",
     "package/src/feedback/components/ActionFeedbackButton.vue",
+    "package/src/feedback/components/FeedbackToastRegion.client.vue",
     "package/src/feedback/index.ts",
     "package/src/feedback/minimum-loading.ts",
     "package/src/feedback/notice.ts",
@@ -143,7 +138,17 @@ try {
     "package/src/theme/index.js",
   ].sort();
   if (JSON.stringify(packedFiles) !== JSON.stringify(allowedFiles)) {
-    throw new Error(`Unexpected tarball contents:\n${packedFiles.join("\n")}`);
+    const unexpected = packedFiles.filter(
+      (file) => !allowedFiles.includes(file),
+    );
+    const missing = allowedFiles.filter((file) => !packedFiles.includes(file));
+    throw new Error(
+      [
+        "Unexpected tarball contents",
+        `Added:\n${unexpected.join("\n") || "(none)"}`,
+        `Missing:\n${missing.join("\n") || "(none)"}`,
+      ].join("\n"),
+    );
   }
 
   await mkdir(join(consumerRoot, "app", "assets", "css"), {
@@ -316,7 +321,10 @@ void optimizeImageFile;
 `,
   );
 
-  await runPnpm(["install", "--ignore-workspace"], { cwd: consumerRoot });
+  // The consumer lives under the OS temp directory, outside every workspace.
+  // Passing pnpm's --ignore-workspace flag through npm 11 exits without a
+  // diagnostic, so the isolated install needs no package-manager-specific flag.
+  await runPnpm(["install"], { cwd: consumerRoot });
   await runPnpm(["build"], { cwd: consumerRoot });
 
   const assetRoot = join(consumerRoot, ".output", "public", "_nuxt");

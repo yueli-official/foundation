@@ -115,6 +115,10 @@ export async function optimizeImage(
     const context = canvas.getContext("2d");
     if (!context)
       return originalResult(file, "canvas-unavailable", source, output);
+    if (decision.options.outputType === "image/jpeg") {
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, output.width, output.height);
+    }
     decoded.draw(context, output.width, output.height);
 
     let blob: Blob | null;

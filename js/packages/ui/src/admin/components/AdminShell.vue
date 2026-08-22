@@ -5,6 +5,7 @@ import type {
   AdminNavigationItem,
   AdminSearchGroup,
   AdminShellMessages,
+  AdminShellUi,
 } from "../types";
 
 defineOptions({ inheritAttrs: false });
@@ -27,6 +28,7 @@ const props = withDefaults(
     defaultSize?: number;
     minSize?: number;
     maxSize?: number;
+    ui?: AdminShellUi;
   }>(),
   {
     secondaryNavigation: () => [],
@@ -43,6 +45,7 @@ const props = withDefaults(
     defaultSize: 16,
     minSize: 13,
     maxSize: 22,
+    ui: () => ({}),
   },
 );
 const open = defineModel<boolean>("open", { default: false });
@@ -62,6 +65,10 @@ const navigationStateKey = computed(() =>
 
 function navigationGroup(item: unknown) {
   return item as AdminNavigationItem;
+}
+
+function classes(...values: Array<string | undefined>) {
+  return values.filter(Boolean).join(" ");
 }
 </script>
 
@@ -94,16 +101,27 @@ function navigationGroup(item: unknown) {
       :min-size="minSize"
       :max-size="maxSize"
       :toggle="{ size: 'lg', class: 'size-11 shrink-0' }"
-      class="admin-shell-sidebar border-e border-default/80 bg-elevated/45"
+      :class="[
+        'admin-shell-sidebar bg-elevated/45',
+        sidebarAppearance === 'commercial'
+          ? 'border-e-0'
+          : 'border-e border-default/80',
+        ui.sidebar,
+      ]"
       :data-admin-sidebar-appearance="sidebarAppearance"
       :ui="{
-        header: 'h-auto min-h-(--ui-header-height) gap-2 px-3 py-2.5',
-        body: 'gap-3 px-3 py-2',
-        footer:
+        header: classes(
+          'h-auto min-h-(--ui-header-height) gap-2 px-3 py-2.5',
+          ui.sidebarHeader,
+        ),
+        body: classes('gap-3 px-3 py-2', ui.sidebarBody),
+        footer: classes(
           sidebarAppearance === 'commercial'
-            ? 'border-t border-default/70 px-3 pb-3 pt-2.5 lg:border-t'
+            ? 'border-t-0 px-3 pb-3 pt-2.5 lg:border-t-0'
             : 'px-3 pb-3 pt-2 lg:border-t-0',
-        content: 'bg-default',
+          ui.sidebarFooter,
+        ),
+        content: classes('bg-default', ui.sidebarContent),
       }"
     >
       <template v-if="slots.brand" #header="slotProps">
@@ -125,18 +143,20 @@ function navigationGroup(item: unknown) {
       <template #default="{ collapsed }">
         <div
           v-if="searchGroups.length"
-          class="px-0.5"
+          :class="['px-0.5', ui.search]"
           data-admin-sidebar-search
         >
           <UDashboardSearchButton
             v-if="searchGroups.length"
             :collapsed="collapsed"
             :label="messages.search"
+            :variant="sidebarAppearance === 'commercial' ? 'soft' : 'outline'"
             :class="[
               'min-h-11 w-full rounded-lg',
               sidebarAppearance === 'commercial'
-                ? 'bg-default/50 ring-default/70 hover:bg-default/80'
+                ? 'bg-elevated hover:bg-accented'
                 : 'bg-default/75 ring-default hover:bg-default',
+              ui.searchButton,
             ]"
           />
         </div>
@@ -156,10 +176,13 @@ function navigationGroup(item: unknown) {
             tooltip
             popover
             :ui="{
-              root: 'gap-1',
-              list: 'space-y-0.5',
-              link: 'min-h-11 gap-2.5 rounded-lg px-2.5 py-2 before:inset-0 before:rounded-lg',
-              linkLeadingIcon: 'size-5',
+              root: classes('gap-1', ui.navigationRoot),
+              list: classes('space-y-0.5', ui.navigationList),
+              link: classes(
+                'min-h-11 gap-2.5 rounded-lg px-2.5 py-2 before:inset-0 before:rounded-lg',
+                ui.navigationLink,
+              ),
+              linkLeadingIcon: classes('size-5', ui.navigationIcon),
             }"
           >
             <template #admin-navigation-group="{ item }">
@@ -204,10 +227,13 @@ function navigationGroup(item: unknown) {
             tooltip
             class="admin-shell-nav"
             :ui="{
-              root: 'gap-1',
-              list: 'space-y-0.5',
-              link: 'min-h-11 gap-2.5 rounded-lg px-2.5 py-2 before:inset-0 before:rounded-lg',
-              linkLeadingIcon: 'size-5',
+              root: classes('gap-1', ui.navigationRoot),
+              list: classes('space-y-0.5', ui.navigationList),
+              link: classes(
+                'min-h-11 gap-2.5 rounded-lg px-2.5 py-2 before:inset-0 before:rounded-lg',
+                ui.navigationLink,
+              ),
+              linkLeadingIcon: classes('size-5', ui.navigationIcon),
             }"
           />
 

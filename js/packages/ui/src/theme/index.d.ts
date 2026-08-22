@@ -46,10 +46,17 @@ export interface UiPreset {
     readonly card: { readonly slots: { readonly root: string } };
     readonly toast: {
       readonly slots: {
+        readonly root: string;
+        readonly wrapper: string;
         readonly title: string;
         readonly description: string;
+        readonly icon: string;
+        readonly actions: string;
+        readonly progress: string;
+        readonly close: string;
       };
     };
+    readonly toaster: { readonly slots: { readonly viewport: string } };
     readonly icons: UiIconMap;
   };
 }
@@ -60,8 +67,18 @@ export declare const foundationUiPreset: Readonly<{
   colors: Readonly<{ neutral: string }>;
   card: Readonly<{ slots: Readonly<{ root: string }> }>;
   toast: Readonly<{
-    slots: Readonly<{ title: string; description: string }>;
+    slots: Readonly<{
+      root: string;
+      wrapper: string;
+      title: string;
+      description: string;
+      icon: string;
+      actions: string;
+      progress: string;
+      close: string;
+    }>;
   }>;
+  toaster: Readonly<{ slots: Readonly<{ viewport: string }> }>;
 }>;
 
 export declare function createUiPreset(

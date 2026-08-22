@@ -14,6 +14,9 @@ describe("public theme contract", () => {
 
     expect(preset.ui.colors).toEqual({ primary: "emerald", neutral: "stone" });
     expect(preset.ui.card).toEqual(foundationUiPreset.card);
+    expect(preset.ui.toast.slots.root).toContain("yueli-toast");
+    expect(preset.ui.toast.slots.progress).toBe("hidden");
+    expect(preset.ui.toaster.slots.viewport).toContain("22rem");
     expect(preset.ui.icons).toBe(FOUNDATION_TABLER_ICONS);
     expect(DEFAULT_UI_THEME).toEqual({ primary: "blue", neutral: "stone" });
   });

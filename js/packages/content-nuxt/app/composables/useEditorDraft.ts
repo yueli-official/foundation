@@ -1,33 +1,40 @@
-// Local draft auto-save for the post editor (editor E7). Persists title/content/
-// excerpt to localStorage on an interval so an unsaved session survives a crash
-// or accidental navigation; offers to restore on next open. Ported from donor,
-// with the plugin options store dropped (auto-save is always on, 60s interval).
-
-interface DraftData {
-  title?: string;
-  content?: string;
-  excerpt?: string;
-  savedAt?: string;
-}
+import {
+  computed,
+  onUnmounted,
+  ref,
+  shallowRef,
+  toValue,
+  watch,
+  type MaybeRefOrGetter,
+  type Ref,
+} from "vue";
+import {
+  editorDraftSnapshot,
+  parseEditorDraft,
+  serializeEditorDraft,
+  shouldOfferEditorDraft,
+  type EditorDraftRecord,
+} from "../utils/editorDraft";
 
 const AUTO_SAVE_INTERVAL = 60_000;
 
-export function useEditorDraft(
-  formData: Ref<{ title?: string; content?: string; excerpt?: string }>,
+export function useEditorDraft<T extends Record<string, unknown>>(
+  formData: Ref<T>,
   opts: {
     mode: "create" | "edit";
-    entityId?: string | number;
+    entityId?: MaybeRefOrGetter<string | number | undefined>;
     keyPrefix?: string;
-    hasInitialContent: boolean;
+    /** @deprecated Existing content is compared instead of suppressing recovery. */
+    hasInitialContent?: boolean;
   },
 ) {
-  const keyPrefix = opts.keyPrefix ?? "blog:draft";
-
-  const autoSaveKey = computed(() =>
-    opts.mode === "edit" && opts.entityId
-      ? `${keyPrefix}:${opts.entityId}`
-      : `${keyPrefix}:new`,
-  );
+  const keyPrefix = opts.keyPrefix ?? "content:draft";
+  const autoSaveKey = computed(() => {
+    const entityId = toValue(opts.entityId);
+    return opts.mode === "edit" && entityId
+      ? `${keyPrefix}:${entityId}`
+      : `${keyPrefix}:new`;
+  });
 
   const lastAutoSaved = ref<Date | null>(null);
   const autoSavedLabel = computed(() => {
@@ -37,78 +44,99 @@ export function useEditorDraft(
       minute: "2-digit",
     })}`;
   });
-
   const showDraftRestore = ref(false);
-  const savedDraft = ref<DraftData | null>(null);
-  const hasUnsavedChanges = ref(false);
+  const savedDraft = shallowRef<EditorDraftRecord<T> | null>(null);
+  const savedSnapshot = ref(editorDraftSnapshot(formData.value));
+  const hasUnsavedChanges = computed(
+    () => editorDraftSnapshot(formData.value) !== savedSnapshot.value,
+  );
 
-  const doAutoSave = () => {
-    if (!formData.value.title && !formData.value.content) return;
-    try {
-      localStorage.setItem(
-        autoSaveKey.value,
-        JSON.stringify({
-          title: formData.value.title,
-          content: formData.value.content,
-          excerpt: formData.value.excerpt,
-          savedAt: new Date().toISOString(),
-        }),
-      );
-      lastAutoSaved.value = new Date();
-    } catch {
-      // localStorage may be unavailable in restricted browser contexts.
-    }
-  };
-
-  const restoreDraft = () => {
-    if (!savedDraft.value) return;
-    if (savedDraft.value.title) formData.value.title = savedDraft.value.title;
-    if (savedDraft.value.content)
-      formData.value.content = savedDraft.value.content;
-    if (savedDraft.value.excerpt)
-      formData.value.excerpt = savedDraft.value.excerpt;
-    showDraftRestore.value = false;
-    localStorage.removeItem(autoSaveKey.value);
-  };
-
-  const discardDraft = () => {
-    localStorage.removeItem(autoSaveKey.value);
-    showDraftRestore.value = false;
-  };
-
-  const markSaved = () => {
-    hasUnsavedChanges.value = false;
+  function removeStoredDraft() {
     try {
       localStorage.removeItem(autoSaveKey.value);
     } catch {
       // localStorage may be unavailable in restricted browser contexts.
     }
-  };
+  }
 
-  let autoSaveTimer: ReturnType<typeof setInterval>;
-
-  const startAutoSave = () => {
-    // Check for an existing draft on mount (only when the server had no content,
-    // so we never shadow a freshly-loaded post with a stale local copy).
-    if (!opts.hasInitialContent) {
-      try {
-        const saved = localStorage.getItem(autoSaveKey.value);
-        if (saved) {
-          const draft = JSON.parse(saved);
-          if (draft.title || draft.content) {
-            savedDraft.value = draft;
-            showDraftRestore.value = true;
-          }
-        }
-      } catch {
-        // Ignore malformed or inaccessible local drafts.
+  function loadStoredDraft() {
+    showDraftRestore.value = false;
+    savedDraft.value = null;
+    try {
+      const raw = localStorage.getItem(autoSaveKey.value);
+      if (!raw) return;
+      const draft = parseEditorDraft<T>(raw);
+      if (!draft) {
+        removeStoredDraft();
+        return;
       }
+      savedDraft.value = draft;
+      showDraftRestore.value = shouldOfferEditorDraft(draft, formData.value);
+      if (!showDraftRestore.value) {
+        savedDraft.value = null;
+        removeStoredDraft();
+      }
+    } catch {
+      // Ignore inaccessible local drafts.
     }
+  }
 
-    autoSaveTimer = setInterval(doAutoSave, AUTO_SAVE_INTERVAL);
-  };
+  function saveNow() {
+    if (!hasUnsavedChanges.value) return false;
+    try {
+      const savedAt = new Date();
+      localStorage.setItem(
+        autoSaveKey.value,
+        serializeEditorDraft(formData.value, savedAt.toISOString()),
+      );
+      lastAutoSaved.value = savedAt;
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
-  onUnmounted(() => clearInterval(autoSaveTimer));
+  function restoreDraft() {
+    if (!savedDraft.value) return undefined;
+    const restored = JSON.parse(JSON.stringify(savedDraft.value.data)) as T;
+    formData.value = restored;
+    showDraftRestore.value = false;
+    savedDraft.value = null;
+    removeStoredDraft();
+    return restored;
+  }
+
+  function discardDraft() {
+    removeStoredDraft();
+    showDraftRestore.value = false;
+    savedDraft.value = null;
+  }
+
+  function markSaved() {
+    savedSnapshot.value = editorDraftSnapshot(formData.value);
+    discardDraft();
+  }
+
+  let autoSaveTimer: ReturnType<typeof setInterval> | undefined;
+  let started = false;
+  function startAutoSave() {
+    if (started) return;
+    started = true;
+    savedSnapshot.value = editorDraftSnapshot(formData.value);
+    loadStoredDraft();
+    autoSaveTimer = setInterval(saveNow, AUTO_SAVE_INTERVAL);
+    window.addEventListener("pagehide", saveNow);
+  }
+
+  watch(autoSaveKey, (next, previous) => {
+    if (started && next !== previous) loadStoredDraft();
+  });
+
+  onUnmounted(() => {
+    saveNow();
+    if (autoSaveTimer) clearInterval(autoSaveTimer);
+    if (started) window.removeEventListener("pagehide", saveNow);
+  });
 
   return {
     autoSaveKey,
@@ -119,6 +147,7 @@ export function useEditorDraft(
     restoreDraft,
     discardDraft,
     markSaved,
+    saveNow,
     startAutoSave,
   };
 }

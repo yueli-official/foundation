@@ -2,103 +2,153 @@
 /* eslint-disable vue/no-v-html */
 import { NodeViewWrapper } from "@tiptap/vue-3";
 import katex from "katex";
+import { computed, nextTick, ref, watch } from "vue";
+import { useExclusiveNodeViewEditing } from "../utils/nodeViewEditing";
 
-// 公式 NodeView 支持点击编辑和 KaTeX 实时预览。
 const props = defineProps<{
-  node: { attrs: { latex: string } };
+  node: { attrs: { latex: string; editing?: boolean } };
   updateAttributes: (attrs: Record<string, unknown>) => void;
   selected: boolean;
 }>();
 
-const editing = ref(false);
+const draft = ref(props.node.attrs.latex || "");
 const inputRef = ref<HTMLTextAreaElement>();
+const { nodeViewId, activate } = useExclusiveNodeViewEditing({
+  isEditing: () => Boolean(props.node.attrs.editing),
+  close: finishEdit,
+  focusSelector: "[data-editor-math-source]",
+});
+
+watch(
+  () => props.node.attrs.latex,
+  (latex) => {
+    if (latex !== draft.value) draft.value = latex || "";
+  },
+);
 
 const rendered = computed(() => {
-  const src = props.node.attrs.latex || "";
-  if (!src.trim())
+  if (!draft.value.trim()) {
     return '<span class="text-muted text-sm">点击输入公式</span>';
+  }
   try {
-    return katex.renderToString(src, {
+    return katex.renderToString(draft.value, {
       displayMode: true,
       throwOnError: false,
     });
   } catch {
-    return `<span class="text-error text-sm">${src}</span>`;
+    return `<span class="text-error text-sm">${draft.value}</span>`;
   }
 });
 
 function startEdit() {
-  editing.value = true;
+  props.updateAttributes({ editing: true });
+  activate();
   nextTick(() => {
-    inputRef.value?.focus();
     autoResize();
   });
 }
 
-function onInput(e: Event) {
-  const val = (e.target as HTMLTextAreaElement).value;
-  props.updateAttributes({ latex: val });
+function finishEdit() {
+  props.updateAttributes({ editing: false });
+}
+
+function onInput(event: Event) {
+  draft.value = (event.target as HTMLTextAreaElement).value;
+  props.updateAttributes({ latex: draft.value });
   autoResize();
 }
 
 function autoResize() {
-  const el = inputRef.value;
-  if (!el) return;
-  el.style.height = "auto";
-  el.style.height = el.scrollHeight + "px";
+  const element = inputRef.value;
+  if (!element) return;
+  element.style.height = "auto";
+  element.style.height = `${element.scrollHeight}px`;
 }
 
-function onBlur() {
-  editing.value = false;
+function onFocusOut(event: FocusEvent) {
+  const root = event.currentTarget as HTMLElement;
+  const next = event.relatedTarget as Node | null;
+  if (next && root.contains(next)) return;
+  requestAnimationFrame(() => {
+    if (!root.contains(document.activeElement)) finishEdit();
+  });
 }
 
-function onKeydown(e: KeyboardEvent) {
-  // Escape 退出编辑状态。
-  if (e.key === "Escape") {
-    editing.value = false;
-    e.preventDefault();
-  }
+function onKeydown(event: KeyboardEvent) {
+  if (event.key !== "Escape") return;
+  finishEdit();
+  event.preventDefault();
 }
 </script>
 
 <template>
   <NodeViewWrapper
-    class="my-[1em] overflow-hidden rounded-xl border transition-colors duration-150 focus-within:border-primary"
+    data-editor-math-block
+    :data-yueli-node-view-id="nodeViewId"
+    class="my-[1em] overflow-hidden rounded-lg border bg-default transition-colors duration-150 focus-within:border-primary"
     :class="selected ? 'border-primary' : 'border-default'"
+    @focusout="onFocusOut"
+    @focusin="node.attrs.editing && activate()"
   >
-    <!-- 编辑区域 -->
-    <div v-if="editing" class="border-b border-default">
-      <div
-        class="flex items-center border-b border-default bg-elevated px-3 py-1"
-        contenteditable="false"
-      >
-        <span
-          class="text-[0.7rem] font-semibold uppercase tracking-[0.05em] text-muted"
-          >LaTeX</span
-        >
-      </div>
-      <textarea
-        ref="inputRef"
-        :value="node.attrs.latex"
-        class="min-h-[2.5em] w-full resize-none overflow-hidden border-0 bg-default p-[0.75em] font-mono text-[0.875em] leading-6 text-default outline-none"
-        spellcheck="false"
-        placeholder="E = mc^2"
-        @input="onInput"
-        @blur="onBlur"
-        @keydown="onKeydown"
-      />
-    </div>
-    <!-- KaTeX 在默认非信任模式下生成预览 HTML。 -->
     <div
-      class="overflow-x-auto p-[1em] text-center"
-      :class="{
-        'flex min-h-[3em] cursor-pointer items-center justify-center hover:bg-elevated':
-          !editing,
-      }"
+      class="flex min-h-10 items-center justify-between gap-3 border-b border-default bg-elevated/60 px-3 py-1.5"
       contenteditable="false"
-      @click="!editing && startEdit()"
     >
-      <div v-html="rendered" />
+      <span class="text-xs font-medium text-toned">公式</span>
+      <button
+        type="button"
+        class="rounded-md px-2.5 py-1 text-xs font-medium text-muted outline-none transition-colors hover:bg-accented hover:text-default focus-visible:ring-2 focus-visible:ring-primary"
+        @mousedown.stop
+        @click.stop="node.attrs.editing ? finishEdit() : startEdit()"
+      >
+        {{ node.attrs.editing ? "完成公式" : "编辑公式" }}
+      </button>
+    </div>
+
+    <div :class="node.attrs.editing && 'grid md:grid-cols-2'">
+      <section
+        v-if="node.attrs.editing"
+        class="min-w-0 border-b border-default bg-default md:border-b-0 md:border-e"
+      >
+        <div
+          class="px-3 pt-2.5 text-[0.7rem] font-medium text-muted"
+          contenteditable="false"
+        >
+          LaTeX 源码
+        </div>
+        <textarea
+          ref="inputRef"
+          data-editor-math-source
+          :value="draft"
+          aria-label="LaTeX 源码"
+          class="min-h-32 w-full resize-none overflow-hidden border-0 bg-transparent px-3 pb-3 pt-1.5 font-mono text-[0.875em] leading-6 text-default outline-none"
+          spellcheck="false"
+          placeholder="E = mc^2"
+          @input="onInput"
+          @keydown="onKeydown"
+        />
+      </section>
+
+      <section
+        data-editor-math-preview
+        class="min-w-0 overflow-x-auto bg-muted/35 px-4 py-3 text-center transition-colors"
+        :class="
+          node.attrs.editing
+            ? 'min-h-32'
+            : 'grid min-h-[4.5rem] cursor-text place-items-center hover:bg-muted/60'
+        "
+        contenteditable="false"
+        @mousedown.stop
+        @click.stop="!node.attrs.editing && startEdit()"
+      >
+        <div
+          v-if="node.attrs.editing"
+          class="mb-2 text-left text-[0.7rem] font-medium text-muted"
+        >
+          预览
+        </div>
+        <div v-html="rendered" />
+      </section>
     </div>
   </NodeViewWrapper>
 </template>

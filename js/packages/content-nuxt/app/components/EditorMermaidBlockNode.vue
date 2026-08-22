@@ -1,159 +1,281 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-v-html */
 import { NodeViewWrapper } from "@tiptap/vue-3";
+import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import { renderMermaidSvg } from "../utils/mermaidRuntime";
+import { useExclusiveNodeViewEditing } from "../utils/nodeViewEditing";
 
-// Mermaid NodeView 支持点击编辑和延迟实时预览；Mermaid 按需加载。
 const props = defineProps<{
-  node: { attrs: { code: string } };
+  node: {
+    attrs: {
+      code: string;
+      editing?: boolean;
+      previewSvg?: string;
+      previewCode?: string;
+      previewError?: string;
+    };
+  };
   updateAttributes: (attrs: Record<string, unknown>) => void;
   selected: boolean;
 }>();
 
-const editing = ref(false);
 const inputRef = ref<HTMLTextAreaElement>();
-const svgHtml = ref("");
-const renderError = ref("");
-
 const colorMode = useColorMode();
+let destroyed = false;
+const { nodeViewId, activate } = useExclusiveNodeViewEditing({
+  isEditing: () => Boolean(props.node.attrs.editing),
+  close: finishEdit,
+  focusSelector: "[data-editor-mermaid-source]",
+});
 
-// 模块只加载一次，但每次渲染重新应用主题以跟随当前配色。
-let mermaidInstance: (typeof import("mermaid"))["default"] | null = null;
+const previewMatchesCode = () =>
+  Boolean(
+    props.node.attrs.previewSvg &&
+    props.node.attrs.previewCode === props.node.attrs.code,
+  );
 
-async function getMermaid() {
-  if (!mermaidInstance) {
-    const mod = await import("mermaid");
-    mermaidInstance = mod.default;
-  }
-  mermaidInstance.initialize({
-    startOnLoad: false,
-    theme: colorMode.value === "dark" ? "dark" : "default",
-  });
-  return mermaidInstance;
-}
-
-// 输入停止后再渲染，避免每个按键都重建 SVG。
-let renderTimer: ReturnType<typeof setTimeout> | null = null;
-
-async function renderMermaid(code: string) {
+async function renderCurrentCode() {
+  const code = props.node.attrs.code || "";
+  const editing = Boolean(props.node.attrs.editing);
   if (!code.trim()) {
-    svgHtml.value = "";
-    renderError.value = "";
+    props.updateAttributes({
+      previewSvg: "",
+      previewCode: "",
+      previewError: "",
+      editing,
+    });
     return;
   }
+  if (previewMatchesCode()) return;
   try {
-    const mermaid = await getMermaid();
     const id = `mermaid-editor-${Math.random().toString(36).slice(2, 8)}`;
-    const { svg } = await mermaid.render(id, code);
-    svgHtml.value = svg;
-    renderError.value = "";
+    const { svg } = await renderMermaidSvg(
+      id,
+      code,
+      colorMode.value === "dark" ? "dark" : "default",
+    );
+    if (destroyed) return;
+    props.updateAttributes({
+      previewSvg: svg,
+      previewCode: code,
+      previewError: "",
+      editing,
+    });
   } catch (error: unknown) {
-    renderError.value = error instanceof Error ? error.message : "渲染失败";
+    if (destroyed) return;
+    props.updateAttributes({
+      previewSvg: "",
+      previewCode: "",
+      previewError: error instanceof Error ? error.message : "渲染失败",
+      editing,
+    });
   }
 }
 
-watch(
-  () => props.node.attrs.code,
-  (code) => {
-    if (renderTimer) clearTimeout(renderTimer);
-    renderTimer = setTimeout(() => renderMermaid(code), 500);
-  },
-  { immediate: true },
-);
-
-// 明暗主题切换后重新渲染。
-watch(
-  () => colorMode.value,
-  () => renderMermaid(props.node.attrs.code),
-);
+onMounted(() => {
+  if (!props.node.attrs.editing) void renderCurrentCode();
+});
+onBeforeUnmount(() => {
+  destroyed = true;
+});
 
 function startEdit() {
-  editing.value = true;
+  props.updateAttributes({ editing: true });
+  activate();
   nextTick(() => {
-    inputRef.value?.focus();
     autoResize();
   });
 }
 
-function onInput(e: Event) {
-  const val = (e.target as HTMLTextAreaElement).value;
-  props.updateAttributes({ code: val });
+function finishEdit() {
+  props.updateAttributes({ editing: false });
+  setTimeout(() => {
+    if (!destroyed) void renderCurrentCode();
+  }, 0);
+}
+
+function onInput(event: Event) {
+  const value = (event.target as HTMLTextAreaElement).value;
+  props.updateAttributes({ code: value });
   autoResize();
 }
 
-function autoResize() {
-  const el = inputRef.value;
-  if (!el) return;
-  el.style.height = "auto";
-  el.style.height = el.scrollHeight + "px";
-}
+async function renderDraftPreview(event: MouseEvent) {
+  const button = event.currentTarget as HTMLButtonElement;
+  const root = button.closest<HTMLElement>("[data-editor-mermaid-block]");
+  const input = root?.querySelector<HTMLTextAreaElement>(
+    "[data-editor-mermaid-source]",
+  );
+  const output = root?.querySelector<HTMLElement>(
+    "[data-editor-mermaid-live-output]",
+  );
+  const prompt = root?.querySelector<HTMLElement>(
+    "[data-editor-mermaid-live-prompt]",
+  );
+  const code = input?.value || "";
+  if (!root || !output || !prompt || !code.trim()) return;
+  if (button.dataset.loading === "true") return;
 
-function onBlur() {
-  editing.value = false;
-}
-
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === "Escape") {
-    editing.value = false;
-    e.preventDefault();
+  button.dataset.loading = "true";
+  button.setAttribute("aria-busy", "true");
+  button.textContent = "生成中…";
+  try {
+    const id = `mermaid-editor-${Math.random().toString(36).slice(2, 8)}`;
+    const { svg } = await renderMermaidSvg(
+      id,
+      code,
+      colorMode.value === "dark" ? "dark" : "default",
+    );
+    if (!root.isConnected || input?.value !== code) return;
+    output.innerHTML = svg;
+    output.hidden = false;
+    input.focus();
+    prompt.hidden = true;
+  } catch (error: unknown) {
+    output.textContent =
+      error instanceof Error ? error.message : "预览生成失败";
+    output.classList.add("text-error", "text-sm");
+    output.hidden = false;
+  } finally {
+    delete button.dataset.loading;
+    button.removeAttribute("aria-busy");
+    button.textContent = "更新预览";
   }
+}
+
+function autoResize() {
+  const element = inputRef.value;
+  if (!element) return;
+  element.style.height = "auto";
+  element.style.height = `${element.scrollHeight}px`;
+}
+
+function onFocusOut(event: FocusEvent) {
+  const root = event.currentTarget as HTMLElement;
+  const next = event.relatedTarget as Node | null;
+  if (next && root.contains(next)) return;
+  if (next) {
+    finishEdit();
+    return;
+  }
+  requestAnimationFrame(() => {
+    if (!root.contains(document.activeElement)) finishEdit();
+  });
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key !== "Escape") return;
+  finishEdit();
+  event.preventDefault();
 }
 </script>
 
 <template>
   <NodeViewWrapper
-    class="my-[1em] overflow-hidden rounded-xl border transition-colors duration-150 focus-within:border-primary"
+    data-editor-mermaid-block
+    :data-yueli-node-view-id="nodeViewId"
+    class="my-[1em] overflow-hidden rounded-lg border bg-default transition-colors duration-150 focus-within:border-primary"
     :class="selected ? 'border-primary' : 'border-default'"
+    @focusout="onFocusOut"
+    @focusin="node.attrs.editing && activate()"
   >
-    <!-- Edit area -->
-    <div v-if="editing" class="border-b border-default">
-      <div
-        class="flex items-center border-b border-default bg-elevated px-3 py-1"
-        contenteditable="false"
-      >
-        <span
-          class="text-[0.7rem] font-semibold uppercase tracking-[0.05em] text-muted"
-          >Mermaid</span
-        >
-      </div>
-      <textarea
-        ref="inputRef"
-        :value="node.attrs.code"
-        class="min-h-[4em] w-full resize-none overflow-hidden border-0 bg-default p-[0.75em] font-mono text-[0.875em] leading-6 text-default outline-none"
-        spellcheck="false"
-        placeholder="graph TD&#10;    A--&gt;B"
-        @input="onInput"
-        @blur="onBlur"
-        @keydown="onKeydown"
-      />
-    </div>
-    <!-- Preview -->
     <div
-      class="overflow-x-auto p-[1em] text-center"
-      :class="{
-        'flex min-h-[3em] cursor-pointer items-center justify-center hover:bg-elevated':
-          !editing,
-      }"
+      class="flex min-h-10 items-center justify-between gap-3 border-b border-default bg-elevated/60 px-3 py-1.5"
       contenteditable="false"
-      @click="!editing && startEdit()"
     >
-      <!-- Empty placeholder -->
-      <div
-        v-if="!node.attrs.code?.trim() && !editing"
-        class="text-muted text-sm"
+      <span class="text-xs font-medium text-toned">Mermaid</span>
+      <button
+        type="button"
+        class="rounded-md px-2.5 py-1 text-xs font-medium text-muted outline-none transition-colors hover:bg-accented hover:text-default focus-visible:ring-2 focus-visible:ring-primary"
+        @mousedown.stop
+        @click.stop="node.attrs.editing ? finishEdit() : startEdit()"
       >
-        点击输入 Mermaid 图表代码
-      </div>
-      <!-- Error -->
-      <div v-else-if="renderError" class="p-[0.5em] text-left">
-        <div class="text-error text-sm mb-2">{{ renderError }}</div>
-        <pre class="whitespace-pre-wrap break-all text-xs text-muted">{{
-          node.attrs.code
-        }}</pre>
-      </div>
-      <!-- SVG -->
-      <div v-else-if="svgHtml" v-html="svgHtml" />
-      <!-- Loading -->
-      <div v-else class="text-muted text-sm">…</div>
+        {{ node.attrs.editing ? "完成图表" : "编辑图表" }}
+      </button>
+    </div>
+
+    <div :class="node.attrs.editing && 'grid md:grid-cols-2'">
+      <section
+        v-if="node.attrs.editing"
+        class="min-w-0 border-b border-default bg-default md:border-b-0 md:border-e"
+      >
+        <div
+          class="px-3 pt-2.5 text-[0.7rem] font-medium text-muted"
+          contenteditable="false"
+        >
+          源码
+        </div>
+        <textarea
+          ref="inputRef"
+          data-editor-mermaid-source
+          :value="node.attrs.code"
+          aria-label="Mermaid 源码"
+          class="min-h-36 w-full resize-none overflow-hidden border-0 bg-transparent px-3 pb-3 pt-1.5 font-mono text-[0.875em] leading-6 text-default outline-none"
+          spellcheck="false"
+          placeholder="graph TD&#10;    A--&gt;B"
+          @input="onInput"
+          @keydown="onKeydown"
+        />
+      </section>
+
+      <section
+        data-editor-mermaid-preview
+        class="min-w-0 overflow-x-auto bg-muted/35 p-3 text-center transition-colors"
+        :class="
+          node.attrs.editing
+            ? 'min-h-36'
+            : 'grid min-h-28 cursor-text place-items-center hover:bg-muted/60'
+        "
+        contenteditable="false"
+        @mousedown.stop
+        @click.stop="!node.attrs.editing && startEdit()"
+      >
+        <div
+          v-if="node.attrs.editing"
+          class="mb-2 text-left text-[0.7rem] font-medium text-muted"
+        >
+          预览
+        </div>
+        <div
+          v-if="!node.attrs.code?.trim()"
+          class="grid min-h-20 place-items-center text-sm text-muted"
+        >
+          点击输入 Mermaid 图表代码
+        </div>
+        <template v-else-if="node.attrs.editing">
+          <div
+            data-editor-mermaid-live-output
+            :hidden="!previewMatchesCode()"
+            v-html="previewMatchesCode() ? node.attrs.previewSvg : ''"
+          />
+          <div
+            data-editor-mermaid-live-prompt
+            :hidden="previewMatchesCode()"
+            class="grid min-h-20 place-items-center gap-2 text-sm text-muted"
+          >
+            <span>源码已修改</span>
+            <button
+              type="button"
+              class="rounded-lg border border-default bg-default px-3 py-1.5 text-xs font-medium text-toned outline-none hover:bg-accented hover:text-default focus-visible:ring-2 focus-visible:ring-primary aria-busy:cursor-wait aria-busy:opacity-60"
+              @click.stop="renderDraftPreview"
+            >
+              更新预览
+            </button>
+          </div>
+        </template>
+        <div v-else-if="node.attrs.previewError" class="text-left">
+          <div class="mb-2 text-sm text-error">
+            {{ node.attrs.previewError }}
+          </div>
+          <pre
+            class="!m-0 whitespace-pre-wrap break-all !rounded-none !border-0 !bg-transparent !p-0 text-xs text-muted !shadow-none"
+            >{{ node.attrs.code }}</pre>
+        </div>
+        <div v-else-if="node.attrs.previewSvg" v-html="node.attrs.previewSvg" />
+        <div v-else class="grid min-h-20 place-items-center text-sm text-muted">
+          正在生成预览…
+        </div>
+      </section>
     </div>
   </NodeViewWrapper>
 </template>

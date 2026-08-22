@@ -62,3 +62,18 @@ test("shared article stylesheet covers rich markdown reading affordances", () =>
   assert.match(css, /highlight\.js\/styles\/stackoverflow-light\.css/);
   assert.match(css, /StackOverflow Dark/);
 });
+
+test("editor toolbar controls expose names and stay in one mobile row", () => {
+  const toolbar = read("app/composables/useEditorToolbar.ts");
+  const editor = read("app/components/ContentEditor.client.vue");
+  const tooltipLabels = [
+    ...toolbar.matchAll(/tooltip:\s*\{\s*text:\s*"([^"]+)"\s*\}/gu),
+  ].map((match) => match[1]);
+
+  assert.ok(tooltipLabels.length > 10);
+  for (const label of new Set(tooltipLabels)) {
+    assert.match(toolbar, new RegExp(`"aria-label": "${label}"`, "u"));
+  }
+  assert.match(editor, /flex-nowrap[^"\n]*overflow-x-auto/u);
+  assert.doesNotMatch(editor, /flex-wrap items-center/u);
+});

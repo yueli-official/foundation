@@ -14,6 +14,16 @@ const iconStub = defineComponent({
     () =>
       h("span", attrs),
 });
+const cardStub = defineComponent({
+  name: "UCard",
+  inheritAttrs: false,
+  props: { variant: String },
+  setup:
+    (_props, { attrs, slots }) =>
+    () =>
+      h("section", attrs, [slots.header?.(), slots.default?.()]),
+});
+const global = { components: { UIcon: iconStub, UCard: cardStub } };
 const messages: DashboardMessages = {
   metrics: "Key metrics",
   pending: { title: "Pending", description: "Needs attention" },
@@ -43,7 +53,7 @@ describe("dashboard Patterns", () => {
         health: "Healthy",
         quickActions: "Create item",
       },
-      global: { components: { UIcon: iconStub } },
+      global,
     });
     expect(wrapper.findAll("h2").map((heading) => heading.text())).toEqual([
       "Key metrics",
@@ -80,9 +90,43 @@ describe("dashboard Patterns", () => {
         recentDescription: "Open a collection",
       },
       slots: { recent: "Documents" },
-      global: { components: { UIcon: iconStub } },
+      global,
     });
     expect(wrapper.get("h2").text()).toBe("Continue editing");
     expect(wrapper.text()).toContain("Open a collection");
+  });
+
+  it("offers a quiet commercial surface without stacked panel rules", () => {
+    const wrapper = mount(DashboardLayout, {
+      props: {
+        title: "Dashboard",
+        description: "Decide next",
+        messages,
+        appearance: "commercial",
+      },
+      slots: {
+        pending: "Pending content",
+        recent: "Recent content",
+        health: "Healthy",
+        quickActions: "Create item",
+      },
+      global,
+    });
+
+    expect(
+      wrapper.get('[data-dashboard-appearance="commercial"]'),
+    ).toBeTruthy();
+    const cards = wrapper.findAllComponents({ name: "UCard" });
+    expect(cards).toHaveLength(4);
+    for (const card of cards) expect(card.props("variant")).toBe("soft");
+    const panels = wrapper.findAll("[data-dashboard-panel]");
+    expect(panels).toHaveLength(4);
+    for (const panel of panels) {
+      expect(panel.classes()).not.toContain("border");
+      expect(panel.classes()).not.toContain("shadow-sm");
+    }
+    for (const header of wrapper.findAll("[data-dashboard-panel-header]")) {
+      expect(header.classes()).not.toContain("border-b");
+    }
   });
 });

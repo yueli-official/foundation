@@ -1,4 +1,9 @@
-import { addImports, createResolver, defineNuxtModule } from "@nuxt/kit";
+import {
+  addImports,
+  addServerImports,
+  createResolver,
+  defineNuxtModule,
+} from "@nuxt/kit";
 
 export default defineNuxtModule({
   meta: {
@@ -10,6 +15,10 @@ export default defineNuxtModule({
     addImports({
       name: "useDiscoveryPage",
       from: resolver.resolve("./runtime/composable"),
+    });
+    addServerImports({
+      name: "serveDiscoveryArtifact",
+      from: resolver.resolve("./runtime/server/discovery"),
     });
   },
 });

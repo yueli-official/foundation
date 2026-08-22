@@ -42,8 +42,19 @@ export const foundationUiPreset = Object.freeze({
   }),
   toast: Object.freeze({
     slots: Object.freeze({
-      title: "line-clamp-1",
-      description: "line-clamp-2",
+      root: "yueli-toast w-full gap-3 rounded-xl border border-default bg-default p-3 shadow-[0_14px_36px_rgb(15_23_42/0.14)] ring-0",
+      wrapper: "min-w-0 flex-1",
+      title: "line-clamp-2 text-sm font-semibold leading-5 text-highlighted",
+      description: "mt-0.5 line-clamp-2 text-xs leading-5 text-muted",
+      icon: "mt-0.5 size-5 shrink-0",
+      actions: "shrink-0 items-start gap-1.5",
+      progress: "hidden",
+      close: "-mr-1 -mt-1 p-1 text-dimmed hover:text-default",
+    }),
+  }),
+  toaster: Object.freeze({
+    slots: Object.freeze({
+      viewport: "sm:w-[22rem]",
     }),
   }),
 });
@@ -71,12 +82,14 @@ export function createUiPreset(theme = DEFAULT_UI_THEME, options = {}) {
       },
       toast: {
         slots: {
+          ...foundationUiPreset.toast.slots,
           title: options.toastTitle ?? foundationUiPreset.toast.slots.title,
           description:
             options.toastDescription ??
             foundationUiPreset.toast.slots.description,
         },
       },
+      toaster: foundationUiPreset.toaster,
       icons: hasIconOverrides
         ? { ...FOUNDATION_TABLER_ICONS, ...options.icons }
         : FOUNDATION_TABLER_ICONS,

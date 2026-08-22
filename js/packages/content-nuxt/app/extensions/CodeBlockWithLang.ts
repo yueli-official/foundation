@@ -22,6 +22,7 @@ export const CodeBlockWithLang = Node.create({
     return {
       language: { default: null },
       code: { default: "" },
+      editing: { default: false, rendered: false },
     };
   },
 

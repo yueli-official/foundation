@@ -254,7 +254,7 @@ export function createCropperJsConfig(
       viewMode: 1,
       dragMode: "move",
       aspectRatio,
-      autoCropArea: 0.92,
+      autoCropArea: mode === "free" ? 1 : 0.92,
       background: false,
       center: true,
       checkCrossOrigin: true,

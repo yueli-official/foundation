@@ -14,7 +14,10 @@ import { asNodeViewComponent } from "./nodeViewComponent";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mathBlock: {
-      setMathBlock: (attrs?: { latex?: string }) => ReturnType;
+      setMathBlock: (attrs?: {
+        latex?: string;
+        editing?: boolean;
+      }) => ReturnType;
     };
   }
 }
@@ -29,6 +32,7 @@ export const MathBlock = Node.create({
   addAttributes() {
     return {
       latex: { default: "" },
+      editing: { default: false, rendered: false },
     };
   },
 
@@ -74,11 +78,14 @@ export const MathBlock = Node.create({
   addCommands() {
     return {
       setMathBlock:
-        (attrs?: { latex?: string }) =>
+        (attrs?: { latex?: string; editing?: boolean }) =>
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { latex: attrs?.latex ?? "" },
+            attrs: {
+              latex: attrs?.latex ?? "",
+              editing: attrs?.editing ?? false,
+            },
           });
         },
     };

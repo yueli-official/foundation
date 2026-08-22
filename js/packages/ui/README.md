@@ -122,6 +122,9 @@ Admin navigation is intentionally shallow. The public contract accepts flat
 navigation or one parent level with leaf children; deeper product structure
 belongs in page tabs, local navigation or breadcrumbs. A parent with children
 should normally use `type: "trigger"`, while each child owns the actual route.
+Product skins should use the typed `ui` prop (`sidebar*`, `search*`, and
+`navigation*` slots) with Tailwind utilities instead of global descendant
+selectors against Nuxt UI internals.
 Normalize the caller-computed active state before rendering, and derive command
 palette leaves from the same permission-filtered tree:
 

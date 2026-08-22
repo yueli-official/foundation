@@ -10,5 +10,6 @@ export type {
   AdminSearchGroup,
   AdminSearchItem,
   AdminShellMessages,
+  AdminShellUi,
 } from "./types";
 export type { AdminNavigationSearchOptions } from "./navigation";

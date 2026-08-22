@@ -37,9 +37,24 @@ describe("settings Patterns", () => {
     expect(layout.get("h1").text()).toBe("Workspace");
     expect(layout.find("header").exists()).toBe(false);
     expect(layout.get('nav[aria-label="Settings sections"]')).toBeTruthy();
+    const general = layout.get('nav[aria-label="Settings sections"] button');
+    await general.trigger("click");
+    expect(general.classes()).toContain("text-highlighted");
 
     await layout.setProps({ showHeader: false });
     expect(layout.find("h1").exists()).toBe(false);
+
+    await layout.setProps({ reserveSaveDock: false });
+    expect(layout.get("div").classes()).toContain("pb-8");
+    expect(layout.get("div").classes()).not.toContain("pb-28");
+
+    await layout.setProps({ navigationLayout: "sidebar" });
+    expect(
+      layout.find('[data-settings-navigation-layout="sidebar"]').exists(),
+    ).toBe(true);
+    expect(
+      layout.get('nav[aria-label="Settings sections"]').classes(),
+    ).toContain("bg-elevated");
 
     const section = mount(SettingSection, {
       props: { title: "Identity", description: "Public profile" },
@@ -47,6 +62,7 @@ describe("settings Patterns", () => {
     });
     expect(section.text()).toContain("Identity");
     expect(section.text()).toContain("Fields");
+    expect(section.get("section").classes()).toContain("bg-elevated");
   });
 
   it("exposes one live save region with caller-owned labels", async () => {

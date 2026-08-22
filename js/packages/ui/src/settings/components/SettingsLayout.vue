@@ -8,6 +8,8 @@ export interface SettingsSectionItem {
   readonly icon?: string;
 }
 
+export type SettingsNavigationLayout = "auto" | "sidebar" | "tabs";
+
 const props = withDefaults(
   defineProps<{
     title: string;
@@ -16,12 +18,16 @@ const props = withDefaults(
     showSectionNavigation?: boolean;
     showHeader?: boolean;
     navigationLabel: string;
+    navigationLayout?: SettingsNavigationLayout;
+    reserveSaveDock?: boolean;
   }>(),
   {
     description: "",
     sections: () => [],
     showSectionNavigation: true,
     showHeader: true,
+    navigationLayout: "auto",
+    reserveSaveDock: true,
   },
 );
 const activeSection = defineModel<string>("activeSection", { default: "" });
@@ -31,13 +37,18 @@ const sectionItems = computed(() =>
     value: section.key,
   })),
 );
+const useSidebarNavigation = computed(
+  () =>
+    props.navigationLayout === "sidebar" ||
+    (props.navigationLayout === "auto" && props.sections.length >= 5),
+);
 function selectSection(key: string) {
   activeSection.value = key;
 }
 </script>
 
 <template>
-  <div class="space-y-5 pb-28">
+  <div class="space-y-5" :class="reserveSaveDock ? 'pb-28' : 'pb-8'">
     <div
       v-if="showHeader"
       class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
@@ -57,10 +68,11 @@ function selectSection(key: string) {
     </div>
 
     <div
-      v-if="showSectionNavigation && sections.length >= 5"
-      class="grid min-w-0 gap-5 lg:grid-cols-[14rem_minmax(0,1fr)]"
+      v-if="showSectionNavigation && useSidebarNavigation"
+      class="grid min-w-0 gap-4 lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-6"
+      data-settings-navigation-layout="sidebar"
     >
-      <aside class="min-w-0 lg:sticky lg:top-20 lg:self-start">
+      <aside class="min-w-0 lg:sticky lg:top-5 lg:self-start">
         <USelect
           v-model="activeSection"
           :items="sectionItems"
@@ -69,7 +81,7 @@ function selectSection(key: string) {
           class="w-full lg:hidden"
         />
         <nav
-          class="hidden gap-1 rounded-lg border border-default bg-default p-2 lg:grid"
+          class="hidden gap-1 rounded-xl border border-muted bg-elevated p-2 shadow-sm dark:shadow-none lg:grid"
           :aria-label="navigationLabel"
         >
           <UButton
@@ -80,17 +92,23 @@ function selectSection(key: string) {
             :color="activeSection === section.key ? 'primary' : 'neutral'"
             :variant="activeSection === section.key ? 'soft' : 'ghost'"
             class="justify-start"
+            :class="
+              activeSection === section.key
+                ? 'font-semibold text-highlighted'
+                : ''
+            "
             @click="selectSection(section.key)"
           />
         </nav>
       </aside>
-      <div class="min-w-0 space-y-5"><slot name="notice" /><slot /></div>
+      <div class="min-w-0 space-y-4"><slot name="notice" /><slot /></div>
     </div>
 
     <template v-else>
       <div
         v-if="showSectionNavigation && sections.length > 1"
-        class="rounded-lg border border-default bg-default p-2"
+        class="rounded-xl border border-muted bg-elevated p-2 shadow-sm dark:shadow-none"
+        data-settings-navigation-layout="tabs"
       >
         <USelect
           v-model="activeSection"
@@ -107,6 +125,11 @@ function selectSection(key: string) {
             :label="section.label"
             :color="activeSection === section.key ? 'primary' : 'neutral'"
             :variant="activeSection === section.key ? 'soft' : 'ghost'"
+            :class="
+              activeSection === section.key
+                ? 'font-semibold text-highlighted'
+                : ''
+            "
             @click="selectSection(section.key)"
           />
         </nav>

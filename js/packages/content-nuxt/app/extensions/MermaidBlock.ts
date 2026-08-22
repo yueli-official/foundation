@@ -13,7 +13,10 @@ import { asNodeViewComponent } from "./nodeViewComponent";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mermaidBlock: {
-      setMermaidBlock: (attrs?: { code?: string }) => ReturnType;
+      setMermaidBlock: (attrs?: {
+        code?: string;
+        editing?: boolean;
+      }) => ReturnType;
     };
   }
 }
@@ -28,6 +31,10 @@ export const MermaidBlock = Node.create({
   addAttributes() {
     return {
       code: { default: "" },
+      editing: { default: false, rendered: false },
+      previewSvg: { default: "", rendered: false },
+      previewCode: { default: "", rendered: false },
+      previewError: { default: "", rendered: false },
     };
   },
 
@@ -73,11 +80,14 @@ export const MermaidBlock = Node.create({
   addCommands() {
     return {
       setMermaidBlock:
-        (attrs?: { code?: string }) =>
+        (attrs?: { code?: string; editing?: boolean }) =>
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { code: attrs?.code ?? "" },
+            attrs: {
+              code: attrs?.code ?? "",
+              editing: attrs?.editing ?? false,
+            },
           });
         },
     };

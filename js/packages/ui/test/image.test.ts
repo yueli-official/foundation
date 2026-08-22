@@ -119,7 +119,8 @@ describe("browser image optimization", () => {
   function runtime(blob: Blob) {
     const dispose = vi.fn();
     const draw = vi.fn();
-    const context = {} as CanvasRenderingContext2D;
+    const fillRect = vi.fn();
+    const context = { fillRect } as unknown as CanvasRenderingContext2D;
     const canvas = {
       getContext: vi.fn(() => context),
       toBlob: vi.fn((callback: BlobCallback) => callback(blob)),
@@ -131,7 +132,7 @@ describe("browser image optimization", () => {
         new File([nextBlob], name, options),
       now: () => 42,
     };
-    return { value, dispose, draw };
+    return { value, dispose, draw, fillRect, context };
   }
 
   it("encodes through an injected runtime and always disposes decoded resources", async () => {
@@ -166,5 +167,22 @@ describe("browser image optimization", () => {
     expect(result).toMatchObject({ optimized: false, reason: "larger-output" });
     expect(result.file).toBe(source);
     expect(adapter.dispose).toHaveBeenCalledOnce();
+  });
+
+  it("flattens transparent pixels onto white before JPEG encoding", async () => {
+    const adapter = runtime(new Blob([new Uint8Array(100)], { type: "image/jpeg" }));
+    const source = new File([new Uint8Array(200)], "cover.png", {
+      type: "image/png",
+    });
+    const result = await optimizeImage(
+      source,
+      { outputType: "image/jpeg", discardLarger: false },
+      adapter.value,
+    );
+
+    expect(result.file.type).toBe("image/jpeg");
+    expect(adapter.context.fillStyle).toBe("#fff");
+    expect(adapter.fillRect).toHaveBeenCalledWith(0, 0, 1920, 960);
+    expect(adapter.draw).toHaveBeenCalledOnce();
   });
 });

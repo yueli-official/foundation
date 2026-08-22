@@ -5,35 +5,52 @@ import type {
 } from "@nuxt/ui";
 import type { JSONContent, Editor } from "@tiptap/vue-3";
 import { mapEditorItems } from "@nuxt/ui/utils/editor";
+import { computed, ref } from "vue";
 
-// Toolbar / bubble / suggestion / drag-handle item config for the blog post
-// editor. Ported from donor (Chinese labels, no i18n); the plugin toolbar,
+// Toolbar / bubble / suggestion / drag-handle item config for the shared content
+// editor. Product-specific heading rules enter through explicit options; labels
+// remain Chinese until the package owns a message resolver. The plugin toolbar,
 // @mention menu, link popover and toolbar-overflow popover are dropped — the
-// blog editor uses a horizontally-scrollable fixed toolbar and the built-in
+// shared editor uses a horizontally-scrollable fixed toolbar and the built-in
 // link handler.
-export const useEditorToolbar = () => {
+export const useEditorToolbar = (options: {
+  allowHeadingOne?: boolean;
+} = {}) => {
   const selectedNode = ref<{ node: JSONContent; pos: number }>();
+  const allowHeadingOne = options.allowHeadingOne !== false;
 
   const toolbarItems = computed<EditorToolbarItem[][]>(() => [
     [
       {
         kind: "undo",
         icon: "i-tabler-arrow-back-up",
+        "aria-label": "撤销",
         tooltip: { text: "撤销" },
       },
       {
         kind: "redo",
         icon: "i-tabler-arrow-forward-up",
+        "aria-label": "重做",
         tooltip: { text: "重做" },
       },
     ],
     [
       {
         icon: "i-tabler-heading",
+        "aria-label": "标题",
         tooltip: { text: "标题" },
         content: { align: "start" },
         items: [
-          { kind: "heading", level: 1, icon: "i-tabler-h-1", label: "标题 1" },
+          ...(allowHeadingOne
+            ? [
+                {
+                  kind: "heading" as const,
+                  level: 1 as const,
+                  icon: "i-tabler-h-1",
+                  label: "标题 1",
+                },
+              ]
+            : []),
           { kind: "heading", level: 2, icon: "i-tabler-h-2", label: "标题 2" },
           { kind: "heading", level: 3, icon: "i-tabler-h-3", label: "标题 3" },
           { kind: "heading", level: 4, icon: "i-tabler-h-4", label: "标题 4" },
@@ -41,6 +58,7 @@ export const useEditorToolbar = () => {
       },
       {
         icon: "i-tabler-list",
+        "aria-label": "列表",
         tooltip: { text: "列表" },
         content: { align: "start" },
         items: [
@@ -55,11 +73,13 @@ export const useEditorToolbar = () => {
       {
         kind: "blockquote",
         icon: "i-tabler-blockquote",
+        "aria-label": "引用",
         tooltip: { text: "引用" },
       },
       {
         kind: "codeBlock",
         icon: "i-tabler-code-dots",
+        "aria-label": "代码块",
         tooltip: { text: "代码块" },
       },
     ],
@@ -68,45 +88,62 @@ export const useEditorToolbar = () => {
         kind: "mark",
         mark: "bold",
         icon: "i-tabler-bold",
+        "aria-label": "粗体",
         tooltip: { text: "粗体" },
       },
       {
         kind: "mark",
         mark: "italic",
         icon: "i-tabler-italic",
+        "aria-label": "斜体",
         tooltip: { text: "斜体" },
       },
       {
         kind: "mark",
         mark: "underline",
         icon: "i-tabler-underline",
+        "aria-label": "下划线",
         tooltip: { text: "下划线" },
       },
       {
         kind: "mark",
         mark: "strike",
         icon: "i-tabler-strikethrough",
+        "aria-label": "删除线",
         tooltip: { text: "删除线" },
       },
       {
         kind: "mark",
         mark: "code",
         icon: "i-tabler-code",
+        "aria-label": "行内代码",
         tooltip: { text: "行内代码" },
       },
     ],
     [
-      { kind: "link", icon: "i-tabler-link", tooltip: { text: "链接" } },
-      { kind: "image", icon: "i-tabler-photo", tooltip: { text: "图片" } },
+      {
+        kind: "link",
+        icon: "i-tabler-link",
+        "aria-label": "链接",
+        tooltip: { text: "链接" },
+      },
+      {
+        kind: "image",
+        icon: "i-tabler-photo",
+        "aria-label": "图片",
+        tooltip: { text: "图片" },
+      },
       {
         kind: "horizontalRule",
         icon: "i-tabler-separator",
+        "aria-label": "分隔线",
         tooltip: { text: "分隔线" },
       },
     ],
     [
       {
         icon: "i-tabler-alert-circle",
+        "aria-label": "告示块",
         tooltip: { text: "告示块" },
         content: { align: "start" },
         items: [
@@ -127,6 +164,7 @@ export const useEditorToolbar = () => {
       },
       {
         icon: "i-tabler-math",
+        "aria-label": "公式",
         tooltip: { text: "公式" },
         content: { align: "start" },
         items: [
@@ -141,12 +179,14 @@ export const useEditorToolbar = () => {
       {
         kind: "mermaid-block",
         icon: "i-tabler-chart-dots-3",
+        "aria-label": "Mermaid 图表",
         tooltip: { text: "Mermaid 图表" },
       },
     ],
     [
       {
         icon: "i-tabler-align-justified",
+        "aria-label": "对齐",
         tooltip: { text: "对齐" },
         content: { align: "end" },
         items: [
@@ -181,6 +221,7 @@ export const useEditorToolbar = () => {
       {
         kind: "clearFormatting",
         icon: "i-tabler-clear-formatting",
+        "aria-label": "清除格式",
         tooltip: { text: "清除格式" },
       },
     ],
@@ -198,7 +239,16 @@ export const useEditorToolbar = () => {
         items: [
           { type: "label", label: "转换为" },
           { kind: "paragraph", label: "正文", icon: "i-tabler-text-size" },
-          { kind: "heading", level: 1, icon: "i-tabler-h-1", label: "标题 1" },
+          ...(allowHeadingOne
+            ? [
+                {
+                  kind: "heading" as const,
+                  level: 1 as const,
+                  icon: "i-tabler-h-1",
+                  label: "标题 1",
+                },
+              ]
+            : []),
           { kind: "heading", level: 2, icon: "i-tabler-h-2", label: "标题 2" },
           { kind: "heading", level: 3, icon: "i-tabler-h-3", label: "标题 3" },
           { kind: "bulletList", label: "无序列表", icon: "i-tabler-list" },
@@ -213,15 +263,44 @@ export const useEditorToolbar = () => {
       },
     ],
     [
-      { kind: "mark", mark: "bold", icon: "i-tabler-bold" },
-      { kind: "mark", mark: "italic", icon: "i-tabler-italic" },
-      { kind: "mark", mark: "underline", icon: "i-tabler-underline" },
-      { kind: "mark", mark: "strike", icon: "i-tabler-strikethrough" },
-      { kind: "mark", mark: "code", icon: "i-tabler-code" },
+      {
+        kind: "mark",
+        mark: "bold",
+        icon: "i-tabler-bold",
+        "aria-label": "粗体",
+      },
+      {
+        kind: "mark",
+        mark: "italic",
+        icon: "i-tabler-italic",
+        "aria-label": "斜体",
+      },
+      {
+        kind: "mark",
+        mark: "underline",
+        icon: "i-tabler-underline",
+        "aria-label": "下划线",
+      },
+      {
+        kind: "mark",
+        mark: "strike",
+        icon: "i-tabler-strikethrough",
+        "aria-label": "删除线",
+      },
+      {
+        kind: "mark",
+        mark: "code",
+        icon: "i-tabler-code",
+        "aria-label": "行内代码",
+      },
     ],
     [
-      { kind: "link", icon: "i-tabler-link" },
-      { kind: "clearFormatting", icon: "i-tabler-clear-formatting" },
+      { kind: "link", icon: "i-tabler-link", "aria-label": "链接" },
+      {
+        kind: "clearFormatting",
+        icon: "i-tabler-clear-formatting",
+        "aria-label": "清除格式",
+      },
     ],
   ]);
 
@@ -229,7 +308,16 @@ export const useEditorToolbar = () => {
     [
       { type: "label", label: "样式" },
       { kind: "paragraph", label: "正文", icon: "i-tabler-text-size" },
-      { kind: "heading", level: 1, label: "标题 1", icon: "i-tabler-h-1" },
+      ...(allowHeadingOne
+        ? [
+            {
+              kind: "heading" as const,
+              level: 1 as const,
+              label: "标题 1",
+              icon: "i-tabler-h-1",
+            },
+          ]
+        : []),
       { kind: "heading", level: 2, label: "标题 2", icon: "i-tabler-h-2" },
       { kind: "heading", level: 3, label: "标题 3", icon: "i-tabler-h-3" },
       { kind: "heading", level: 4, label: "标题 4", icon: "i-tabler-h-4" },
@@ -263,17 +351,22 @@ export const useEditorToolbar = () => {
       {
         kind: "download-image",
         icon: "i-tabler-download",
+        "aria-label": "下载图片",
         tooltip: { text: "下载图片" },
       },
       {
         kind: "remove-image",
         icon: "i-tabler-trash",
+        "aria-label": "删除图片",
         tooltip: { text: "删除图片" },
       },
     ],
   ]);
 
-  const dragHandleItems = (editor: Editor): DropdownMenuItem[][] => {
+  const dragHandleItems = (editorValue: unknown): DropdownMenuItem[][] => {
+    // Consumers may type-check this source layer with another compatible
+    // Tiptap patch. Keep the nominal class cast inside the shared boundary.
+    const editor = editorValue as Editor;
     if (!selectedNode.value?.node?.type) return [];
     return mapEditorItems(
       editor,
@@ -285,12 +378,16 @@ export const useEditorToolbar = () => {
             icon: "i-tabler-transform",
             children: [
               { kind: "paragraph", label: "正文", icon: "i-tabler-text-size" },
-              {
-                kind: "heading",
-                level: 1,
-                label: "标题 1",
-                icon: "i-tabler-h-1",
-              },
+              ...(allowHeadingOne
+                ? [
+                    {
+                      kind: "heading" as const,
+                      level: 1 as const,
+                      label: "标题 1",
+                      icon: "i-tabler-h-1",
+                    },
+                  ]
+                : []),
               {
                 kind: "heading",
                 level: 2,
