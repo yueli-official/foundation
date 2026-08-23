@@ -25,8 +25,8 @@ their data model or rendering primitive.
 ## Required anatomy
 
 1. The data surface and its controls share one visual container.
-2. Default mode has one primary toolbar. From the standard Tailwind `@3xl` container size (48rem /
-   768px), search, one filter trigger and a compact utility group share one row.
+2. Default mode has one primary toolbar. From the standard Tailwind `@xl` container size (36rem /
+   576px), search, one filter trigger and a compact utility group share one row.
 3. At compact component widths search owns the first row. The same filter trigger and utilities own
    a deterministic second row. Filter fields live in a popover and never expand the toolbar or wrap
    into accidental rows.

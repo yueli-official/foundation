@@ -91,8 +91,14 @@ describe("CollectionTableToolbar", () => {
 
     const defaultToolbar = wrapper.get("[data-collection-table-default]");
     expect(defaultToolbar.classes()).toContain(
-      "@3xl:grid-cols-[minmax(14rem,1fr)_auto]",
+      "@xl:grid-cols-[minmax(14rem,1fr)_auto]",
     );
+    expect(wrapper.get("[data-collection-table-search]").classes()).toContain(
+      "@xl:col-span-1",
+    );
+    expect(
+      wrapper.get("[data-collection-table-controls]").classes(),
+    ).toContain("@xl:col-span-1");
     expect(defaultToolbar.classes().join(" ")).not.toContain("64rem");
     expect(wrapper.html()).not.toContain("[&>*]:!w-full");
   });

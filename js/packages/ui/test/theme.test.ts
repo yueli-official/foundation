@@ -62,6 +62,8 @@ describe("public theme contract", () => {
     expect(css).toContain(":focus-visible");
     expect(css).toContain(".dark");
     expect(css).toContain(".yueli-interactive");
+    expect(css).toContain("--ui-warning: var(--ui-color-warning-800)");
+    expect(css).toContain("--ui-warning: var(--ui-color-warning-400)");
     expect(css).not.toContain("--platform-");
   });
 });

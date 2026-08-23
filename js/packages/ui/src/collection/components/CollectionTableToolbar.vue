@@ -45,13 +45,13 @@ function submitSearch() {
     <div
       v-else
       data-collection-table-default
-      class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4 @3xl:grid-cols-[minmax(14rem,1fr)_auto]"
+    class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4 @xl:grid-cols-[minmax(14rem,1fr)_auto]"
     >
       <form
         data-collection-table-search
         :class="[
           props.searchAction ? 'grid grid-cols-[minmax(0,1fr)_auto]' : 'block',
-          'col-span-2 min-w-0 gap-2 @3xl:col-span-1',
+          'col-span-2 min-w-0 gap-2 @xl:col-span-1',
         ]"
         role="search"
         @submit.prevent="submitSearch"
@@ -77,7 +77,7 @@ function submitSearch() {
       <div
         v-if="$slots.filters || $slots.utilities"
         data-collection-table-controls
-        class="col-span-2 flex min-w-0 items-center justify-between gap-2 @3xl:col-span-1 @3xl:justify-end"
+        class="col-span-2 flex min-w-0 items-center justify-between gap-2 @xl:col-span-1 @xl:justify-end"
       >
         <UPopover v-if="$slots.filters" v-model:open="filtersOpen">
           <UButton

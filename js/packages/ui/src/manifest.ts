@@ -247,7 +247,7 @@ export const publicUiManifest = [
     entrypoint: "@yueli/ui/admin",
     owner: "foundation",
     responsibility:
-      "Compose Nuxt UI dashboard group, sidebar, bounded two-level navigation/search projection, page panel, navbar and toolbar with stable responsive ownership and caller-owned routes/content.",
+      "Own the reusable admin-console shell, sidebar search/navigation, route bar, semantic canvas, page headers, tabbed surfaces and collection-toolbar anatomy with caller-owned brand content, routes and domain data.",
     nonResponsibilities: [
       "business dashboard regions",
       "application routes",
@@ -263,7 +263,12 @@ export const publicUiManifest = [
         "test/admin-template.test.ts",
         "scripts/test-pack.mjs",
       ],
-      consumers: ["js/apps/ui-lab", "js/conformance/ui"],
+      consumers: [
+        "js/apps/ui-lab",
+        "js/conformance/ui",
+        "yueli-official/blog/web",
+        "yueli-official/identity/account",
+      ],
       accessibility: ["test/admin-template.test.ts"],
     },
   },

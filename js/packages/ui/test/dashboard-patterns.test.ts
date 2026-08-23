@@ -6,6 +6,7 @@ import DashboardLayout, {
   type DashboardMessages,
 } from "../src/dashboard/components/DashboardLayout.vue";
 import PageHeader from "../src/dashboard/components/PageHeader.vue";
+import TabbedSurface from "../src/dashboard/components/TabbedSurface.vue";
 
 const iconStub = defineComponent({
   inheritAttrs: false,
@@ -24,6 +25,19 @@ const cardStub = defineComponent({
       h("section", attrs, [slots.header?.(), slots.default?.()]),
 });
 const global = { components: { UIcon: iconStub, UCard: cardStub } };
+const tabsStub = defineComponent({
+  name: "UTabs",
+  inheritAttrs: false,
+  props: { items: Array, modelValue: String },
+  setup: (props, { attrs }) => () =>
+    h(
+      "div",
+      attrs,
+      (props.items as Array<{ label: string; value: string }>).map((item) =>
+        h("button", { "data-value": item.value }, item.label),
+      ),
+    ),
+});
 const messages: DashboardMessages = {
   metrics: "Key metrics",
   pending: { title: "Pending", description: "Needs attention" },
@@ -35,12 +49,44 @@ const messages: DashboardMessages = {
 describe("dashboard Patterns", () => {
   it("renders caller-owned page header copy and actions", () => {
     const wrapper = mount(PageHeader, {
-      props: { title: "Workspace", description: "Today at a glance" },
+      props: {
+        title: "Workspace",
+        icon: "i-tabler-layout-dashboard",
+        description: "Today at a glance",
+      },
       slots: { actions: "Create" },
+      global,
     });
     expect(wrapper.get("h1").text()).toBe("Workspace");
     expect(wrapper.text()).toContain("Today at a glance");
     expect(wrapper.text()).toContain("Create");
+    expect(
+      wrapper.find('[name="i-tabler-layout-dashboard"]').exists(),
+    ).toBe(true);
+    expect(wrapper.get("[data-manage-page-actions]").text()).toBe("Create");
+  });
+
+  it("keeps same-page workflows inside one shared tabbed surface", () => {
+    const wrapper = mount(TabbedSurface, {
+      props: {
+        modelValue: "library",
+        navigationLabel: "Asset sections",
+        items: [
+          { label: "Library", value: "library" },
+          { label: "Storage", value: "storage" },
+        ],
+      },
+      slots: { default: "Active workflow" },
+      global: { components: { UTabs: tabsStub } },
+    });
+    expect(wrapper.classes()).toContain("yueli-card");
+    expect(wrapper.get("nav").attributes("aria-label")).toBe("Asset sections");
+    expect(wrapper.get("nav").classes()).toContain("overflow-y-hidden");
+    expect(wrapper.findAll("button").map((button) => button.text())).toEqual([
+      "Library",
+      "Storage",
+    ]);
+    expect(wrapper.text()).toContain("Active workflow");
   });
 
   it("keeps the complete dashboard decision order and labelled regions", () => {

@@ -32,7 +32,7 @@ function toggleControls() {
     v-bind="$attrs"
     :aria-label="labelledby ? undefined : label"
     :aria-labelledby="labelledby"
-    class="@container/collection overflow-clip rounded-xl border border-default bg-default"
+    class="@container/collection yueli-card overflow-clip"
   >
     <slot v-if="$slots.toolbar" name="toolbar" />
     <template v-else>

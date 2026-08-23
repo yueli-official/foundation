@@ -19,9 +19,9 @@ Current public surface:
 - `@yueli/ui/image` — bounded raster optimization/crop geometry, output naming and caller-translatable dimension validation.
 - `@yueli/ui/image/browser` — disposable browser decode/canvas Adapter with explicit optimization/fallback results.
 - `@yueli/ui/account-menu/pattern` — provider-neutral account/appearance grouping, identity fallback and inline/sidebar/collapsed menu trigger.
-- `@yueli/ui/admin` — Nuxt UI Dashboard shell/page template with caller-owned navigation, search, content and translation.
+- `@yueli/ui/admin` — complete AdminConsoleLayout, lower-level shell/page primitives, shared PageHeader and TabbedSurface with caller-owned brand content, navigation, data and translation.
 - `@yueli/ui/remote-select` — debounced, abortable and cached remote entity search built on Nuxt UI SelectMenu.
-- `@yueli/ui/dashboard/pattern` — deprecated PageHeader and region-driven DashboardLayout; migrate to `@yueli/ui/admin`.
+- `@yueli/ui/dashboard/pattern` — legacy compatibility entry for PageHeader, TabbedSurface and region-driven DashboardLayout; new admin consumers use `@yueli/ui/admin`.
 - `@yueli/ui/feedback` — latest-wins action lifecycle, minimum loading visibility and transport-neutral notice normalization.
 - `@yueli/ui/feedback/pattern` — explicit `ActionFeedbackButton` import.
 - `@yueli/ui/navigation/back-to-top` — explicit accessible BackToTop Pattern import.
@@ -96,29 +96,29 @@ const result = await optimizeImage(file, { maxSide: 1920 });
 await upload(result.file);
 ```
 
-The module auto-imports public Patterns with the `Y` prefix by default. It also auto-imports `useActionFeedback` and `useMinimumLoading`; consumers that prefer explicit imports can use `@yueli/ui/feedback`. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. AdminShell/AdminPage follow Nuxt UI's official dashboard ownership: the layout owns group/sidebar/search while each page owns its panel/navbar/toolbar/body. AccountMenu owns identity fallback, action grouping, optional appearance selection, sidebar trigger anatomy and the async logout command boundary without reading an auth provider or persisting color-mode state. Visible copy and appearance state remain caller-owned: pass translated props or messages and a preference Adapter; Foundation ships no locale catalogs.
+The module auto-imports public Patterns with the `Y` prefix by default. It also auto-imports `useActionFeedback` and `useMinimumLoading`; consumers that prefer explicit imports can use `@yueli/ui/feedback`. BackToTop owns its scroll threshold, focus return, reduced-motion behavior and dock/overlay avoidance. Action feedback owns latest-wins async state and reset timing. AdminConsoleLayout follows Nuxt UI's official dashboard ownership and hides the fixed sidebar, search, active navigation, route bar, canvas, mobile drawer and back-to-top anatomy behind one small Interface. AccountMenu owns identity fallback, action grouping, optional appearance selection, sidebar trigger anatomy and the async logout command boundary without reading an auth provider or persisting color-mode state. Visible copy and appearance state remain caller-owned: pass translated props or messages and a preference Adapter; Foundation ships no locale catalogs.
 
 Use the admin template with Nuxt UI primitives and caller-owned domain content:
 
 ```vue
-<YAdminShell
-  v-model:open="sidebarOpen"
-  storage-key="content-admin"
+<YAdminConsoleLayout
+  brand-label="Content"
+  brand-icon="i-tabler-file-text"
+  brand-to="/"
   :navigation="navigation"
   :search-groups="searchGroups"
   :messages="shellMessages"
+  storage-key="content-admin"
+  main-id="content-main"
 >
-  <template #brand>Neutral product</template>
-
-  <YAdminPage id="documents" title="Documents">
-    <template #actions><UButton label="Create" /></template>
-    <template #toolbar-left><DocumentFilters /></template>
-    <DocumentCollection />
-  </YAdminPage>
-</YAdminShell>
+  <template #account="{ collapsed }">
+    <ProductAccountMenu :collapsed />
+  </template>
+  <DocumentManagePage />
+</YAdminConsoleLayout>
 ```
 
-`YAdminShell` is SSR-safe and is the server-rendered application shell. Do not
+`YAdminConsoleLayout` is SSR-safe and is the server-rendered application shell. Do not
 wrap the whole component in `ClientOnly` or replace it with a hydration-only
 "opening console" screen. Keep browser-only behavior at the smallest child
 boundary. Consumer acceptance should inspect the navigation response HTML for
@@ -129,9 +129,10 @@ Admin navigation is intentionally shallow. The public contract accepts flat
 navigation or one parent level with leaf children; deeper product structure
 belongs in page tabs, local navigation or breadcrumbs. A parent with children
 should normally use `type: "trigger"`, while each child owns the actual route.
-Product skins should use the typed `ui` prop (`sidebar*`, `search*`, and
-`navigation*` slots) with Tailwind utilities instead of global descendant
-selectors against Nuxt UI internals.
+Product skins set semantic `--yueli-admin-shell`, `--yueli-admin-canvas` and
+`--yueli-admin-search` tokens; the shared module owns geometry, states and
+responsive behavior. `YAdminShell` and its typed `ui` prop remain a lower-level
+seam only for a genuinely different console anatomy.
 Normalize the caller-computed active state before rendering, and derive command
 palette leaves from the same permission-filtered tree:
 
@@ -230,7 +231,7 @@ const save = useActionFeedback();
 </template>
 ```
 
-`CollectionPanel` is the default complete Pattern for card, grid and lightweight row collections: it owns responsive search, a single filter Popover, configured direction utilities, page and result selection, loading/error/empty states, row/grid containers and pagination. At the standard `@3xl` container size (768px), search, the filter trigger and utilities share one row; compact containers put search first and the controls on a deterministic second row. Selection replaces that default toolbar in the same position instead of appending a sticky layer, while the column header remains visible. Callers may pass an empty `searchAction` to use live search, provide an `active-filters` slot for individually removable chips, and use a control `searchPlaceholder` to opt into Nuxt UI's searchable `USelectMenu`. Callers still own translated `CollectionPanelMessages`, query semantics, business HTTP and mutations. `isSelectable` on the Workflow and `isItemSelectable` on the Pattern express rows such as the current administrator that must remain visible but cannot enter batch selection. Because page-local eligibility cannot describe unloaded rows, all-results selection is intentionally unavailable when that predicate is configured. For strict data-table alignment, sorting, visibility and row selection, compose the public Collection Workflow with Nuxt UI `UTable` directly; the Foundation does not reimplement or shallow-wrap its column model. `CollectionTableToolbar` supplies the same toolbar anatomy around that direct `UTable`. Filter fields stay flat unless a real semantic distinction justifies sections under the [Collection toolbar standard](src/collection/toolbar-standard.md); strict table sorting remains in column headers. `CollectionFrame` remains the lower-level anatomy seam. Lightweight or domain-shaped screens may compose `CollectionToolbar`, `CollectionPagination`, `CollectionDock`, `CollectionFooter`, `CollectionLifecycleTabs`, `CollectionViewToggle`, `CollectionActiveFilters`, `CollectionPageSelection`, `CollectionRowShell` and `CollectionSortDirectionButton`.
+`CollectionPanel` is the default complete Pattern for card, grid and lightweight row collections: it owns responsive search, a single filter Popover, configured direction utilities, page and result selection, loading/error/empty states, row/grid containers and pagination. At the standard `@xl` container size (576px), search, the filter trigger and utilities share one row; compact containers put search first and the controls on a deterministic second row. Selection replaces that default toolbar in the same position instead of appending a sticky layer, while the column header remains visible. Callers may pass an empty `searchAction` to use live search, provide an `active-filters` slot for individually removable chips, and use a control `searchPlaceholder` to opt into Nuxt UI's searchable `USelectMenu`. Callers still own translated `CollectionPanelMessages`, query semantics, business HTTP and mutations. `isSelectable` on the Workflow and `isItemSelectable` on the Pattern express rows such as the current administrator that must remain visible but cannot enter batch selection. Because page-local eligibility cannot describe unloaded rows, all-results selection is intentionally unavailable when that predicate is configured. For strict data-table alignment, sorting, visibility and row selection, compose the public Collection Workflow with Nuxt UI `UTable` directly; the Foundation does not reimplement or shallow-wrap its column model. `CollectionTableToolbar` supplies the same toolbar anatomy around that direct `UTable`. Filter fields stay flat unless a real semantic distinction justifies sections under the [Collection toolbar standard](src/collection/toolbar-standard.md); strict table sorting remains in column headers. `CollectionFrame` remains the lower-level anatomy seam. Lightweight or domain-shaped screens may compose `CollectionToolbar`, `CollectionPagination`, `CollectionDock`, `CollectionFooter`, `CollectionLifecycleTabs`, `CollectionViewToggle`, `CollectionActiveFilters`, `CollectionPageSelection`, `CollectionRowShell` and `CollectionSortDirectionButton`.
 
 Nuxt UI owns primitives. Collection patterns compose Nuxt UI controls only where the package adds stable responsive anatomy, query/selection semantics or accessibility behavior; it does not re-export generic buttons, cards or tables. DashboardLayout is a workflow-level composition of caller-owned regions, not a generic card/dashboard primitive.
 

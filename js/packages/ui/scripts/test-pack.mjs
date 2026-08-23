@@ -76,6 +76,7 @@ try {
     "package/package.json",
     "package/src/account-menu/components/AccountMenu.vue",
     "package/src/account-menu/pattern.ts",
+    "package/src/admin/components/AdminConsoleLayout.vue",
     "package/src/admin/components/AdminPage.vue",
     "package/src/admin/components/AdminShell.vue",
     "package/src/admin/index.ts",
@@ -104,6 +105,7 @@ try {
     "package/src/collection/workflow.ts",
     "package/src/dashboard/components/DashboardLayout.vue",
     "package/src/dashboard/components/PageHeader.vue",
+    "package/src/dashboard/components/TabbedSurface.vue",
     "package/src/dashboard/pattern.ts",
     "package/src/feedback/action.ts",
     "package/src/feedback/components/ActionFeedbackButton.vue",
@@ -289,11 +291,12 @@ void optimizeImageFile;
 </script>
 
 <template>
-  <YAdminShell :navigation="navigation" :search-groups="searchGroups" :messages="shellMessages" main-id="main-content">
-    <template #brand>Packed admin</template>
-    <YAdminPage id="packed" title="Dashboard" main-id="main-content">
+  <YAdminConsoleLayout brand-label="Packed admin" brand-icon="i-tabler-layout-dashboard" brand-to="/" :navigation="navigation" :search-groups="searchGroups" :messages="shellMessages" storage-key="packed-admin" main-id="main-content" back-to-top-label="Top">
+    <template #account="{ collapsed }">
+      <YAccountMenu name="Packed user" :messages="accountMessages" :appearance="accountAppearance" :trigger-mode="collapsed ? 'collapsed' : 'sidebar'" :logout="() => undefined" />
+    </template>
+    <YAdminPage id="packed" title="Dashboard" main-id="packed-content">
     <YRemoteSelect v-model="owner" :load="loadOwners" :messages="remoteMessages" />
-    <YAccountMenu name="Packed user" :messages="accountMessages" :appearance="accountAppearance" trigger-mode="sidebar" :logout="() => undefined" />
     <YDashboardLayout title="Dashboard" :messages="dashboardMessages">
       <template #recent><span>Recent work</span></template>
     </YDashboardLayout>
@@ -316,7 +319,7 @@ void optimizeImageFile;
     <YBackToTop label="Back to top" :threshold="0" />
     <YSettingSection title="Settings"><input v-model="settingsForm.title" /></YSettingSection>
     </YAdminPage>
-  </YAdminShell>
+  </YAdminConsoleLayout>
 </template>
 `,
   );
@@ -340,7 +343,7 @@ void optimizeImageFile;
   }
   if (
     !generatedCss.some((source) =>
-      source.includes("@3xl\\:grid-cols-\\[minmax\\(14rem\\,1fr\\)_auto\\]"),
+      source.includes("@xl\\:grid-cols-\\[minmax\\(14rem\\,1fr\\)_auto\\]"),
     )
   ) {
     throw new Error(

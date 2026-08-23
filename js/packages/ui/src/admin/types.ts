@@ -18,6 +18,7 @@ export interface AdminShellMessages {
   readonly skipToContent: string;
   readonly search: string;
   readonly searchPlaceholder: string;
+  readonly currentLocation?: string;
 }
 
 export interface AdminShellUi {

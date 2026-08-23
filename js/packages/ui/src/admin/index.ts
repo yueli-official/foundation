@@ -1,5 +1,8 @@
 export { default as AdminPage } from "./components/AdminPage.vue";
+export { default as AdminConsoleLayout } from "./components/AdminConsoleLayout.vue";
 export { default as AdminShell } from "./components/AdminShell.vue";
+export { default as PageHeader } from "../dashboard/components/PageHeader.vue";
+export { default as TabbedSurface } from "../dashboard/components/TabbedSurface.vue";
 export {
   createAdminNavigationSearchItems,
   normalizeAdminNavigation,

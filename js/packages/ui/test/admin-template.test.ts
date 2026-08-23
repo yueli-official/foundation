@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import { defineComponent, h } from "vue";
 import { describe, expect, it } from "vitest";
 import AdminPage from "../src/admin/components/AdminPage.vue";
+import AdminConsoleLayout from "../src/admin/components/AdminConsoleLayout.vue";
 import AdminShell from "../src/admin/components/AdminShell.vue";
 
 const passthrough = (name: string, tag = "div") =>
@@ -18,7 +19,11 @@ const passthrough = (name: string, tag = "div") =>
 const dashboardSidebar = defineComponent({
   name: "UDashboardSidebar",
   inheritAttrs: false,
-  props: { ui: { type: Object, default: () => ({}) } },
+  props: {
+    ui: { type: Object, default: () => ({}) },
+    resizable: Boolean,
+    collapsible: Boolean,
+  },
   setup:
     (_props, { attrs, slots }) =>
     () =>
@@ -78,6 +83,7 @@ const dashboardNavbar = defineComponent({
     () =>
       h("header", { "data-navbar": "" }, [
         slots.leading?.(),
+        slots.left?.(),
         slots.title?.() ?? h("h1", props.title),
         slots.trailing?.(),
         slots.right?.(),
@@ -109,10 +115,63 @@ const global = {
       "UDashboardSidebarCollapse",
       "button",
     ),
+    UIcon: passthrough("UIcon", "span"),
+    NuxtLink: defineComponent({
+      name: "NuxtLink",
+      inheritAttrs: false,
+      props: { to: String },
+      setup: (props, { attrs, slots }) => () =>
+        h("a", { ...attrs, href: props.to }, slots.default?.()),
+    }),
   },
+  stubs: { BackToTop: true },
 };
 
 describe("admin template", () => {
+  it("owns the complete reusable console shell and route canvas", () => {
+    const wrapper = mount(AdminConsoleLayout, {
+      props: {
+        brandLabel: "Docs",
+        brandIcon: "i-tabler-book",
+        brandTo: "/",
+        navigation: [
+          { label: "Overview", to: "/admin", active: true },
+          { label: "Members", to: "/admin/members" },
+        ],
+        searchGroups: [{ id: "pages", label: "Pages", items: [] }],
+        messages: {
+          skipToContent: "Skip",
+          search: "Search console",
+          searchPlaceholder: "Search pages",
+        },
+        storageKey: "docs-admin",
+        mainId: "docs-main",
+        backToTopLabel: "Top",
+      },
+      slots: { account: "Account", default: "Workspace" },
+      global,
+    });
+
+    expect(wrapper.get("[data-admin-console]")).toBeTruthy();
+    expect(wrapper.get("[data-admin-console-brand-icon]")).toBeTruthy();
+    expect(wrapper.get("[data-admin-console-breadcrumb]").text()).toContain(
+      "Docs",
+    );
+    expect(wrapper.get("[data-admin-console-breadcrumb]").text()).toContain(
+      "Overview",
+    );
+    expect(wrapper.get("[data-admin-console-canvas]").text()).toBe(
+      "Workspace",
+    );
+    expect(wrapper.text()).toContain("Account");
+    const sidebar = wrapper.findComponent({ name: "UDashboardSidebar" });
+    expect(sidebar.props("resizable")).toBe(false);
+    expect(sidebar.props("collapsible")).toBe(false);
+    expect(sidebar.attributes("class")).toContain(
+      "yueli-admin-shell-surface",
+    );
+  });
+
   it("owns the dashboard shell, search and navigation wiring", () => {
     const wrapper = mount(AdminShell, {
       props: {
