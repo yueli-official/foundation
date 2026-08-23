@@ -18,6 +18,7 @@ import (
 type MemoryOptions struct {
 	RootScopeID       ScopeID
 	ProtectedSubjects []SubjectRef
+	AllowUnclaimed    bool
 	Clock             func() time.Time
 	TokenGenerator    func() (string, error)
 	Constraints       map[ConstraintKey]ConstraintEvaluator
@@ -61,6 +62,7 @@ var (
 	_ RoleReader            = (*Memory)(nil)
 	_ GrantManager          = (*Memory)(nil)
 	_ GrantReader           = (*Memory)(nil)
+	_ AdministratorClaimer  = (*Memory)(nil)
 	_ GroupManager          = (*Memory)(nil)
 	_ GroupReader           = (*Memory)(nil)
 	_ WorkflowManager       = (*Memory)(nil)
@@ -80,9 +82,10 @@ type memoryPolicy struct {
 	touchedScopes  map[ScopeID]struct{}
 }
 
-// NewMemory creates a reference Adapter with one root Scope and at least one
-// protected administrator. Bootstrap is explicit and never reads Identity
-// roles or process configuration.
+// NewMemory creates a reference Adapter with one root Scope. A protected
+// administrator remains required unless the consumer explicitly opts into the
+// one-time unclaimed-instance flow. Bootstrap never reads Identity roles or
+// process configuration.
 func NewMemory(catalog *Catalog, options MemoryOptions) (*Memory, error) {
 	if catalog == nil {
 		return nil, &Error{Kind: ErrorInvalidInput, Field: "catalog", Message: "is required"}
@@ -90,7 +93,7 @@ func NewMemory(catalog *Catalog, options MemoryOptions) (*Memory, error) {
 	if strings.TrimSpace(string(options.RootScopeID)) == "" {
 		return nil, &Error{Kind: ErrorInvalidInput, Field: "root_scope_id", Message: "is required"}
 	}
-	if len(options.ProtectedSubjects) == 0 {
+	if len(options.ProtectedSubjects) == 0 && !options.AllowUnclaimed {
 		return nil, &Error{Kind: ErrorInvariant, Field: "protected_subjects", Message: "at least one protected administrator is required"}
 	}
 	clock := options.Clock
@@ -176,6 +179,67 @@ func NewMemory(catalog *Catalog, options MemoryOptions) (*Memory, error) {
 		module.appendAuditLocked(context.Background(), AuditBootstrapProtected, SubjectRef{}, subject, grant.Role, grant.ScopeID)
 	}
 	return module, nil
+}
+
+func (module *Memory) AdministratorClaimStatus(_ context.Context) (AdministratorClaimStatus, error) {
+	module.mu.RLock()
+	defer module.mu.RUnlock()
+	status, _ := module.administratorClaimStatusLocked(module.clock())
+	return status, nil
+}
+
+func (module *Memory) ClaimInitialAdministrator(
+	ctx context.Context,
+	command ClaimInitialAdministratorCommand,
+) (ClaimInitialAdministratorResult, error) {
+	module.mu.Lock()
+	defer module.mu.Unlock()
+	if command.Actor.Kind != SubjectUser || strings.TrimSpace(command.Actor.ID) == "" {
+		return ClaimInitialAdministratorResult{}, &Error{
+			Kind: ErrorInvalidInput, Field: "actor", Message: "only an identified user may claim an instance",
+		}
+	}
+	now := module.clock()
+	status, existing := module.administratorClaimStatusLocked(now)
+	if status.Claimed {
+		if existing.ID != "" && existing.Target == command.Actor && existing.Source == GrantSourceInitialClaim {
+			return ClaimInitialAdministratorResult{Status: status, Grant: existing}, nil
+		}
+		return ClaimInitialAdministratorResult{}, &Error{
+			Kind: ErrorConflict, Field: "instance", Message: "initial administrator has already been claimed",
+		}
+	}
+	role, exists := module.activeRoleLocked(module.catalog.protectedRole)
+	if !exists || !role.Protected {
+		return ClaimInitialAdministratorResult{}, &Error{
+			Kind: ErrorInvariant, Field: "protected_role", Message: "is unavailable",
+		}
+	}
+	grant := Grant{
+		ID: GrantID(module.newIDLocked("grant")), Target: command.Actor,
+		RoleID: role.ID, Role: role.Key, ScopeID: module.rootScopeIDLocked(),
+		Source: GrantSourceInitialClaim, ValidFrom: now,
+	}
+	module.grants[grant.ID] = grant
+	module.appendAuditLocked(ctx, AuditInitialAdministratorClaimed, command.Actor, command.Actor, grant.Role, grant.ScopeID)
+	return ClaimInitialAdministratorResult{
+		Status: AdministratorClaimStatus{Claimed: true}, Grant: grant, Created: true,
+	}, nil
+}
+
+func (module *Memory) administratorClaimStatusLocked(now time.Time) (AdministratorClaimStatus, Grant) {
+	for _, grant := range module.grants {
+		if grant.Role == module.catalog.protectedRole && grantActive(grant, now) {
+			return AdministratorClaimStatus{Claimed: true}, grant
+		}
+	}
+	for _, event := range module.audit {
+		switch event.Action {
+		case AuditBootstrapProtected, AuditInitialAdministratorClaimed, AuditRecoveryProtected:
+			return AdministratorClaimStatus{Claimed: true}, Grant{}
+		}
+	}
+	return AdministratorClaimStatus{}, Grant{}
 }
 
 func (module *Memory) CreateScope(ctx context.Context, command CreateScopeCommand) (Scope, error) {

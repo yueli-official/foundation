@@ -78,6 +78,7 @@ const (
 	GrantSourceImportSync          GrantSource = "import_sync"
 	GrantSourceBootstrap           GrantSource = "bootstrap"
 	GrantSourceRecovery            GrantSource = "recovery"
+	GrantSourceInitialClaim        GrantSource = "initial_claim"
 )
 
 // AssignmentPolicy limits how a non-protected role may be assigned.

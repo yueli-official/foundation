@@ -21,6 +21,7 @@ const (
 
 var authorizationManagementActions = []authorization.AuditAction{
 	authorization.AuditBootstrapProtected,
+	authorization.AuditInitialAdministratorClaimed,
 	authorization.AuditScopeCreated,
 	authorization.AuditScopeRegistered,
 	authorization.AuditScopeReparented,

@@ -64,6 +64,7 @@ var (
 	_ authorization.RoleReader             = (*Adapter)(nil)
 	_ authorization.GrantManager           = (*Adapter)(nil)
 	_ authorization.GrantReader            = (*Adapter)(nil)
+	_ authorization.AdministratorClaimer   = (*Adapter)(nil)
 	_ authorization.GroupManager           = (*Adapter)(nil)
 	_ authorization.GroupReader            = (*Adapter)(nil)
 	_ authorization.WorkflowManager        = (*Adapter)(nil)

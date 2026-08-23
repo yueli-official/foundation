@@ -486,7 +486,8 @@ func validGrantSource(source GrantSource) bool {
 	switch source {
 	case GrantSourceAutomatic, GrantSourceApplication, GrantSourceInvitation,
 		GrantSourceDirect, GrantSourceGroup, GrantSourceServiceProvisioning,
-		GrantSourceImportSync, GrantSourceBootstrap:
+		GrantSourceImportSync, GrantSourceBootstrap, GrantSourceRecovery,
+		GrantSourceInitialClaim:
 		return true
 	default:
 		return false

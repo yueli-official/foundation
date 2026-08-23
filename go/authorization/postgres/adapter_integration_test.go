@@ -158,6 +158,102 @@ func TestPostgresAdapterRestartRestoresDomainTruth(t *testing.T) {
 	}
 }
 
+func TestPostgresInitialAdministratorClaimIsAtomicAcrossAdapters(t *testing.T) {
+	database := openPostgresTestDatabase(t)
+	catalog := authorization.MustCompile(postgresTestDefinition())
+	ctx := context.Background()
+	options := authorizationpostgres.Options{
+		DB: database, InstanceKey: "initial-claim",
+		Memory: authorization.MemoryOptions{RootScopeID: "site", AllowUnclaimed: true},
+	}
+	first, err := authorizationpostgres.New(ctx, catalog, options)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	second, err := authorizationpostgres.New(ctx, catalog, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, err := first.AdministratorClaimStatus(ctx)
+	if err != nil || before.Claimed {
+		t.Fatalf("before = %#v, err = %v", before, err)
+	}
+	type outcome struct {
+		actor  authorization.SubjectRef
+		result authorization.ClaimInitialAdministratorResult
+		err    error
+	}
+	outcomes := make(chan outcome, 2)
+	for index, adapter := range []*authorizationpostgres.Adapter{first, second} {
+		actor := authorization.SubjectRef{Kind: authorization.SubjectUser, ID: fmt.Sprintf("owner-%d", index+1)}
+		go func(adapter *authorizationpostgres.Adapter, actor authorization.SubjectRef) {
+			result, err := adapter.ClaimInitialAdministrator(ctx, authorization.ClaimInitialAdministratorCommand{Actor: actor})
+			outcomes <- outcome{actor: actor, result: result, err: err}
+		}(adapter, actor)
+	}
+	var winner authorization.SubjectRef
+	success, conflicts := 0, 0
+	for range 2 {
+		outcome := <-outcomes
+		switch {
+		case outcome.err == nil:
+			success++
+			winner = outcome.actor
+			if !outcome.result.Created || outcome.result.Grant.Target != outcome.actor {
+				t.Fatalf("winning result = %#v", outcome.result)
+			}
+		case authorization.Is(outcome.err, authorization.ErrorConflict):
+			conflicts++
+		default:
+			t.Fatalf("claim error = %v", outcome.err)
+		}
+	}
+	if success != 1 || conflicts != 1 {
+		t.Fatalf("success=%d conflicts=%d", success, conflicts)
+	}
+	restarted, err := authorizationpostgres.New(ctx, catalog, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, err := restarted.AdministratorClaimStatus(ctx)
+	if err != nil || !status.Claimed {
+		t.Fatalf("restarted status = %#v, err = %v", status, err)
+	}
+	decision, err := restarted.Decide(ctx, authorization.DecisionRequest{
+		Subject: winner, Capability: authorization.CapabilityManage, ScopeID: "site",
+	})
+	if err != nil || !decision.Allowed {
+		t.Fatalf("winner decision = %#v, err = %v", decision, err)
+	}
+	for index, adapter := range []*authorizationpostgres.Adapter{first, second} {
+		decision, err := adapter.Decide(ctx, authorization.DecisionRequest{
+			Subject: winner, Capability: authorization.CapabilityManage, ScopeID: "site",
+		})
+		if err != nil || !decision.Allowed {
+			t.Fatalf("adapter %d stale winner decision = %#v, err = %v", index, decision, err)
+		}
+	}
+	if _, err := database.Exec(`
+		UPDATE authorization_grants SET revoked_at = now()
+		WHERE instance_key = 'initial-claim' AND source = 'initial_claim'
+	`); err != nil {
+		t.Fatal(err)
+	}
+	afterLoss, err := authorizationpostgres.New(ctx, catalog, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, err = afterLoss.AdministratorClaimStatus(ctx)
+	if err != nil || !status.Claimed {
+		t.Fatalf("status after administrator loss = %#v, err = %v", status, err)
+	}
+	if _, err := afterLoss.ClaimInitialAdministrator(ctx, authorization.ClaimInitialAdministratorCommand{
+		Actor: authorization.SubjectRef{Kind: authorization.SubjectUser, ID: "late-claimant"},
+	}); !authorization.Is(err, authorization.ErrorConflict) {
+		t.Fatalf("claim after administrator loss error = %v", err)
+	}
+}
+
 func TestPostgresDecisionAndIdempotentScopeRegistrationDoNotRewriteProjection(t *testing.T) {
 	database := openPostgresTestDatabase(t)
 	definition := postgresTestDefinition()

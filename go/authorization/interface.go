@@ -339,6 +339,27 @@ type GrantReader interface {
 	ListGrants(context.Context, GrantListQuery) (GrantPage, error)
 }
 
+type AdministratorClaimStatus struct {
+	Claimed bool
+}
+
+type ClaimInitialAdministratorCommand struct {
+	Actor SubjectRef
+}
+
+type ClaimInitialAdministratorResult struct {
+	Status  AdministratorClaimStatus
+	Grant   Grant
+	Created bool
+}
+
+// AdministratorClaimer is the one-time initialization interface for an
+// authorization instance created without bootstrap administrators.
+type AdministratorClaimer interface {
+	AdministratorClaimStatus(context.Context) (AdministratorClaimStatus, error)
+	ClaimInitialAdministrator(context.Context, ClaimInitialAdministratorCommand) (ClaimInitialAdministratorResult, error)
+}
+
 type Group struct {
 	ID          GroupID
 	ScopeID     ScopeID
@@ -736,33 +757,34 @@ type AuditID string
 type AuditAction string
 
 const (
-	AuditBootstrapProtected    AuditAction = "bootstrap.protected"
-	AuditScopeCreated          AuditAction = "scope.created"
-	AuditScopeRegistered       AuditAction = "scope.registered"
-	AuditScopeReparented       AuditAction = "scope.reparented"
-	AuditGroupCreated          AuditAction = "group.created"
-	AuditGroupMemberAdded      AuditAction = "group.member_added"
-	AuditGroupMemberRemoved    AuditAction = "group.member_removed"
-	AuditGrantCreated          AuditAction = "grant.created"
-	AuditGrantRevoked          AuditAction = "grant.revoked"
-	AuditApplicationCreated    AuditAction = "application.created"
-	AuditApplicationReviewed   AuditAction = "application.reviewed"
-	AuditApplicationWithdrawn  AuditAction = "application.withdrawn"
-	AuditInvitationCreated     AuditAction = "invitation.created"
-	AuditInvitationAccepted    AuditAction = "invitation.accepted"
-	AuditInvitationDeclined    AuditAction = "invitation.declined"
-	AuditInvitationRevoked     AuditAction = "invitation.revoked"
-	AuditInvitationResent      AuditAction = "invitation.resent"
-	AuditAutomaticReconciled   AuditAction = "automatic.reconciled"
-	AuditRoleCreated           AuditAction = "role.created"
-	AuditRoleUpdated           AuditAction = "role.updated"
-	AuditRoleRetired           AuditAction = "role.retired"
-	AuditAutomaticRuleChanged  AuditAction = "automatic.rule_changed"
-	AuditPolicyDraftCreated    AuditAction = "policy.draft_created"
-	AuditPolicyBindingsChanged AuditAction = "policy.bindings_changed"
-	AuditPolicyActivated       AuditAction = "policy.activated"
-	AuditPolicyRolledBack      AuditAction = "policy.rolled_back"
-	AuditRecoveryProtected     AuditAction = "recovery.protected"
+	AuditBootstrapProtected          AuditAction = "bootstrap.protected"
+	AuditInitialAdministratorClaimed AuditAction = "initial_administrator.claimed"
+	AuditScopeCreated                AuditAction = "scope.created"
+	AuditScopeRegistered             AuditAction = "scope.registered"
+	AuditScopeReparented             AuditAction = "scope.reparented"
+	AuditGroupCreated                AuditAction = "group.created"
+	AuditGroupMemberAdded            AuditAction = "group.member_added"
+	AuditGroupMemberRemoved          AuditAction = "group.member_removed"
+	AuditGrantCreated                AuditAction = "grant.created"
+	AuditGrantRevoked                AuditAction = "grant.revoked"
+	AuditApplicationCreated          AuditAction = "application.created"
+	AuditApplicationReviewed         AuditAction = "application.reviewed"
+	AuditApplicationWithdrawn        AuditAction = "application.withdrawn"
+	AuditInvitationCreated           AuditAction = "invitation.created"
+	AuditInvitationAccepted          AuditAction = "invitation.accepted"
+	AuditInvitationDeclined          AuditAction = "invitation.declined"
+	AuditInvitationRevoked           AuditAction = "invitation.revoked"
+	AuditInvitationResent            AuditAction = "invitation.resent"
+	AuditAutomaticReconciled         AuditAction = "automatic.reconciled"
+	AuditRoleCreated                 AuditAction = "role.created"
+	AuditRoleUpdated                 AuditAction = "role.updated"
+	AuditRoleRetired                 AuditAction = "role.retired"
+	AuditAutomaticRuleChanged        AuditAction = "automatic.rule_changed"
+	AuditPolicyDraftCreated          AuditAction = "policy.draft_created"
+	AuditPolicyBindingsChanged       AuditAction = "policy.bindings_changed"
+	AuditPolicyActivated             AuditAction = "policy.activated"
+	AuditPolicyRolledBack            AuditAction = "policy.rolled_back"
+	AuditRecoveryProtected           AuditAction = "recovery.protected"
 )
 
 type AuditEvent struct {
