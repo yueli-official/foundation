@@ -30,6 +30,10 @@ export default defineNuxtConfig({
 target path 必须是同源绝对路径。模块会拒绝绝对 URL、协议相对路径、反斜杠、fragment、query 和 `..`
 segment。只有 target 名称和路径进入 public runtime config；SSR cookie/header 策略保留在 server 私有配置。
 
+除显式 Cookie allowlist 外，SSR 会自动转发 Identity Nuxt 保留的 `ys_` 产品 Session 命名空间，使同主机
+多个站点实例的派生 Cookie 无需逐站复制名称。`yt_` authorization transaction 和其他浏览器 Cookie 不会
+因此进入 SSR API 请求。
+
 ## 调用
 
 ```ts
@@ -71,6 +75,7 @@ export default createBffHandler({
 ## 边界与验证
 
 - 不拥有下游服务地址、认证会话、产品端点、翻译或错误文案；
-- 只允许受控 cookie/header 进入 SSR 请求，不转发浏览器 Authorization 和 forwarding header；
+- 只允许显式 Cookie、保留的产品 Session 命名空间和受控 header 进入 SSR 请求，不转发 authorization transaction、
+  浏览器 Authorization 或 forwarding header；
 - 修改 runtime config、allowlist 或 BFF 行为时必须运行 `pnpm --filter @yueli/nuxt-runtime typecheck` 和
   `pnpm --filter @yueli/nuxt-runtime test`。

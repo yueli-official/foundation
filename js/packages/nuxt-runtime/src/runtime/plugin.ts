@@ -13,6 +13,7 @@ import {
   useRuntimeConfig,
 } from "#app";
 import { getHeader, parseCookies, type H3Event } from "h3";
+import { selectSsrCookies } from "./ssr-cookies";
 
 interface RuntimeTargetConfig {
   readonly path: `/${string}`;
@@ -26,6 +27,7 @@ interface RuntimeConfig {
 interface ServerTargetConfig {
   readonly ssr: {
     readonly cookies: readonly string[];
+    readonly cookiePrefixes: readonly string[];
     readonly headers: readonly string[];
   };
 }
@@ -99,10 +101,11 @@ function transportHeaders(
   }
 
   const inboundCookies = parseCookies(event);
-  const cookie = policy.cookies
-    .filter((name) => inboundCookies[name] !== undefined)
-    .map((name) => `${name}=${encodeURIComponent(inboundCookies[name]!)}`)
-    .join("; ");
+  const cookie = selectSsrCookies(
+    inboundCookies,
+    policy.cookies,
+    policy.cookiePrefixes,
+  );
   if (cookie) {
     forwarded.cookie = cookie;
   }
