@@ -240,6 +240,28 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "content-share-actions",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/sharing/content-share",
+    owner: "foundation",
+    responsibility:
+      "Own bounded social targets, system sharing, resilient clipboard copying and original-action copy feedback for public content surfaces.",
+    nonResponsibilities: [
+      "popover placement",
+      "page action layout",
+      "content canonical URL policy",
+      "locale catalogs",
+    ],
+    runtimeDependencies: ["@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/content-share-actions.test.ts"],
+      consumers: ["blog/web", "docs/web"],
+      accessibility: ["test/content-share-actions.test.ts"],
+    },
+  },
+  {
     id: "account-menu-pattern",
     kind: "pattern",
     status: "experimental",

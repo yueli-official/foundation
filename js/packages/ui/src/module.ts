@@ -62,6 +62,7 @@ const yueliUiModule = defineNuxtModule<YueliUiModuleOptions>({
       "feedback",
       "navigation",
       "remote-select",
+      "sharing",
       "settings",
     ]) {
       addComponentsDir({

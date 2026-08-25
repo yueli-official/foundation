@@ -133,6 +133,9 @@ try {
     "package/src/navigation/components/ReadingTableOfContents.vue",
     "package/src/navigation/table-of-contents.ts",
     "package/src/navigation/table-of-contents.types.ts",
+    "package/src/sharing/components/ContentShareActions.vue",
+    "package/src/sharing/content-share.ts",
+    "package/src/sharing/content-share.types.ts",
     "package/src/remote-select/components/RemoteSelect.vue",
     "package/src/remote-select/index.ts",
     "package/src/remote-select/types.ts",
@@ -218,6 +221,7 @@ import { useActionFeedback } from "@yueli/ui/feedback";
 import { evaluateImageOptimization } from "@yueli/ui/image";
 import { optimizeImageFile } from "@yueli/ui/image/browser";
 import { ReadingTableOfContents } from "@yueli/ui/navigation/table-of-contents";
+import { ContentShareActions } from "@yueli/ui/sharing/content-share";
 import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import type { RemoteSelectLoader, RemoteSelectMessages, RemoteSelectValue } from "@yueli/ui/remote-select";
 import { publicUiManifest } from "@yueli/ui/manifest";
@@ -300,6 +304,7 @@ const loadOwners: RemoteSelectLoader = async ({ signal }) => {
 };
 const imageDecision = evaluateImageOptimization({ name: "packed.png", type: "image/png", size: 2_000_000 });
 const readingHeadings = [{ id: "packed-heading", text: "Packed heading", level: 2 }];
+const shareMessages = { weibo: "Weibo", x: "X", system: "Share", copy: "Copy", copied: "Copied", copyFailed: "Copy failed" };
 void optimizeImageFile;
 </script>
 
@@ -331,6 +336,7 @@ void optimizeImageFile;
     </YCollectionTableToolbar>
     <YBackToTop label="Back to top" :threshold="0" />
     <ReadingTableOfContents :items="readingHeadings" />
+    <ContentShareActions title="Packed content" url="https://example.test/packed" :messages="shareMessages" />
     <h2 id="packed-heading">Packed heading</h2>
     <YSettingSection title="Settings"><input v-model="settingsForm.title" /></YSettingSection>
     </YAdminPage>
@@ -390,6 +396,7 @@ void optimizeImageFile;
     !packedPackage.exports?.["./image/browser"] ||
     !packedPackage.exports?.["./navigation/back-to-top"] ||
     !packedPackage.exports?.["./navigation/table-of-contents"] ||
+    !packedPackage.exports?.["./sharing/content-share"] ||
     !packedPackage.exports?.["./remote-select"] ||
     !packedPackage.exports?.["./settings"] ||
     !packedPackage.exports?.["./settings/vue"] ||

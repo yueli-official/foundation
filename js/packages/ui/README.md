@@ -26,6 +26,7 @@ Current public surface:
 - `@yueli/ui/feedback/pattern` — explicit `ActionFeedbackButton` import.
 - `@yueli/ui/navigation/back-to-top` — explicit accessible BackToTop Pattern import.
 - `@yueli/ui/navigation/table-of-contents` — accessible heading hierarchy, fragment navigation and active-section tracking for reading surfaces.
+- `@yueli/ui/sharing/content-share` — bounded public-content share targets, system sharing and clipboard feedback rendered on the original action.
 - `@yueli/ui/settings` — framework-independent JSON-safe baseline, dirty, capture and discard workflow.
 - `@yueli/ui/settings/vue` — reactive Vue Adapter for a caller-owned settings form.
 - `@yueli/ui/settings/browser` and `@yueli/ui/settings/vue-router` — opt-in unload and route-leave guards.
