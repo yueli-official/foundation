@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useId } from "vue";
+import { ref, useId, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -20,9 +20,43 @@ const search = defineModel<string>("search", { default: "" });
 const filtersOpen = defineModel<boolean>("filtersOpen", { default: false });
 const emit = defineEmits<{ search: [value: string] }>();
 const filterPanelId = `y-collection-filter-panel-${useId().replaceAll(":", "")}`;
+const searchDraft = ref(search.value);
+const isComposing = ref(false);
+
+watch(search, (value) => {
+  if (!isComposing.value && searchDraft.value !== value) {
+    searchDraft.value = value;
+  }
+});
+
+function updateSearchDraft(value: string) {
+  searchDraft.value = value;
+  if (!isComposing.value && search.value !== value) {
+    search.value = value;
+  }
+}
+
+function startComposition() {
+  isComposing.value = true;
+}
+
+function finishComposition(event: CompositionEvent) {
+  isComposing.value = false;
+  const value =
+    (event.target as HTMLInputElement | null)?.value ?? searchDraft.value;
+  searchDraft.value = value;
+  if (search.value !== value) {
+    search.value = value;
+  }
+}
 
 function submitSearch() {
-  emit("search", search.value.trim());
+  if (isComposing.value) return;
+  const value = searchDraft.value.trim();
+  if (search.value !== value) {
+    search.value = value;
+  }
+  emit("search", value);
 }
 </script>
 
@@ -45,7 +79,7 @@ function submitSearch() {
     <div
       v-else
       data-collection-table-default
-    class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4 @xl:grid-cols-[minmax(14rem,1fr)_auto]"
+      class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4 @xl:grid-cols-[minmax(14rem,1fr)_auto]"
     >
       <form
         data-collection-table-search
@@ -57,11 +91,14 @@ function submitSearch() {
         @submit.prevent="submitSearch"
       >
         <UInput
-          v-model="search"
+          :model-value="searchDraft"
           icon="i-tabler-search"
           size="sm"
           :placeholder="props.searchPlaceholder"
           class="w-full min-w-0"
+          @update:model-value="updateSearchDraft"
+          @compositionstart="startComposition"
+          @compositionend="finishComposition"
         />
         <UButton
           v-if="props.searchAction"

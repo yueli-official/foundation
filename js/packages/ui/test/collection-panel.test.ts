@@ -240,8 +240,9 @@ describe("CollectionPanel", () => {
             name: "USelectMenu",
             inheritAttrs: false,
             props: ["searchInput"],
-            setup: (props) => () =>
+            setup: (props, { attrs }) => () =>
               h("div", {
+                ...attrs,
                 "data-search-placeholder": (
                   props.searchInput as { placeholder?: string }
                 )?.placeholder,
@@ -258,6 +259,64 @@ describe("CollectionPanel", () => {
     expect(
       wrapper.get('[data-search-placeholder="Search categories"]'),
     ).toBeTruthy();
+    expect(wrapper.get("[data-collection-inline-filter]")).toBeTruthy();
+    expect(
+      wrapper.findAll("button").some((button) => button.text() === "Filters"),
+    ).toBe(false);
+  });
+
+  it("keeps two or more select controls inside the filter popover", () => {
+    const wrapper = mount(CollectionPanel, {
+      props: {
+        label: "Records",
+        items: [],
+        itemKey: () => "record",
+        itemLabel: () => "Record",
+        messages,
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        filtersOpen: true,
+        controls: [
+          {
+            kind: "select",
+            id: "status",
+            label: "Status",
+            value: "all",
+            options: [{ label: "All", value: "all" }],
+          },
+          {
+            kind: "select",
+            id: "category",
+            label: "Category",
+            value: "all",
+            options: [{ label: "All", value: "all" }],
+          },
+        ],
+      },
+      global: {
+        components: {
+          UInput,
+          UButton,
+          UCheckbox,
+          USelect: passiveStub,
+          USelectMenu: passiveStub,
+          UPopover,
+          UPagination: passiveStub,
+          USkeleton: passiveStub,
+          UIcon: passiveStub,
+        },
+      },
+    });
+
+    expect(
+      wrapper.findAll("button").some((button) => button.text() === "Filters"),
+    ).toBe(true);
+    expect(wrapper.find("[data-collection-inline-filter]").exists()).toBe(
+      false,
+    );
+    expect(wrapper.text()).toContain("Status");
+    expect(wrapper.text()).toContain("Category");
   });
 
   it("keeps one caller-owned view switch reachable without inventing filters", () => {

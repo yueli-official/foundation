@@ -2,6 +2,15 @@
 // Consumers extend the layer and get the components/composables
 // auto-imported PLUS this build config merged in — so they never re-declare the
 // prosemirror dedup / katex css. See checklists/frontend-dev-gotchas §7.
+import { createRequire } from "node:module";
+import { realpathSync } from "node:fs";
+import { dirname } from "node:path";
+
+const require = createRequire(import.meta.url);
+const katexStylesRoot = dirname(
+  realpathSync(require.resolve("katex/dist/katex.min.css")),
+);
+
 export default defineNuxtConfig({
   modules: ["@nuxt/ui"],
   // katex stylesheet is global so it covers both the reading side and the
@@ -12,6 +21,12 @@ export default defineNuxtConfig({
   // copies of prosemirror-state and the editor throws "Adding different instances
   // of a keyed plugin (plugin$)". Forcing both into one optimized chunk fixes it.
   vite: {
+    server: {
+      // A local Dependency Overlay resolves KaTeX from the Foundation checkout,
+      // which is outside the consumer root. The layer owns this exact dependency
+      // boundary so every consumer need not widen Vite's filesystem allowlist.
+      fs: { allow: [katexStylesRoot] },
+    },
     optimizeDeps: {
       include: [
         "@nuxt/ui > prosemirror-state",

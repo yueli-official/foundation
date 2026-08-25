@@ -50,6 +50,29 @@ const UPopover = defineComponent({
 });
 
 describe("CollectionTableToolbar", () => {
+  it("does not publish an IME search value until composition ends", async () => {
+    const wrapper = mount(CollectionTableToolbar, {
+      props: {
+        label: "Document controls",
+        search: "",
+        searchPlaceholder: "Search documents",
+        filterLabel: "Filters",
+      },
+      global: { components: { UInput, UButton, UPopover } },
+    });
+    const input = wrapper.get("input");
+
+    await input.trigger("compositionstart");
+    await input.setValue("ce s");
+
+    expect(wrapper.emitted("update:search")).toBeUndefined();
+
+    input.element.value = "测试";
+    await input.trigger("compositionend");
+
+    expect(wrapper.emitted("update:search")).toEqual([["测试"]]);
+  });
+
   it("owns one deterministic default toolbar with compact filter popover", () => {
     const wrapper = mount(CollectionTableToolbar, {
       props: {
@@ -96,9 +119,9 @@ describe("CollectionTableToolbar", () => {
     expect(wrapper.get("[data-collection-table-search]").classes()).toContain(
       "@xl:col-span-1",
     );
-    expect(
-      wrapper.get("[data-collection-table-controls]").classes(),
-    ).toContain("@xl:col-span-1");
+    expect(wrapper.get("[data-collection-table-controls]").classes()).toContain(
+      "@xl:col-span-1",
+    );
     expect(defaultToolbar.classes().join(" ")).not.toContain("64rem");
     expect(wrapper.html()).not.toContain("[&>*]:!w-full");
   });

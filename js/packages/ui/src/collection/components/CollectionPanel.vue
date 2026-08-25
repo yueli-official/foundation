@@ -93,14 +93,22 @@ const filterControls = computed(() =>
       control.kind === "select",
   ),
 );
+const inlineFilter = computed(() =>
+  filterControls.value.length === 1 ? filterControls.value[0] : undefined,
+);
+const popoverFilters = computed(() =>
+  filterControls.value.length > 1 ? filterControls.value : [],
+);
 const directionControls = computed(() =>
   props.controls.filter(
     (control): control is Extract<CollectionControl, { kind: "direction" }> =>
       control.kind === "direction",
   ),
 );
-const hasFilters = computed(() => filterControls.value.length > 0);
-const hasUtilities = computed(() => directionControls.value.length > 0);
+const hasFilters = computed(() => popoverFilters.value.length > 0);
+const hasUtilities = computed(
+  () => Boolean(inlineFilter.value) || directionControls.value.length > 0,
+);
 
 function changeControl(id: string, value: unknown) {
   if (typeof value === "string" || typeof value === "number") {
@@ -150,7 +158,7 @@ function toggle(item: TItem, key: TKey) {
         <template v-if="hasFilters" #filters>
           <div class="grid w-72 max-w-[calc(100vw-2rem)] gap-3">
             <div
-              v-for="control in filterControls"
+              v-for="control in popoverFilters"
               :key="control.id"
               class="grid gap-1.5"
             >
@@ -185,6 +193,31 @@ function toggle(item: TItem, key: TKey) {
         </template>
 
         <template v-if="hasUtilities || $slots.view" #utilities>
+          <USelectMenu
+            v-if="inlineFilter?.searchPlaceholder"
+            :model-value="inlineFilter.value"
+            :items="inlineFilter.options.slice()"
+            value-key="value"
+            :icon="inlineFilter.icon"
+            size="xs"
+            :class="inlineFilter.class || 'w-36'"
+            :search-input="{ placeholder: inlineFilter.searchPlaceholder }"
+            :aria-label="inlineFilter.label"
+            data-collection-inline-filter
+            @update:model-value="changeControl(inlineFilter.id, $event)"
+          />
+          <USelect
+            v-else-if="inlineFilter"
+            :model-value="inlineFilter.value"
+            :items="inlineFilter.options.slice()"
+            value-key="value"
+            :icon="inlineFilter.icon"
+            size="xs"
+            :class="inlineFilter.class || 'w-36'"
+            :aria-label="inlineFilter.label"
+            data-collection-inline-filter
+            @update:model-value="changeControl(inlineFilter.id, $event)"
+          />
           <UButton
             v-for="control in directionControls"
             :key="control.id"

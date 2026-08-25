@@ -15,7 +15,15 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "yueli-ui-pack-"));
 const consumerRoot = join(temporaryRoot, "consumer");
 const tar = process.platform === "win32" ? "tar.exe" : "tar";
-const pnpm = process.platform === "win32" ? "pnpm.exe" : "pnpm";
+const corepack = join(
+  dirname(process.execPath),
+  "node_modules",
+  "corepack",
+  "dist",
+  "corepack.js",
+);
+const pnpm = process.platform === "win32" ? process.execPath : "pnpm";
+const pnpmPrefix = process.platform === "win32" ? [corepack, "pnpm"] : [];
 const resolvedTemporaryRoot = resolve(temporaryRoot);
 
 if (
@@ -52,7 +60,7 @@ function run(command, args, options = {}) {
 }
 
 function runPnpm(args, options) {
-  return run(pnpm, args, options);
+  return run(pnpm, [...pnpmPrefix, ...args], options);
 }
 
 function toFileSpecifier(path) {
@@ -122,6 +130,9 @@ try {
     "package/src/module.ts",
     "package/src/navigation/back-to-top.ts",
     "package/src/navigation/components/BackToTop.vue",
+    "package/src/navigation/components/ReadingTableOfContents.vue",
+    "package/src/navigation/table-of-contents.ts",
+    "package/src/navigation/table-of-contents.types.ts",
     "package/src/remote-select/components/RemoteSelect.vue",
     "package/src/remote-select/index.ts",
     "package/src/remote-select/types.ts",
@@ -206,6 +217,7 @@ import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-rou
 import { useActionFeedback } from "@yueli/ui/feedback";
 import { evaluateImageOptimization } from "@yueli/ui/image";
 import { optimizeImageFile } from "@yueli/ui/image/browser";
+import { ReadingTableOfContents } from "@yueli/ui/navigation/table-of-contents";
 import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import type { RemoteSelectLoader, RemoteSelectMessages, RemoteSelectValue } from "@yueli/ui/remote-select";
 import { publicUiManifest } from "@yueli/ui/manifest";
@@ -287,6 +299,7 @@ const loadOwners: RemoteSelectLoader = async ({ signal }) => {
   return { items: [{ value: "packed", label: "Packed owner" }] };
 };
 const imageDecision = evaluateImageOptimization({ name: "packed.png", type: "image/png", size: 2_000_000 });
+const readingHeadings = [{ id: "packed-heading", text: "Packed heading", level: 2 }];
 void optimizeImageFile;
 </script>
 
@@ -317,6 +330,8 @@ void optimizeImageFile;
       <template #selection><span>Selected</span></template>
     </YCollectionTableToolbar>
     <YBackToTop label="Back to top" :threshold="0" />
+    <ReadingTableOfContents :items="readingHeadings" />
+    <h2 id="packed-heading">Packed heading</h2>
     <YSettingSection title="Settings"><input v-model="settingsForm.title" /></YSettingSection>
     </YAdminPage>
   </YAdminConsoleLayout>
@@ -374,6 +389,7 @@ void optimizeImageFile;
     !packedPackage.exports?.["./image"] ||
     !packedPackage.exports?.["./image/browser"] ||
     !packedPackage.exports?.["./navigation/back-to-top"] ||
+    !packedPackage.exports?.["./navigation/table-of-contents"] ||
     !packedPackage.exports?.["./remote-select"] ||
     !packedPackage.exports?.["./settings"] ||
     !packedPackage.exports?.["./settings/vue"] ||

@@ -218,6 +218,28 @@ export const publicUiManifest = [
     },
   },
   {
+    id: "reading-table-of-contents",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/navigation/table-of-contents",
+    owner: "foundation",
+    responsibility:
+      "Own heading filtering, hierarchy, fragment navigation, active-section tracking and accessible visual states for in-page reading navigation.",
+    nonResponsibilities: [
+      "article rendering",
+      "page column layout",
+      "mobile disclosure placement",
+      "product color values",
+    ],
+    runtimeDependencies: ["@nuxt/ui", "tailwindcss", "vue"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/reading-table-of-contents.test.ts"],
+      consumers: ["docs/web", "blog/web"],
+      accessibility: ["test/reading-table-of-contents.test.ts"],
+    },
+  },
+  {
     id: "account-menu-pattern",
     kind: "pattern",
     status: "experimental",

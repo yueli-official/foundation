@@ -102,7 +102,8 @@ function classes(...values: Array<string | undefined>) {
       :max-size="maxSize"
       :toggle="{ size: 'lg', class: 'size-11 shrink-0' }"
       :class="[
-        'admin-shell-sidebar bg-elevated/45',
+        'admin-shell-sidebar',
+        ui.sidebar ? undefined : 'bg-default',
         sidebarAppearance === 'commercial'
           ? 'border-e-0'
           : 'border-e border-default/80',

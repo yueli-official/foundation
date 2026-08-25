@@ -30,6 +30,7 @@
     "./feedback": "./src/feedback/index.ts",
     "./feedback/pattern": "./src/feedback/pattern.ts",
     "./navigation/back-to-top": "./src/navigation/back-to-top.ts",
+    "./navigation/table-of-contents": "./src/navigation/table-of-contents.ts",
     "./remote-select": "./src/remote-select/index.ts",
     "./settings": "./src/settings/index.ts",
     "./settings/vue": "./src/settings/vue.ts",

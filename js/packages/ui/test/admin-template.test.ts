@@ -170,6 +170,8 @@ describe("admin template", () => {
     expect(sidebar.attributes("class")).toContain(
       "yueli-admin-shell-surface",
     );
+    expect(sidebar.attributes("class")).not.toContain("bg-elevated/45");
+    expect(sidebar.attributes("class")).not.toContain("bg-default");
   });
 
   it("owns the dashboard shell, search and navigation wiring", () => {
@@ -222,6 +224,9 @@ describe("admin template", () => {
     expect(wrapper.get("[data-main-id]").attributes("data-main-id")).toBe(
       "workspace-main",
     );
+    const sidebar = wrapper.findComponent({ name: "UDashboardSidebar" });
+    expect(sidebar.attributes("class")).toContain("bg-default");
+    expect(sidebar.attributes("class")).not.toContain("bg-elevated/45");
   });
 
   it("offers an opt-in commercial sidebar without framing brand and account", () => {
