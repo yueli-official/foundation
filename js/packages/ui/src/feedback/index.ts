@@ -10,8 +10,12 @@ export {
 } from "./minimum-loading";
 export {
   createFeedbackNotifier,
+  createNuxtToastNotifier,
   normalizeFeedbackNotice,
+  normalizeNuxtToastInput,
   type FeedbackNoticeInput,
   type FeedbackTone,
+  type NuxtToastInput,
+  type NormalizedNuxtToastInput,
   type NormalizedFeedbackNotice,
 } from "./notice";

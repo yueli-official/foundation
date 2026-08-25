@@ -57,6 +57,14 @@ export interface UiPreset {
       };
     };
     readonly toaster: { readonly slots: { readonly viewport: string } };
+    readonly input: { readonly slots: { readonly base: string } };
+    readonly inputNumber: { readonly slots: { readonly base: string } };
+    readonly textarea: { readonly slots: { readonly base: string } };
+    readonly select: { readonly slots: { readonly base: string } };
+    readonly selectMenu: {
+      readonly slots: { readonly base: string; readonly input: string };
+    };
+    readonly inputMenu: { readonly slots: { readonly base: string } };
     readonly icons: UiIconMap;
   };
 }
@@ -79,6 +87,14 @@ export declare const foundationUiPreset: Readonly<{
     }>;
   }>;
   toaster: Readonly<{ slots: Readonly<{ viewport: string }> }>;
+  input: Readonly<{ slots: Readonly<{ base: string }> }>;
+  inputNumber: Readonly<{ slots: Readonly<{ base: string }> }>;
+  textarea: Readonly<{ slots: Readonly<{ base: string }> }>;
+  select: Readonly<{ slots: Readonly<{ base: string }> }>;
+  selectMenu: Readonly<{
+    slots: Readonly<{ base: string; input: string }>;
+  }>;
+  inputMenu: Readonly<{ slots: Readonly<{ base: string }> }>;
 }>;
 
 export declare function createUiPreset(

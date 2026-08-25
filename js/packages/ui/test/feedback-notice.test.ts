@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   createFeedbackNotifier,
+  createNuxtToastNotifier,
   normalizeFeedbackNotice,
 } from "../src/feedback/notice";
 
@@ -41,6 +42,23 @@ describe("feedback notices", () => {
         title: "Saved",
         color: "success",
         type: "foreground",
+      }),
+    );
+  });
+
+  it("adapts Nuxt toast inputs without product-specific notifier copies", () => {
+    const add = vi.fn();
+    const notifier = createNuxtToastNotifier({ add });
+
+    notifier.add({ title: "Saved", color: "success" });
+    expect(add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Saved",
+        color: "success",
+        icon: "i-tabler-circle-check",
+        close: true,
+        duration: 4_500,
+        type: "background",
       }),
     );
   });

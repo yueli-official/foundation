@@ -10,6 +10,7 @@ import {
 } from "vue";
 import {
   editorDraftSnapshot,
+  editorDraftStorageKey,
   parseEditorDraft,
   serializeEditorDraft,
   shouldOfferEditorDraft,
@@ -31,9 +32,7 @@ export function useEditorDraft<T extends Record<string, unknown>>(
   const keyPrefix = opts.keyPrefix ?? "content:draft";
   const autoSaveKey = computed(() => {
     const entityId = toValue(opts.entityId);
-    return opts.mode === "edit" && entityId
-      ? `${keyPrefix}:${entityId}`
-      : `${keyPrefix}:new`;
+    return editorDraftStorageKey(keyPrefix, opts.mode, entityId);
   });
 
   const lastAutoSaved = ref<Date | null>(null);

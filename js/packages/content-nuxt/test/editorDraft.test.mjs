@@ -2,10 +2,30 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  editorDraftStorageKey,
   parseEditorDraft,
   serializeEditorDraft,
   shouldOfferEditorDraft,
 } from "../app/utils/editorDraft.ts";
+
+test("create drafts can use a stable instance key while edit drafts keep entity keys", () => {
+  assert.equal(
+    editorDraftStorageKey("docs:doc", "create", "new-a"),
+    "docs:doc:new:new-a",
+  );
+  assert.equal(
+    editorDraftStorageKey("docs:doc", "create", "new-b"),
+    "docs:doc:new:new-b",
+  );
+  assert.equal(
+    editorDraftStorageKey("docs:doc", "edit", "doc-1"),
+    "docs:doc:doc-1",
+  );
+  assert.equal(
+    editorDraftStorageKey("docs:doc", "create"),
+    "docs:doc:new",
+  );
+});
 
 test("existing content still offers a different local draft without replacing it silently", () => {
   const current = { content: "server version" };

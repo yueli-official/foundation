@@ -57,6 +57,17 @@ export const foundationUiPreset = Object.freeze({
       viewport: "sm:w-[22rem]",
     }),
   }),
+  input: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
+  inputNumber: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
+  textarea: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
+  select: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
+  selectMenu: Object.freeze({
+    slots: Object.freeze({
+      base: "yueli-field-border",
+      input: "yueli-select-menu-search",
+    }),
+  }),
+  inputMenu: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
 });
 
 /**
@@ -90,6 +101,12 @@ export function createUiPreset(theme = DEFAULT_UI_THEME, options = {}) {
         },
       },
       toaster: foundationUiPreset.toaster,
+      input: foundationUiPreset.input,
+      inputNumber: foundationUiPreset.inputNumber,
+      textarea: foundationUiPreset.textarea,
+      select: foundationUiPreset.select,
+      selectMenu: foundationUiPreset.selectMenu,
+      inputMenu: foundationUiPreset.inputMenu,
       icons: hasIconOverrides
         ? { ...FOUNDATION_TABLER_ICONS, ...options.icons }
         : FOUNDATION_TABLER_ICONS,

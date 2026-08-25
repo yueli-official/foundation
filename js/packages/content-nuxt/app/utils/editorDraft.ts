@@ -3,6 +3,19 @@ export interface EditorDraftRecord<T extends Record<string, unknown>> {
   savedAt: string;
 }
 
+export function editorDraftStorageKey(
+  keyPrefix: string,
+  mode: "create" | "edit",
+  entityId?: string | number,
+): string {
+  if (mode === "create") {
+    return entityId
+      ? `${keyPrefix}:new:${entityId}`
+      : `${keyPrefix}:new`;
+  }
+  return entityId ? `${keyPrefix}:${entityId}` : `${keyPrefix}:new`;
+}
+
 function normalized(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(normalized);
   if (!value || typeof value !== "object") return value;

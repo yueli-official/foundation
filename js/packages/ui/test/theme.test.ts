@@ -17,6 +17,17 @@ describe("public theme contract", () => {
     expect(preset.ui.toast.slots.root).toContain("yueli-toast");
     expect(preset.ui.toast.slots.progress).toBe("hidden");
     expect(preset.ui.toaster.slots.viewport).toContain("22rem");
+    for (const component of [
+      "input",
+      "inputNumber",
+      "textarea",
+      "select",
+      "selectMenu",
+      "inputMenu",
+    ] as const) {
+      expect(preset.ui[component].slots.base).toBe("yueli-field-border");
+    }
+    expect(preset.ui.selectMenu.slots.input).toBe("yueli-select-menu-search");
     expect(preset.ui.icons).toBe(FOUNDATION_TABLER_ICONS);
     expect(DEFAULT_UI_THEME).toEqual({ primary: "blue", neutral: "stone" });
   });
@@ -62,6 +73,9 @@ describe("public theme contract", () => {
     expect(css).toContain(":focus-visible");
     expect(css).toContain(".dark");
     expect(css).toContain(".yueli-interactive");
+    expect(css).toContain(".yueli-field-border");
+    expect(css).toContain(".yueli-select-menu-search .yueli-field-border");
+    expect(css).toContain("border-color: var(--ui-primary) !important");
     expect(css).toContain("--ui-warning: var(--ui-color-warning-800)");
     expect(css).toContain("--ui-warning: var(--ui-color-warning-400)");
     expect(css).not.toContain("--platform-");

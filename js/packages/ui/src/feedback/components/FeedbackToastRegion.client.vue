@@ -1,27 +1,20 @@
 <script setup lang="ts">
 import { useToast } from "@nuxt/ui/composables";
 import { computed, onBeforeUnmount, watch } from "vue";
+import { normalizeNuxtToastInput, type NuxtToastInput } from "../notice";
 
-type ToastTone = "primary" | "secondary" | "success" | "info" | "warning" | "error" | "neutral";
-
-interface ToastNotice {
+interface ToastNotice extends NuxtToastInput {
   id: string | number;
   open?: boolean;
-  title?: string;
-  description?: string;
-  icon?: string;
-  color?: ToastTone;
-  duration?: number;
-  close?: boolean;
-  type?: "foreground" | "background";
   _duplicate?: number;
 }
 
 const toast = useToast();
 const timers = new Map<string | number, ReturnType<typeof setTimeout>>();
-const notices = computed(() => (toast.toasts.value as ToastNotice[])
+const notices = computed(() => (toast.toasts.value as unknown as ToastNotice[])
   .filter(notice => notice.open !== false)
-  .slice(-3));
+  .slice(-3)
+  .map(notice => normalizeNuxtToastInput(notice)));
 
 function clearTimer(id: string | number) {
   const timer = timers.get(id);

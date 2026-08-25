@@ -155,6 +155,41 @@
 }
 
 @layer components {
+  .yueli-field-border {
+    border: 1px solid var(--ui-border) !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .yueli-field-border:focus,
+  .yueli-field-border:focus-visible,
+  .yueli-field-border[data-state="open"] {
+    border-color: var(--ui-primary) !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .yueli-field-border[aria-invalid="true"] {
+    border-color: var(--ui-error) !important;
+  }
+
+  .yueli-select-menu-search {
+    border-color: var(--ui-border) !important;
+  }
+
+  .yueli-select-menu-search:focus-within {
+    border-color: var(--ui-primary) !important;
+  }
+
+  .yueli-select-menu-search .yueli-field-border,
+  .yueli-select-menu-search .yueli-field-border:focus,
+  .yueli-select-menu-search .yueli-field-border:focus-visible {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
   .yueli-app-shell {
     background: var(--yueli-surface-page);
   }
