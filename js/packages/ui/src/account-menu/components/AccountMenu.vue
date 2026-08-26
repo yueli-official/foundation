@@ -167,7 +167,7 @@ const menuContent = computed(() => ({
 
 const menuUi = computed(() => ({
   content: [
-    "min-w-56 rounded-xl p-1 shadow-lg",
+    "yueli-account-menu-surface z-[110] min-w-56 rounded-xl border border-default bg-[var(--yueli-surface-overlay)] p-1 shadow-lg",
     props.triggerMode === "sidebar"
       ? "w-(--reka-dropdown-menu-trigger-width)"
       : "w-56",
@@ -242,3 +242,12 @@ const menuUi = computed(() => ({
     </UButton>
   </UDropdownMenu>
 </template>
+
+<style>
+.yueli-account-menu-surface {
+  z-index: 110;
+  isolation: isolate;
+  opacity: 1 !important;
+  background-color: var(--yueli-surface-overlay) !important;
+}
+</style>

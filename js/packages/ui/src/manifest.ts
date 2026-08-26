@@ -291,12 +291,13 @@ export const publicUiManifest = [
     entrypoint: "@yueli/ui/admin",
     owner: "foundation",
     responsibility:
-      "Own the reusable admin-console shell, sidebar search/navigation, route bar, semantic canvas, page headers, tabbed surfaces and collection-toolbar anatomy with caller-owned brand content, routes and domain data.",
+      "Own the reusable admin-console shell, sidebar search/navigation, route bar, semantic canvas, page headers, tabbed surfaces, editor inspectors and collection-toolbar anatomy with caller-owned brand content, routes and domain data.",
     nonResponsibilities: [
       "business dashboard regions",
       "application routes",
       "authorization",
       "brand assets",
+      "editor business fields or persistence",
       "locale catalogs",
     ],
     runtimeDependencies: ["nuxt", "@nuxt/ui", "tailwindcss", "vue"],
@@ -311,6 +312,7 @@ export const publicUiManifest = [
         "js/apps/ui-lab",
         "js/conformance/ui",
         "yueli-official/blog/web",
+        "yueli-official/docs/web",
         "yueli-official/identity/account",
       ],
       accessibility: ["test/admin-template.test.ts"],

@@ -16,7 +16,7 @@ const buttonStub = defineComponent({
 });
 const passiveStub = defineComponent({
   inheritAttrs: false,
-  props: ["items", "src", "text", "name"],
+  props: ["items", "src", "text", "name", "ui", "content"],
   setup:
     (props, { attrs, slots }) =>
     () =>
@@ -60,6 +60,22 @@ describe("AccountMenu", () => {
       "Open Current user account menu",
     );
     expect(wrapper.text()).toContain("Current user");
+  });
+
+  it("owns an opaque high-layer overlay surface", () => {
+    const wrapper = mount(AccountMenu, {
+      props: { name: "Lin", logout: vi.fn(), messages },
+      global,
+    });
+    const dropdown = wrapper.getComponent(passiveStub);
+    const ui = dropdown.props("ui") as { content?: string[] };
+    expect(ui.content).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("yueli-account-menu-surface"),
+        expect.stringContaining("bg-[var(--yueli-surface-overlay)]"),
+        expect.stringContaining("z-[110]"),
+      ]),
+    );
   });
 
   it("keeps context separate while grouping account utilities together", () => {
