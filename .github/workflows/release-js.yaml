@@ -19,7 +19,7 @@ jobs:
         with:
           version: 10.28.2
           run_install: false
-      - uses: actions/setup-node@49933ea5288ca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24.18.0
           cache: pnpm
@@ -40,7 +40,7 @@ jobs:
           pnpm --filter "./js/packages/*" --recursive pack --dry-run
           pnpm --filter @yueli/ui test:pack
       - name: 安装 CLI Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter @yueli/http-runtime-conformance exec playwright install --with-deps chromium
       - name: 运行 CLI Playwright 验收
         run: |
           pnpm --filter @yueli/http-runtime-conformance test:e2e
@@ -62,7 +62,7 @@ jobs:
         with:
           version: 10.28.2
           run_install: false
-      - uses: actions/setup-node@49933ea5288ca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24.18.0
           cache: pnpm

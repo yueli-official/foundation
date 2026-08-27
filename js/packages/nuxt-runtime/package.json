@@ -27,11 +27,12 @@
   },
   "peerDependencies": {
     "@yueli/http-runtime": "^0.1.0",
-    "nuxt": "^4.4.0"
+    "nuxt": "^4.5.1"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@yueli/http-runtime": "workspace:*",
+    "nuxt": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
