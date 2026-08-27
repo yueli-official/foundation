@@ -1,5 +1,8 @@
 import { addPlugin, createResolver, defineNuxtModule } from "@nuxt/kit";
-import { PLATFORM_SESSION_COOKIE_PREFIX } from "./runtime/ssr-cookies";
+import {
+  PLATFORM_SESSION_COOKIE_PREFIX,
+  platformSessionCookieNames,
+} from "./runtime/ssr-cookies";
 
 export type SsrForwardHeader = "accept-language" | "user-agent";
 
@@ -107,7 +110,7 @@ export default defineNuxtModule<NuxtRuntimeModuleOptions>({
           name,
           {
             ssr: {
-              cookies: [...(target.ssr?.cookies ?? [])],
+              cookies: platformSessionCookieNames(target.ssr?.cookies ?? []),
               cookiePrefixes: [PLATFORM_SESSION_COOKIE_PREFIX],
               headers: [...(target.ssr?.headers ?? [])],
             },

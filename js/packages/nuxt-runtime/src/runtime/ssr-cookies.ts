@@ -1,4 +1,11 @@
 export const PLATFORM_SESSION_COOKIE_PREFIX = "ys_";
+export const LEGACY_PLATFORM_SESSION_COOKIE_NAMES = ["rs_session"] as const;
+
+export function platformSessionCookieNames(
+  explicit: readonly string[],
+): string[] {
+  return [...new Set([...LEGACY_PLATFORM_SESSION_COOKIE_NAMES, ...explicit])];
+}
 
 export function selectSsrCookies(
   inbound: Readonly<Record<string, string>>,
