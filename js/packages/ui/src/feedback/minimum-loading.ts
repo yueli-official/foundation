@@ -18,7 +18,7 @@ export function useMinimumLoading(
   loading: Readonly<Ref<boolean>>,
   options: MinimumLoadingOptions = {},
 ): Readonly<Ref<boolean>> {
-  const minimumMs = options.minimumMs ?? 400;
+  const minimumMs = options.minimumMs ?? 500;
   const delayMs = options.delayMs ?? 0;
   if (
     !Number.isFinite(minimumMs) ||

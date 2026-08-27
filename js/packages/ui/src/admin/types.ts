@@ -34,3 +34,7 @@ export interface AdminShellUi {
   readonly navigationLink?: string;
   readonly navigationIcon?: string;
 }
+export interface AdminIconOption {
+  label: string;
+  value: string;
+}

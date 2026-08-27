@@ -69,7 +69,7 @@ function submitSearch() {
     <div
       v-if="props.selectionCount > 0"
       data-collection-table-selection
-      class="flex min-h-14 items-center border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
+      class="flex min-h-24 items-center border-b border-default bg-primary/5 px-3 py-2 sm:px-4 @xl:min-h-16"
     >
       <div class="min-w-0 flex-1">
         <slot name="selection" :count="props.selectionCount" />
@@ -79,7 +79,7 @@ function submitSearch() {
     <div
       v-else
       data-collection-table-default
-      class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4 @xl:grid-cols-[minmax(14rem,1fr)_auto]"
+      class="grid min-h-24 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4 @xl:min-h-16 @xl:grid-cols-[minmax(14rem,1fr)_auto]"
     >
       <form
         data-collection-table-search
@@ -153,11 +153,7 @@ function submitSearch() {
     </div>
 
     <div
-      v-if="
-        $slots['active-filters'] &&
-        props.filterCount > 0 &&
-        props.selectionCount === 0
-      "
+      v-if="$slots['active-filters'] && props.filterCount > 0"
       data-collection-table-active-filters
       class="flex min-h-10 flex-wrap items-center gap-1.5 border-b border-default px-3 py-2 sm:px-4"
     >

@@ -126,7 +126,7 @@ describe("CollectionTableToolbar", () => {
     expect(wrapper.html()).not.toContain("[&>*]:!w-full");
   });
 
-  it("replaces default controls with selection mode instead of appending a band", async () => {
+  it("replaces default controls without changing toolbar or active-filter height", async () => {
     const wrapper = mount(CollectionTableToolbar, {
       props: {
         label: "Document controls",
@@ -156,12 +156,13 @@ describe("CollectionTableToolbar", () => {
     expect(wrapper.find("[data-collection-table-utilities]").exists()).toBe(
       false,
     );
-    expect(
-      wrapper.find("[data-collection-table-active-filters]").exists(),
-    ).toBe(false);
-    expect(wrapper.get("[data-collection-table-selection]").text()).toContain(
-      "2 selected",
+    expect(wrapper.get("[data-collection-table-active-filters]").text()).toContain(
+      "Status: Draft",
     );
+    const selection = wrapper.get("[data-collection-table-selection]");
+    expect(selection.text()).toContain("2 selected");
+    expect(selection.classes()).toContain("min-h-24");
+    expect(selection.classes()).toContain("@xl:min-h-16");
     expect(wrapper.html()).not.toMatch(/\b(?:sticky|fixed)\b/);
   });
 });

@@ -49,6 +49,23 @@ describe("useMinimumLoading", () => {
     expect(visible.value).toBe(false);
   });
 
+  it("keeps the default indicator visible for 500ms", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
+    const loading = ref(false);
+    const visible = useMinimumLoading(loading);
+
+    loading.value = true;
+    await nextTick();
+    expect(visible.value).toBe(true);
+    loading.value = false;
+    await nextTick();
+    await vi.advanceTimersByTimeAsync(499);
+    expect(visible.value).toBe(true);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(visible.value).toBe(false);
+  });
+
   it("rejects invalid timing configuration", () => {
     expect(() =>
       useMinimumLoading(ref(false), { minimumMs: Number.NaN }),

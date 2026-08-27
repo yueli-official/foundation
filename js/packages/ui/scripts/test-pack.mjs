@@ -85,6 +85,7 @@ try {
     "package/src/account-menu/components/AccountMenu.vue",
     "package/src/account-menu/pattern.ts",
     "package/src/admin/components/AdminConsoleLayout.vue",
+    "package/src/admin/components/AdminIconPicker.vue",
     "package/src/admin/components/AdminPage.vue",
     "package/src/admin/components/AdminShell.vue",
     "package/src/admin/components/EditorInspector.vue",
