@@ -27,8 +27,6 @@ export interface AdminShellUi {
   readonly sidebarBody?: string;
   readonly sidebarFooter?: string;
   readonly sidebarContent?: string;
-  readonly search?: string;
-  readonly searchButton?: string;
   readonly navigationRoot?: string;
   readonly navigationList?: string;
   readonly navigationLink?: string;
@@ -37,4 +35,19 @@ export interface AdminShellUi {
 export interface AdminIconOption {
   label: string;
   value: string;
+  keywords?: readonly string[];
+}
+
+export interface AdminRowActionItem {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: string;
+  readonly to?: string;
+  readonly target?: string;
+  readonly rel?: string;
+  readonly disabled?: boolean;
+  readonly loading?: boolean;
+  readonly hidden?: boolean;
+  readonly tone?: "neutral" | "danger";
+  readonly onSelect?: () => void;
 }

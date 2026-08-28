@@ -86,6 +86,7 @@ describe("EditorInspector", () => {
     });
     expect(docked.classes()).toContain("y-editor-inspector-surface");
     expect(docked.attributes("data-content-class")).toContain("w-[25rem]");
+    expect(docked.attributes("data-content-class")).toContain("z-40");
     expect(docked.attributes("data-footer-class")).toContain("hidden");
     expect(wrapper.get("[data-y-editor-inspector]").attributes("data-inspector-mode")).toBe("docked");
     expect(wrapper.text()).toContain("Inspector body");

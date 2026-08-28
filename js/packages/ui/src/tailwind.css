@@ -1,6 +1,8 @@
 @source "./account-menu/components";
 @source "./admin/components";
 @source "./collection/components";
+@source "./comments/components";
+@source "./comments/admin/components";
 @source "./dashboard/components";
 @source "./feedback/components";
 @source "./navigation/components";

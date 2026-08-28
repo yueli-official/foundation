@@ -64,12 +64,11 @@ function submitSearch() {
   <section
     data-collection-table-toolbar
     :aria-label="props.label"
-    class="@container"
   >
     <div
       v-if="props.selectionCount > 0"
       data-collection-table-selection
-      class="flex min-h-24 items-center border-b border-default bg-primary/5 px-3 py-2 sm:px-4 @xl:min-h-16"
+      class="flex min-h-24 items-center border-b border-default bg-primary/5 px-3 py-2 sm:px-4"
     >
       <div class="min-w-0 flex-1">
         <slot name="selection" :count="props.selectionCount" />
@@ -79,13 +78,13 @@ function submitSearch() {
     <div
       v-else
       data-collection-table-default
-      class="grid min-h-24 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4 @xl:min-h-16 @xl:grid-cols-[minmax(14rem,1fr)_auto]"
+      class="grid min-h-24 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4"
     >
       <form
         data-collection-table-search
         :class="[
           props.searchAction ? 'grid grid-cols-[minmax(0,1fr)_auto]' : 'block',
-          'col-span-2 min-w-0 gap-2 @xl:col-span-1',
+          'col-span-2 min-w-0 gap-2',
         ]"
         role="search"
         @submit.prevent="submitSearch"
@@ -114,7 +113,7 @@ function submitSearch() {
       <div
         v-if="$slots.filters || $slots.utilities"
         data-collection-table-controls
-        class="col-span-2 flex min-w-0 items-center justify-between gap-2 @xl:col-span-1 @xl:justify-end"
+        class="col-span-2 flex min-w-0 items-center justify-between gap-2"
       >
         <UPopover v-if="$slots.filters" v-model:open="filtersOpen">
           <UButton
@@ -126,7 +125,8 @@ function submitSearch() {
             "
             color="neutral"
             variant="outline"
-            size="xs"
+            size="sm"
+            class="h-[1.875rem]"
             :aria-controls="filterPanelId"
             :aria-expanded="filtersOpen"
           />
@@ -161,3 +161,29 @@ function submitSearch() {
     </div>
   </section>
 </template>
+
+<style scoped>
+[data-collection-table-toolbar] {
+  container-type: inline-size;
+}
+
+@container (min-width: 36rem) {
+  [data-collection-table-selection],
+  [data-collection-table-default] {
+    min-height: 4rem;
+  }
+
+  [data-collection-table-default] {
+    grid-template-columns: minmax(14rem, 1fr) auto;
+  }
+
+  [data-collection-table-search],
+  [data-collection-table-controls] {
+    grid-column: span 1 / span 1;
+  }
+
+  [data-collection-table-controls] {
+    justify-content: flex-end;
+  }
+}
+</style>

@@ -44,7 +44,7 @@ onBeforeUnmount(() => {
     class="y-editor-inspector-surface"
     :ui="{
       content: docked
-        ? 'top-16 h-[calc(100svh-4rem)] w-[25rem] max-w-[25rem] border-l border-default bg-default shadow-none'
+        ? 'top-16 z-40 h-[calc(100svh-4rem)] w-[25rem] max-w-[25rem] border-l border-default bg-default shadow-none'
         : 'w-full max-w-md bg-default',
       header: 'border-b border-default bg-default px-5 py-4',
       body: 'bg-default p-5',

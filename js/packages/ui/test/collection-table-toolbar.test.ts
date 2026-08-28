@@ -1,8 +1,18 @@
 // @vitest-environment happy-dom
 import { mount } from "@vue/test-utils";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { defineComponent, h } from "vue";
 import { describe, expect, it } from "vitest";
 import CollectionTableToolbar from "../src/collection/components/CollectionTableToolbar.vue";
+
+const toolbarSource = readFileSync(
+  path.resolve(
+    import.meta.dirname,
+    "../src/collection/components/CollectionTableToolbar.vue",
+  ),
+  "utf8",
+);
 
 const UInput = defineComponent({
   name: "UInput",
@@ -98,6 +108,10 @@ describe("CollectionTableToolbar", () => {
     expect(wrapper.get("[data-collection-table-default]")).toBeTruthy();
     expect(wrapper.get("[data-collection-table-search]")).toBeTruthy();
     expect(wrapper.get("[data-collection-table-controls]")).toBeTruthy();
+    const buttons = wrapper.findAllComponents(UButton);
+    expect(buttons.find((button) => button.props("label") === "Search")?.attributes("size")).toBe("sm");
+    expect(buttons.find((button) => button.props("label") === "Filters · 2")?.attributes("size")).toBe("sm");
+    expect(buttons.find((button) => button.props("label") === "Filters · 2")?.classes()).toContain("h-[1.875rem]");
     expect(
       wrapper.get("[data-collection-table-filter-panel]").text(),
     ).toContain("All");
@@ -112,17 +126,9 @@ describe("CollectionTableToolbar", () => {
     );
     expect(wrapper.html()).not.toMatch(/\b(?:sticky|fixed)\b/);
 
-    const defaultToolbar = wrapper.get("[data-collection-table-default]");
-    expect(defaultToolbar.classes()).toContain(
-      "@xl:grid-cols-[minmax(14rem,1fr)_auto]",
-    );
-    expect(wrapper.get("[data-collection-table-search]").classes()).toContain(
-      "@xl:col-span-1",
-    );
-    expect(wrapper.get("[data-collection-table-controls]").classes()).toContain(
-      "@xl:col-span-1",
-    );
-    expect(defaultToolbar.classes().join(" ")).not.toContain("64rem");
+    expect(toolbarSource).toContain("container-type: inline-size");
+    expect(toolbarSource).toContain("@container (min-width: 36rem)");
+    expect(toolbarSource).toContain("grid-template-columns: minmax(14rem, 1fr) auto");
     expect(wrapper.html()).not.toContain("[&>*]:!w-full");
   });
 
@@ -162,7 +168,9 @@ describe("CollectionTableToolbar", () => {
     const selection = wrapper.get("[data-collection-table-selection]");
     expect(selection.text()).toContain("2 selected");
     expect(selection.classes()).toContain("min-h-24");
-    expect(selection.classes()).toContain("@xl:min-h-16");
+    expect(toolbarSource).toMatch(
+      /\[data-collection-table-selection\],[\s\S]*?min-height: 4rem/,
+    );
     expect(wrapper.html()).not.toMatch(/\b(?:sticky|fixed)\b/);
   });
 });

@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { FOUNDATION_TABLER_ICONS } from "../src/theme/index.js";
+import { ADMIN_TABLER_ICON_OPTIONS } from "../src/admin/icons";
+import { PUBLIC_COMMENT_TABLER_ICONS } from "../src/comments/icons";
 import {
   createTablerIconDelivery,
   normalizeTablerIconName,
@@ -14,7 +16,7 @@ describe("shared Tabler delivery", () => {
       "i-tabler-palette",
     ]);
 
-    expect(delivery.provider).toBe("none");
+    expect(delivery.provider).toBe("server");
     expect(delivery.fallbackToApi).toBe(false);
     expect(delivery.serverBundle).toEqual({ collections: ["tabler"] });
     expect(delivery.clientBundle.icons).toContain("tabler:palette");
@@ -32,6 +34,16 @@ describe("shared Tabler delivery", () => {
     });
 
     for (const icon of Object.values(FOUNDATION_TABLER_ICONS)) {
+      expect(delivery.clientBundle.icons).toContain(
+        normalizeTablerIconName(icon),
+      );
+    }
+    for (const icon of ADMIN_TABLER_ICON_OPTIONS) {
+      expect(delivery.clientBundle.icons).toContain(
+        normalizeTablerIconName(icon.value),
+      );
+    }
+    for (const icon of PUBLIC_COMMENT_TABLER_ICONS) {
       expect(delivery.clientBundle.icons).toContain(
         normalizeTablerIconName(icon),
       );
@@ -56,5 +68,7 @@ describe("shared Tabler delivery", () => {
     expect(moduleSource).toContain("moduleDependencies(nuxt)");
     expect(moduleSource).toContain('"@nuxt/icon"');
     expect(moduleSource).toContain("createTablerIconDelivery");
+    expect(moduleSource).toContain('resolver.resolve("../package.json")');
+    expect(moduleSource).toContain("nuxt.options.watch.push(packageManifest)");
   });
 });

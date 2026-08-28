@@ -41,7 +41,9 @@
     "./collection": "./src/collection/index.ts",
     "./collection/pattern": "./src/collection/pattern.ts",
     "./collection/vue": "./src/collection/vue.ts",
-    "./collection/vue-router": "./src/collection/vue-router.ts"
+    "./collection/vue-router": "./src/collection/vue-router.ts",
+    "./comments": "./src/comments/index.ts",
+    "./comments/admin": "./src/comments/admin/index.ts"
   },
   "scripts": {
     "test:pack": "node scripts/test-pack.mjs",
@@ -53,6 +55,7 @@
   },
   "peerDependencies": {
     "@iconify-json/tabler": "1.2.35",
+    "@iconify/vue": "^5.0.1",
     "@nuxt/icon": "2.4.1",
     "@nuxt/ui": "^4.9.0",
     "nuxt": "^4.5.1",
@@ -67,6 +70,7 @@
   },
   "devDependencies": {
     "@iconify-json/tabler": "catalog:",
+    "@iconify/vue": "catalog:",
     "@nuxt/icon": "catalog:",
     "@nuxt/ui": "catalog:",
     "@types/node": "catalog:",

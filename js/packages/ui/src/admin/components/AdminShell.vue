@@ -142,26 +142,6 @@ function classes(...values: Array<string | undefined>) {
       </template>
 
       <template #default="{ collapsed }">
-        <div
-          v-if="searchGroups.length"
-          :class="['px-0.5', ui.search]"
-          data-admin-sidebar-search
-        >
-          <UDashboardSearchButton
-            v-if="searchGroups.length"
-            :collapsed="collapsed"
-            :label="messages.search"
-            :variant="sidebarAppearance === 'commercial' ? 'soft' : 'outline'"
-            :class="[
-              'min-h-11 w-full rounded-lg',
-              sidebarAppearance === 'commercial'
-                ? 'bg-elevated hover:bg-accented'
-                : 'bg-default/75 ring-default hover:bg-default',
-              ui.searchButton,
-            ]"
-          />
-        </div>
-
         <slot name="sidebar-top" :collapsed="collapsed" />
 
         <div class="admin-shell-nav min-w-0" data-admin-sidebar-primary>
@@ -258,12 +238,6 @@ function classes(...values: Array<string | undefined>) {
         </div>
       </template>
     </UDashboardSidebar>
-
-    <UDashboardSearch
-      v-if="searchGroups.length"
-      :groups="searchGroups.slice()"
-      :placeholder="messages.searchPlaceholder"
-    />
 
     <slot :main-id="mainId" />
   </UDashboardGroup>

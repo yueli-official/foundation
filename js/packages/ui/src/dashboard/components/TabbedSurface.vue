@@ -24,7 +24,7 @@ const tabItems = computed(() => [...props.items]);
   >
     <nav
       :aria-label="navigationLabel"
-      class="overflow-x-auto overflow-y-hidden border-b border-default px-3 pt-2 [scrollbar-width:none] sm:px-5 sm:pt-3 [&::-webkit-scrollbar]:hidden"
+      class="overflow-x-auto overflow-y-hidden border-b border-default px-2 pt-2 [scrollbar-width:none] sm:px-5 sm:pt-3 [&::-webkit-scrollbar]:hidden"
     >
       <UTabs
         v-model="active"

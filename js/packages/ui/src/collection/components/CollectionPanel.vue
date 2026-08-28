@@ -143,6 +143,9 @@ function toggle(item: TItem, key: TKey) {
 
 <template>
   <CollectionFrame :label="label" :labelledby="labelledby">
+    <template v-if="$slots.navigation" #navigation>
+      <slot name="navigation" />
+    </template>
     <template #toolbar>
       <CollectionTableToolbar
         v-model:search="search"
@@ -385,7 +388,8 @@ function toggle(item: TItem, key: TKey) {
 
     <div
       v-else-if="layout === 'grid'"
-      class="grid gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-3"
+      class="grid gap-3 p-3 sm:p-4 @sm/collection:grid-cols-2 @3xl/collection:grid-cols-3"
+      data-collection-grid
     >
       <article
         v-for="item in items"

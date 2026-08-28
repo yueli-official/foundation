@@ -190,6 +190,12 @@
     outline: none !important;
   }
 
+  /* Transient Portal overlays sit above the docked editor inspector (z-40)
+     and below account/global command surfaces (z-100+). */
+  .yueli-transient-overlay {
+    z-index: 60 !important;
+  }
+
   .yueli-app-shell {
     background: var(--yueli-surface-page);
   }

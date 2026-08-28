@@ -1,4 +1,6 @@
 import { FOUNDATION_TABLER_ICONS } from "./theme/index.js";
+import { ADMIN_TABLER_ICON_OPTIONS } from "./admin/icons";
+import { PUBLIC_COMMENT_TABLER_ICONS } from "./comments/icons";
 
 const tablerCssName = /^i-tabler-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 const tablerIconifyName = /^tabler:([a-z0-9]+(?:-[a-z0-9]+)*)$/;
@@ -17,14 +19,19 @@ export function normalizeTablerIconName(value: string): string {
 export function createTablerIconDelivery(dynamicIcons: readonly string[] = []) {
   const icons = Array.from(
     new Set(
-      [...Object.values(FOUNDATION_TABLER_ICONS), ...dynamicIcons].map(
+      [
+        ...Object.values(FOUNDATION_TABLER_ICONS),
+        ...ADMIN_TABLER_ICON_OPTIONS.map((icon) => icon.value),
+        ...PUBLIC_COMMENT_TABLER_ICONS,
+        ...dynamicIcons,
+      ].map(
         normalizeTablerIconName,
       ),
     ),
   ).sort();
 
   return {
-    provider: "none" as const,
+    provider: "server" as const,
     fallbackToApi: false as const,
     serverBundle: { collections: ["tabler"] },
     clientBundle: {

@@ -93,6 +93,47 @@ const messages: CollectionPanelMessages = {
 };
 
 describe("CollectionPanel", () => {
+  it("adapts grid columns to its collection container", () => {
+    const items = [{ id: "one", title: "First" }];
+    const wrapper = mount(CollectionPanel, {
+      props: {
+        label: "Records",
+        items,
+        itemKey: (item: unknown) => (item as (typeof items)[number]).id,
+        itemLabel: (item: unknown) => (item as (typeof items)[number]).title,
+        messages,
+        total: 1,
+        page: 1,
+        pageSize: 10,
+        layout: "grid",
+      },
+      slots: {
+        item: ({ item }: { item: unknown }) =>
+          (item as (typeof items)[number]).title,
+      },
+      global: {
+        components: {
+          UInput,
+          UButton,
+          UCheckbox,
+          USelect: passiveStub,
+          USelectMenu: passiveStub,
+          UPopover,
+          UPagination: passiveStub,
+          USkeleton: passiveStub,
+          UIcon: passiveStub,
+        },
+      },
+    });
+
+    expect(wrapper.get("[data-collection-grid]").classes()).toEqual(
+      expect.arrayContaining([
+        "@sm/collection:grid-cols-2",
+        "@3xl/collection:grid-cols-3",
+      ]),
+    );
+  });
+
   it("owns search, item selection and result anatomy through one Interface", async () => {
     const items = [
       { id: "one", title: "First" },
@@ -240,13 +281,15 @@ describe("CollectionPanel", () => {
             name: "USelectMenu",
             inheritAttrs: false,
             props: ["searchInput"],
-            setup: (props, { attrs }) => () =>
-              h("div", {
-                ...attrs,
-                "data-search-placeholder": (
-                  props.searchInput as { placeholder?: string }
-                )?.placeholder,
-              }),
+            setup:
+              (props, { attrs }) =>
+              () =>
+                h("div", {
+                  ...attrs,
+                  "data-search-placeholder": (
+                    props.searchInput as { placeholder?: string }
+                  )?.placeholder,
+                }),
           }),
           UPopover,
           UPagination: passiveStub,

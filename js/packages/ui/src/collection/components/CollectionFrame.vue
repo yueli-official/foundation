@@ -34,6 +34,7 @@ function toggleControls() {
     :aria-labelledby="labelledby"
     class="@container/collection yueli-card overflow-clip"
   >
+    <slot v-if="$slots.navigation" name="navigation" />
     <slot v-if="$slots.toolbar" name="toolbar" />
     <template v-else>
       <div class="border-b border-default p-3 sm:p-4">

@@ -82,6 +82,8 @@ describe("dashboard Patterns", () => {
     expect(wrapper.classes()).toContain("yueli-card");
     expect(wrapper.get("nav").attributes("aria-label")).toBe("Asset sections");
     expect(wrapper.get("nav").classes()).toContain("overflow-y-hidden");
+    expect(wrapper.get("nav").classes()).toContain("px-2");
+    expect(wrapper.get("nav").classes()).toContain("sm:px-5");
     expect(wrapper.findAll("button").map((button) => button.text())).toEqual([
       "Library",
       "Storage",

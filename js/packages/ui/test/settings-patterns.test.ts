@@ -58,11 +58,13 @@ describe("settings Patterns", () => {
 
     const section = mount(SettingSection, {
       props: { title: "Identity", description: "Public profile" },
-      slots: { default: "Fields" },
+      slots: { default: "Fields", actions: "Add field" },
     });
     expect(section.text()).toContain("Identity");
     expect(section.text()).toContain("Fields");
-    expect(section.get("section").classes()).toContain("bg-elevated");
+    expect(section.get("section").classes()).toContain("bg-default");
+    expect(section.get("[data-setting-section-actions]").text()).toBe("Add field");
+    expect(section.get("[data-setting-section-body]").text()).toBe("Fields");
   });
 
   it("exposes one live save region with caller-owned labels", async () => {

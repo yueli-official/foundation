@@ -40,8 +40,14 @@ const yueliUiModule = defineNuxtModule<YueliUiModuleOptions>({
       },
     };
   },
-  setup(options) {
+  setup(options, nuxt) {
     const resolver = createResolver(import.meta.url);
+    const packageManifest = resolver.resolve("../package.json");
+    if (!nuxt.options.watch.includes(packageManifest)) {
+      // Vite caches package export maps. Local-source consumers must restart
+      // their Nuxt resolver when Foundation adds a new public subpath.
+      nuxt.options.watch.push(packageManifest);
+    }
 
     addImports([
       {
@@ -58,6 +64,7 @@ const yueliUiModule = defineNuxtModule<YueliUiModuleOptions>({
       "account-menu",
       "admin",
       "collection",
+      "comments",
       "dashboard",
       "feedback",
       "navigation",

@@ -35,6 +35,8 @@ Current public surface:
 - `@yueli/ui/collection/vue` — Vue setup lifecycle, reactive snapshot and data-query invalidation Adapter.
 - `@yueli/ui/collection/vue-router` — optional Vue Router query Adapter plus a reactive query-only composable for host-owned data loaders.
 - `@yueli/ui/collection/pattern` — complete `CollectionPanel`, lower-level `CollectionFrame`, adaptive table toolbar, and composable Toolbar/Pagination/Dock/Footer/Tabs/View/selection patterns.
+- `@yueli/ui/comments` — public two-level comment threads, sorting, nested reply timeline, plain-text composer and caller-supplied data/auth adapters.
+- `@yueli/ui/comments/admin` — comment moderation collection, canonical source/user/date columns, responsive rows and caller-owned data/command adapters.
 
 Enable the Nuxt module and package Tailwind source:
 
@@ -50,17 +52,25 @@ export default defineNuxtConfig({
 ```
 
 The module owns deterministic local Tabler delivery for every consumer: it
-pins the Nuxt Icon peer, bundles the Foundation core icons plus scanned source
-icons and the finite `tablerIcons` allowlist, and disables runtime API fallback.
-Persisted icon values must be validated against the same application-owned
-allowlist; do not add the whole Tabler collection to the client bundle.
+pins the Nuxt Icon peer, bundles Foundation/core and application allowlist
+icons, and resolves other valid Tabler names through Nuxt Icon's same-origin
+server provider. External Iconify fallback remains disabled.
+
+`YAdminIconPicker` provides the shared searchable Tabler manager for settings,
+navigation and content metadata. It shows a preloaded Chinese-labelled quick
+catalog immediately, then lazy-loads the complete Tabler catalog only when the
+picker is mounted. Search therefore includes names such as `fish` without
+adding the full collection to the application entry bundle. Persisted choices
+remain available after reload through the same-origin server provider. Products
+may replace the catalog through `options` when a domain intentionally needs a
+smaller controlled set.
 
 ### Upgrading to 0.2.0
 
-Install the pinned `@nuxt/icon@2.4.1` and `@iconify-json/tabler@1.2.35` peers,
-then list every Tabler name that can arrive from persisted data in
-`yueliUi.tablerIcons`. Runtime icon API fallback is intentionally disabled, so
-an unlisted dynamic name is a contract error instead of a late network fetch.
+Install the pinned `@nuxt/icon@2.4.1`, `@iconify-json/tabler@1.2.35` and
+`@iconify/vue@5.0.1` peers. The provider is the local Nuxt server and external
+Iconify API fallback is disabled; `yueliUi.tablerIcons` remains the fast-path
+allowlist for icons that must render without a lazy lookup.
 
 ```css
 @import "tailwindcss";
@@ -118,6 +128,60 @@ Use the admin template with Nuxt UI primitives and caller-owned domain content:
   </template>
   <DocumentManagePage />
 </YAdminConsoleLayout>
+```
+
+Standard canvas pages use `YManagePage`; it requires the page icon and owns the
+accessible heading, right-side action area and the fixed `space-y-5` rhythm
+between the heading and page body. Collection pages place `YCollectionPanel`
+inside it, so search, filters, selection and pagination remain one collection
+surface instead of becoming a second page toolbar:
+
+```vue
+<YManagePage id="documents" title="Documents" icon="i-tabler-file-text">
+  <template #actions><UButton label="New document" /></template>
+  <YCollectionPanel v-bind="collection" />
+</YManagePage>
+```
+
+`PageHeader` remains the lower-level seam for exceptional compositions. New
+standard pages should not call it directly because doing so makes the required
+icon and vertical rhythm caller-owned again.
+
+Dense collection rows use `YAdminRowActions`. Callers provide only action
+identity, label, Tabler icon, target or callback; the Module owns tooltip,
+accessible naming, optical centering, responsive hit area, danger treatment and
+the shared 16px glyph. Use `presentation="inline"` for the few justified direct
+actions and `presentation="overflow"` for low-frequency action groups:
+
+```vue
+<YAdminRowActions
+  :label="`${item.title} actions`"
+  :items="[
+    { id: 'view', label: 'View', icon: 'i-tabler-external-link', to: item.href },
+    { id: 'edit', label: 'Edit', icon: 'i-tabler-pencil', onSelect: () => edit(item) },
+  ]"
+/>
+```
+
+Settings workflows use `YSettingSection` as the standard configuration Card.
+It owns a compact title header, optional right-side actions and a full-width
+body below; products should not recreate left-label/right-form grids or custom
+Card headers. Omit `description` when the field labels already explain the
+section.
+
+Public content comments use `PublicCommentThread`. The product owns loading and
+submission adapters; the Module owns thread cards, nested replies, oldest/newest
+sorting, composer state and anonymous/login presentation:
+
+```vue
+<PublicCommentThread
+  v-model:order="order"
+  :comments="comments"
+  :total="total"
+  :messages="messages"
+  :format-time="formatTime"
+  :submit="submitComment"
+/>
 ```
 
 `YAdminConsoleLayout` is SSR-safe and is the server-rendered application shell. Do not

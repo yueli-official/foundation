@@ -28,6 +28,17 @@ describe("public theme contract", () => {
       expect(preset.ui[component].slots.base).toBe("yueli-field-border");
     }
     expect(preset.ui.selectMenu.slots.input).toBe("yueli-select-menu-search");
+    for (const component of [
+      "select",
+      "selectMenu",
+      "inputMenu",
+      "dropdownMenu",
+      "popover",
+    ] as const) {
+      expect(preset.ui[component].slots.content).toBe(
+        "yueli-transient-overlay",
+      );
+    }
     expect(preset.ui.icons).toBe(FOUNDATION_TABLER_ICONS);
     expect(DEFAULT_UI_THEME).toEqual({ primary: "blue", neutral: "stone" });
   });
@@ -75,6 +86,8 @@ describe("public theme contract", () => {
     expect(css).toContain(".yueli-interactive");
     expect(css).toContain(".yueli-field-border");
     expect(css).toContain(".yueli-select-menu-search .yueli-field-border");
+    expect(css).toContain(".yueli-transient-overlay");
+    expect(css).toContain("z-index: 60 !important");
     expect(css).toContain("border-color: var(--ui-primary) !important");
     expect(css).toContain("--ui-warning: var(--ui-color-warning-800)");
     expect(css).toContain("--ui-warning: var(--ui-color-warning-400)");

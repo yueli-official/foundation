@@ -88,9 +88,6 @@ const shellUi: AdminShellUi = {
   sidebarHeader: "shrink-0",
   sidebarBody: "min-h-0 flex-1 overflow-y-auto",
   sidebarFooter: "shrink-0",
-  search: "mb-3 mt-2",
-  searchButton:
-    "border-transparent bg-[var(--yueli-admin-search)] text-muted shadow-none hover:bg-accented",
   navigationLink:
     "group relative min-h-12 rounded-xl border border-transparent px-2.5 py-2 text-muted transition-colors after:pointer-events-none after:absolute after:start-2.5 after:top-1/2 after:size-8 after:-translate-y-1/2 after:rounded-lg after:bg-muted after:content-[''] hover:border-default hover:bg-primary/5 hover:text-default data-[active]:border-primary/25 data-[active]:bg-primary/10 data-[active]:text-highlighted data-[active]:shadow-[inset_2px_0_var(--ui-primary)] data-[active]:after:bg-primary/10",
   navigationIcon:
@@ -104,7 +101,6 @@ const shellUi: AdminShellUi = {
     v-model:open="sidebarOpen"
     :navigation="shellNavigation"
     :secondary-navigation="shellSecondaryNavigation"
-    :search-groups="searchGroups"
     :messages="messages"
     sidebar-appearance="commercial"
     :storage-key="storageKey"

@@ -60,11 +60,21 @@ export interface UiPreset {
     readonly input: { readonly slots: { readonly base: string } };
     readonly inputNumber: { readonly slots: { readonly base: string } };
     readonly textarea: { readonly slots: { readonly base: string } };
-    readonly select: { readonly slots: { readonly base: string } };
-    readonly selectMenu: {
-      readonly slots: { readonly base: string; readonly input: string };
+    readonly select: {
+      readonly slots: { readonly base: string; readonly content: string };
     };
-    readonly inputMenu: { readonly slots: { readonly base: string } };
+    readonly selectMenu: {
+      readonly slots: {
+        readonly base: string;
+        readonly input: string;
+        readonly content: string;
+      };
+    };
+    readonly inputMenu: {
+      readonly slots: { readonly base: string; readonly content: string };
+    };
+    readonly dropdownMenu: { readonly slots: { readonly content: string } };
+    readonly popover: { readonly slots: { readonly content: string } };
     readonly icons: UiIconMap;
   };
 }
@@ -90,11 +100,17 @@ export declare const foundationUiPreset: Readonly<{
   input: Readonly<{ slots: Readonly<{ base: string }> }>;
   inputNumber: Readonly<{ slots: Readonly<{ base: string }> }>;
   textarea: Readonly<{ slots: Readonly<{ base: string }> }>;
-  select: Readonly<{ slots: Readonly<{ base: string }> }>;
-  selectMenu: Readonly<{
-    slots: Readonly<{ base: string; input: string }>;
+  select: Readonly<{
+    slots: Readonly<{ base: string; content: string }>;
   }>;
-  inputMenu: Readonly<{ slots: Readonly<{ base: string }> }>;
+  selectMenu: Readonly<{
+    slots: Readonly<{ base: string; input: string; content: string }>;
+  }>;
+  inputMenu: Readonly<{
+    slots: Readonly<{ base: string; content: string }>;
+  }>;
+  dropdownMenu: Readonly<{ slots: Readonly<{ content: string }> }>;
+  popover: Readonly<{ slots: Readonly<{ content: string }> }>;
 }>;
 
 export declare function createUiPreset(

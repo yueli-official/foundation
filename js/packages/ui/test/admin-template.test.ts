@@ -4,6 +4,7 @@ import { defineComponent, h } from "vue";
 import { describe, expect, it } from "vitest";
 import AdminPage from "../src/admin/components/AdminPage.vue";
 import AdminConsoleLayout from "../src/admin/components/AdminConsoleLayout.vue";
+import ManagePage from "../src/admin/components/ManagePage.vue";
 import AdminShell from "../src/admin/components/AdminShell.vue";
 
 const passthrough = (name: string, tag = "div") =>
@@ -174,7 +175,7 @@ describe("admin template", () => {
     expect(sidebar.attributes("class")).not.toContain("bg-default");
   });
 
-  it("owns the dashboard shell, search and navigation wiring", () => {
+  it("owns the dashboard shell and navigation wiring without global search", () => {
     const wrapper = mount(AdminShell, {
       props: {
         navigation: [{ label: "Home", to: "/" }],
@@ -217,10 +218,8 @@ describe("admin template", () => {
     expect(wrapper.get('[role="complementary"]')).toBeTruthy();
     expect(wrapper.get('nav[aria-label="Home"]')).toBeTruthy();
     expect(wrapper.get('nav[aria-label="Help"]')).toBeTruthy();
-    expect(wrapper.get("[data-search-button]").text()).toBe("Search");
-    expect(wrapper.get("[data-search-placeholder]").attributes()).toMatchObject(
-      { "data-search-placeholder": "Search pages" },
-    );
+    expect(wrapper.findComponent({ name: "UDashboardSearchButton" }).exists()).toBe(false);
+    expect(wrapper.findComponent({ name: "UDashboardSearch" }).exists()).toBe(false);
     expect(wrapper.get("[data-main-id]").attributes("data-main-id")).toBe(
       "workspace-main",
     );
@@ -238,8 +237,6 @@ describe("admin template", () => {
         ui: {
           sidebar: "h-svh bg-default",
           sidebarBody: "min-h-0 overflow-y-auto",
-          search: "my-2",
-          searchButton: "bg-muted",
           navigationLink: "rounded-xl",
           navigationIcon: "size-8",
         },
@@ -276,17 +273,9 @@ describe("admin template", () => {
         wrapper.findComponent({ name: "UDashboardSidebar" }).props("ui").footer,
       ).split(/\s+/),
     ).not.toContain("border-t");
-    const searchButton = wrapper.findComponent({
-      name: "UDashboardSearchButton",
-    });
-    expect(searchButton.props("variant")).toBe("soft");
-    expect(searchButton.attributes("class")).toContain("bg-muted");
     const sidebar = wrapper.findComponent({ name: "UDashboardSidebar" });
     expect(sidebar.attributes("class")).toContain("h-svh");
     expect(String(sidebar.props("ui").body)).toContain("min-h-0");
-    expect(wrapper.get("[data-admin-sidebar-search]").classes()).toContain(
-      "my-2",
-    );
     const navigation = wrapper.findComponent({ name: "UNavigationMenu" });
     expect(String(navigation.props("ui").link)).toContain("rounded-xl");
     expect(String(navigation.props("ui").linkLeadingIcon)).toContain("size-8");
@@ -350,5 +339,36 @@ describe("admin template", () => {
       "overflow-y-auto",
     );
     expect(wrapper.text()).toContain("Pagination");
+  });
+
+  it("owns the canvas page heading, icon, actions and vertical rhythm", () => {
+    const wrapper = mount(ManagePage, {
+      props: {
+        id: "images",
+        title: "Images",
+        icon: "i-tabler-photo",
+        bodyClass: "results-grid",
+      },
+      attrs: { "data-gallery-page": "" },
+      slots: {
+        subtitle: "Optional context",
+        actions: "Upload",
+        default: "Results",
+        footer: "Pagination",
+      },
+      global,
+    });
+
+    const page = wrapper.get("[data-manage-page]");
+    expect(page.attributes("aria-labelledby")).toBe("images-title");
+    expect(page.classes()).toContain("space-y-5");
+    expect(page.attributes()).toHaveProperty("data-gallery-page");
+    expect(wrapper.get("[data-manage-page-icon]")).toBeTruthy();
+    expect(wrapper.get("#images-title").text()).toBe("Images");
+    expect(wrapper.get("[data-manage-page-actions]").text()).toBe("Upload");
+    const body = wrapper.get(".results-grid");
+    expect(body.text()).toBe("Results");
+    expect(body.classes()).toContain("space-y-5");
+    expect(wrapper.get("footer").text()).toBe("Pagination");
   });
 });

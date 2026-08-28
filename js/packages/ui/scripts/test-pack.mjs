@@ -87,8 +87,11 @@ try {
     "package/src/admin/components/AdminConsoleLayout.vue",
     "package/src/admin/components/AdminIconPicker.vue",
     "package/src/admin/components/AdminPage.vue",
+    "package/src/admin/components/AdminRowActions.vue",
     "package/src/admin/components/AdminShell.vue",
     "package/src/admin/components/EditorInspector.vue",
+    "package/src/admin/components/ManagePage.vue",
+    "package/src/admin/icons.ts",
     "package/src/admin/index.ts",
     "package/src/admin/navigation.ts",
     "package/src/admin/types.ts",
@@ -114,6 +117,14 @@ try {
     "package/src/collection/vue.ts",
     "package/src/collection/vue-router.ts",
     "package/src/collection/workflow.ts",
+    "package/src/comments/admin/components/CommentModerationCollection.vue",
+    "package/src/comments/admin/index.ts",
+    "package/src/comments/admin/types.ts",
+    "package/src/comments/components/PublicCommentComposer.vue",
+    "package/src/comments/components/PublicCommentThread.vue",
+    "package/src/comments/icons.ts",
+    "package/src/comments/index.ts",
+    "package/src/comments/types.ts",
     "package/src/dashboard/components/DashboardLayout.vue",
     "package/src/dashboard/components/PageHeader.vue",
     "package/src/dashboard/components/TabbedSurface.vue",
@@ -215,8 +226,12 @@ try {
     join(consumerRoot, "app", "app.vue"),
     `<script setup lang="ts">
 import { createCollectionRouteQueryCodec, createJsonCollectionQueryPolicy } from "@yueli/ui/collection";
+import { PublicCommentThread } from "@yueli/ui/comments";
+import type { PublicCommentMessages } from "@yueli/ui/comments";
+import { CommentModerationCollection } from "@yueli/ui/comments/admin";
+import type { CommentModerationCollectionActions, CommentModerationCollectionModel } from "@yueli/ui/comments/admin";
 import type { AccountMenuAppearance, AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
-import { createAdminNavigationSearchItems, normalizeAdminNavigation } from "@yueli/ui/admin";
+import { AdminRowActions, createAdminNavigationSearchItems, normalizeAdminNavigation } from "@yueli/ui/admin";
 import type { AdminNavigationItem, AdminSearchGroup, AdminShellMessages } from "@yueli/ui/admin";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
@@ -308,6 +323,31 @@ const loadOwners: RemoteSelectLoader = async ({ signal }) => {
 const imageDecision = evaluateImageOptimization({ name: "packed.png", type: "image/png", size: 2_000_000 });
 const readingHeadings = [{ id: "packed-heading", text: "Packed heading", level: 2 }];
 const shareMessages = { weibo: "Weibo", x: "X", system: "Share", copy: "Copy", copied: "Copied", copyFailed: "Copy failed" };
+const rowActions = [
+  { id: "view", label: "View packed row", icon: "i-tabler-external-link", to: "/" },
+  { id: "edit", label: "Edit packed row", icon: "i-tabler-pencil", onSelect: () => undefined },
+];
+const commentMessages: PublicCommentMessages = {
+  count: (count) => count + " comments", replies: (count) => count + " replies",
+  sort: "Comment order", loading: "Loading comments", oldest: "Oldest", newest: "Newest",
+  reply: "Reply", cancelReply: "Cancel", anonymous: "Anonymous", empty: "No comments",
+  closed: "Comments closed", loadError: "Comments unavailable", retry: "Retry",
+  writeComment: "Write a comment", writeReply: "Write a reply", authorName: "Name",
+  authorEmail: "Email", anonymousHint: "Anonymous comments are moderated", login: "Sign in",
+  submit: "Comment", submitReply: "Reply", submitted: "Published", pending: "Pending",
+  submitError: "Unable to comment", nameRequired: "Name is required",
+};
+const moderationModel: CommentModerationCollectionModel = {
+  search: "", searchPlaceholder: "Search comments", items: [], state: "ready",
+  total: 0, page: 1, pageSize: 20, sortOrder: "desc", lifecycle: "all",
+};
+const moderationActions: CommentModerationCollectionActions = {
+  updateSearch: () => undefined, search: () => undefined,
+  controlChange: () => undefined, clearFilters: () => undefined,
+  retry: () => undefined, sort: () => undefined,
+  lifecycleChange: () => undefined,
+  pageChange: () => undefined, pageSizeChange: () => undefined,
+};
 void optimizeImageFile;
 </script>
 
@@ -340,6 +380,9 @@ void optimizeImageFile;
     <YBackToTop label="Back to top" :threshold="0" />
     <ReadingTableOfContents :items="readingHeadings" />
     <ContentShareActions title="Packed content" url="https://example.test/packed" :messages="shareMessages" />
+    <AdminRowActions label="Packed row actions" :items="rowActions" />
+    <PublicCommentThread :comments="[]" :total="0" :messages="commentMessages" :format-time="String" />
+    <CommentModerationCollection :model="moderationModel" :actions="moderationActions" :format-date="String" />
     <h2 id="packed-heading">Packed heading</h2>
     <YSettingSection title="Settings"><input v-model="settingsForm.title" /></YSettingSection>
     </YAdminPage>
@@ -363,6 +406,15 @@ void optimizeImageFile;
   if (!generatedCss.some((source) => source.includes("collection"))) {
     throw new Error(
       "Packed consumer CSS is missing CollectionFrame Tailwind selectors.",
+    );
+  }
+  if (
+    !generatedCss.some((source) =>
+      source.includes("minmax(16rem,1.4fr)"),
+    )
+  ) {
+    throw new Error(
+      "Packed consumer CSS is missing CommentModerationCollection grid selectors.",
     );
   }
   if (

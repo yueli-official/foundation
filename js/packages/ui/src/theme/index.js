@@ -60,14 +60,31 @@ export const foundationUiPreset = Object.freeze({
   input: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
   inputNumber: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
   textarea: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
-  select: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
+  select: Object.freeze({
+    slots: Object.freeze({
+      base: "yueli-field-border",
+      content: "yueli-transient-overlay",
+    }),
+  }),
   selectMenu: Object.freeze({
     slots: Object.freeze({
       base: "yueli-field-border",
       input: "yueli-select-menu-search",
+      content: "yueli-transient-overlay",
     }),
   }),
-  inputMenu: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
+  inputMenu: Object.freeze({
+    slots: Object.freeze({
+      base: "yueli-field-border",
+      content: "yueli-transient-overlay",
+    }),
+  }),
+  dropdownMenu: Object.freeze({
+    slots: Object.freeze({ content: "yueli-transient-overlay" }),
+  }),
+  popover: Object.freeze({
+    slots: Object.freeze({ content: "yueli-transient-overlay" }),
+  }),
 });
 
 /**
@@ -107,6 +124,8 @@ export function createUiPreset(theme = DEFAULT_UI_THEME, options = {}) {
       select: foundationUiPreset.select,
       selectMenu: foundationUiPreset.selectMenu,
       inputMenu: foundationUiPreset.inputMenu,
+      dropdownMenu: foundationUiPreset.dropdownMenu,
+      popover: foundationUiPreset.popover,
       icons: hasIconOverrides
         ? { ...FOUNDATION_TABLER_ICONS, ...options.icons }
         : FOUNDATION_TABLER_ICONS,
