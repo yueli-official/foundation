@@ -1,6 +1,8 @@
 module github.com/yueli-official/foundation/go
 
-go 1.25.12
+go 1.25.13
+
+retract v0.3.0 // Built with vulnerable Go 1.25.12; use v0.3.1 or later.
 
 require (
 	github.com/casbin/casbin/v3 v3.10.0
@@ -45,7 +47,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
