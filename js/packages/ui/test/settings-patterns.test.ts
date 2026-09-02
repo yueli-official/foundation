@@ -63,7 +63,9 @@ describe("settings Patterns", () => {
     expect(section.text()).toContain("Identity");
     expect(section.text()).toContain("Fields");
     expect(section.get("section").classes()).toContain("bg-default");
-    expect(section.get("[data-setting-section-actions]").text()).toBe("Add field");
+    expect(section.get("[data-setting-section-actions]").text()).toBe(
+      "Add field",
+    );
     expect(section.get("[data-setting-section-body]").text()).toBe("Fields");
   });
 

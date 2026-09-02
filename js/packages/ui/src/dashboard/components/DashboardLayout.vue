@@ -77,19 +77,18 @@ const copy = computed(() => ({
           :variant="appearance === 'commercial' ? 'soft' : 'outline'"
           data-dashboard-panel
           :class="appearance === 'commercial' ? 'bg-elevated divide-y-0' : ''"
-          :ui="appearance === 'commercial'
-            ? {
-                header: 'px-5 pb-2 pt-5 sm:px-5',
-                body: 'px-5 pb-5 pt-2 sm:px-5 sm:pb-5 sm:pt-2',
-              }
-            : undefined"
+          :ui="
+            appearance === 'commercial'
+              ? {
+                  header: 'px-5 pb-2 pt-5 sm:px-5',
+                  body: 'px-5 pb-5 pt-2 sm:px-5 sm:pb-5 sm:pt-2',
+                }
+              : undefined
+          "
           :aria-labelledby="`${id}-pending`"
         >
           <template #header>
-            <div
-              data-dashboard-panel-header
-              class="flex items-start gap-3"
-            >
+            <div data-dashboard-panel-header class="flex items-start gap-3">
               <span
                 class="grid size-8 shrink-0 place-items-center rounded-lg bg-warning/10 text-warning"
                 aria-hidden="true"
@@ -118,19 +117,18 @@ const copy = computed(() => ({
           :variant="appearance === 'commercial' ? 'soft' : 'outline'"
           data-dashboard-panel
           :class="appearance === 'commercial' ? 'bg-elevated divide-y-0' : ''"
-          :ui="appearance === 'commercial'
-            ? {
-                header: 'px-5 pb-3 pt-5 sm:px-5',
-                body: 'p-0 sm:p-0',
-              }
-            : { body: 'p-0 sm:p-0' }"
+          :ui="
+            appearance === 'commercial'
+              ? {
+                  header: 'px-5 pb-3 pt-5 sm:px-5',
+                  body: 'p-0 sm:p-0',
+                }
+              : { body: 'p-0 sm:p-0' }
+          "
           :aria-labelledby="`${id}-recent`"
         >
           <template #header>
-            <div
-              data-dashboard-panel-header
-              class="flex items-start gap-3"
-            >
+            <div data-dashboard-panel-header class="flex items-start gap-3">
               <span
                 class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
                 aria-hidden="true"
@@ -164,12 +162,14 @@ const copy = computed(() => ({
           :variant="appearance === 'commercial' ? 'soft' : 'outline'"
           data-dashboard-panel
           :class="appearance === 'commercial' ? 'bg-elevated divide-y-0' : ''"
-          :ui="appearance === 'commercial'
-            ? {
-                header: 'p-5 pb-3 sm:p-5 sm:pb-3',
-                body: 'px-5 pb-5 pt-0 sm:px-5 sm:pb-5 sm:pt-0',
-              }
-            : undefined"
+          :ui="
+            appearance === 'commercial'
+              ? {
+                  header: 'p-5 pb-3 sm:p-5 sm:pb-3',
+                  body: 'px-5 pb-5 pt-0 sm:px-5 sm:pb-5 sm:pt-0',
+                }
+              : undefined
+          "
           :aria-labelledby="`${id}-health`"
         >
           <template #header>
@@ -202,12 +202,14 @@ const copy = computed(() => ({
           :variant="appearance === 'commercial' ? 'soft' : 'outline'"
           data-dashboard-panel
           :class="appearance === 'commercial' ? 'bg-elevated divide-y-0' : ''"
-          :ui="appearance === 'commercial'
-            ? {
-                header: 'p-5 pb-3 sm:p-5 sm:pb-3',
-                body: 'px-5 pb-5 pt-0 sm:px-5 sm:pb-5 sm:pt-0',
-              }
-            : undefined"
+          :ui="
+            appearance === 'commercial'
+              ? {
+                  header: 'p-5 pb-3 sm:p-5 sm:pb-3',
+                  body: 'px-5 pb-5 pt-0 sm:px-5 sm:pb-5 sm:pt-0',
+                }
+              : undefined
+          "
           :aria-labelledby="`${id}-actions`"
         >
           <template #header>

@@ -157,8 +157,18 @@ actions and `presentation="overflow"` for low-frequency action groups:
 <YAdminRowActions
   :label="`${item.title} actions`"
   :items="[
-    { id: 'view', label: 'View', icon: 'i-tabler-external-link', to: item.href },
-    { id: 'edit', label: 'Edit', icon: 'i-tabler-pencil', onSelect: () => edit(item) },
+    {
+      id: 'view',
+      label: 'View',
+      icon: 'i-tabler-external-link',
+      to: item.href,
+    },
+    {
+      id: 'edit',
+      label: 'Edit',
+      icon: 'i-tabler-pencil',
+      onSelect: () => edit(item),
+    },
   ]"
 />
 ```

@@ -1,36 +1,39 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from "vue";
 
-const props = withDefaults(defineProps<{
-  title: string
-  description?: string
-}>(), {
-  description: undefined,
-})
+const props = withDefaults(
+  defineProps<{
+    title: string;
+    description?: string;
+  }>(),
+  {
+    description: undefined,
+  },
+);
 
-const open = defineModel<boolean>('open', { default: false })
-const docked = ref(false)
-let media: MediaQueryList | undefined
+const open = defineModel<boolean>("open", { default: false });
+const docked = ref(false);
+let media: MediaQueryList | undefined;
 
 function syncMode(event?: MediaQueryListEvent) {
-  const next = event?.matches ?? media?.matches ?? false
-  if (open.value && next !== docked.value) open.value = false
-  docked.value = next
+  const next = event?.matches ?? media?.matches ?? false;
+  if (open.value && next !== docked.value) open.value = false;
+  docked.value = next;
 }
 
 function close() {
-  open.value = false
+  open.value = false;
 }
 
 onMounted(() => {
-  media = window.matchMedia('(min-width: 1280px)')
-  syncMode()
-  media.addEventListener('change', syncMode)
-})
+  media = window.matchMedia("(min-width: 1280px)");
+  syncMode();
+  media.addEventListener("change", syncMode);
+});
 
 onBeforeUnmount(() => {
-  media?.removeEventListener('change', syncMode)
-})
+  media?.removeEventListener("change", syncMode);
+});
 </script>
 
 <template>

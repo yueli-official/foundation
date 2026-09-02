@@ -1,31 +1,31 @@
 <script setup lang="ts">
 import { addCollection } from "@iconify/vue";
 import { computed, onMounted, ref, shallowRef } from "vue";
-import {
-  ADMIN_TABLER_ICON_OPTIONS,
-  filterAdminIconOptions,
-} from "../icons";
+import { ADMIN_TABLER_ICON_OPTIONS, filterAdminIconOptions } from "../icons";
 import type { AdminIconOption } from "../types";
 
-const props = withDefaults(defineProps<{
-  modelValue?: string;
-  options?: readonly AdminIconOption[];
-  disabled?: boolean;
-  compact?: boolean;
-  fullCatalog?: boolean;
-  resultLimit?: number;
-  searchPlaceholder?: string;
-  emptyLabel?: string;
-}>(), {
-  modelValue: "",
-  options: () => [],
-  disabled: false,
-  compact: false,
-  fullCatalog: true,
-  resultLimit: 96,
-  searchPlaceholder: "搜索全部 Tabler 图标",
-  emptyLabel: "没有匹配的图标",
-});
+const props = withDefaults(
+  defineProps<{
+    modelValue?: string;
+    options?: readonly AdminIconOption[];
+    disabled?: boolean;
+    compact?: boolean;
+    fullCatalog?: boolean;
+    resultLimit?: number;
+    searchPlaceholder?: string;
+    emptyLabel?: string;
+  }>(),
+  {
+    modelValue: "",
+    options: () => [],
+    disabled: false,
+    compact: false,
+    fullCatalog: true,
+    resultLimit: 96,
+    searchPlaceholder: "搜索全部 Tabler 图标",
+    emptyLabel: "没有匹配的图标",
+  },
+);
 const emit = defineEmits<{ "update:modelValue": [value: string] }>();
 const search = ref("");
 const fullCatalogItems = shallowRef<readonly AdminIconOption[]>([]);
@@ -42,7 +42,9 @@ const filteredItems = computed(() =>
     search.value,
   ).slice(0, props.resultLimit),
 );
-const selected = computed(() => props.modelValue || items.value[0]?.value || "i-tabler-apps");
+const selected = computed(
+  () => props.modelValue || items.value[0]?.value || "i-tabler-apps",
+);
 
 function choose(value: string) {
   if (!props.disabled) emit("update:modelValue", value);
@@ -54,7 +56,8 @@ async function loadFullCatalog() {
     props.options.length ||
     fullCatalogItems.value.length ||
     catalogLoading.value
-  ) return;
+  )
+    return;
   catalogLoading.value = true;
   catalogError.value = false;
   try {
@@ -90,7 +93,10 @@ onMounted(loadFullCatalog);
     :class="compact ? 'w-56 max-w-[calc(100vw-2rem)]' : 'w-full'"
     data-admin-icon-picker
   >
-    <div v-if="!compact" class="flex min-w-0 items-center justify-between gap-3">
+    <div
+      v-if="!compact"
+      class="flex min-w-0 items-center justify-between gap-3"
+    >
       <p class="text-xs font-medium text-muted">图标</p>
       <span class="truncate font-mono text-xs text-muted">{{ selected }}</span>
     </div>
@@ -109,7 +115,11 @@ onMounted(loadFullCatalog);
       class="grid max-h-52 grid-cols-[repeat(5,2rem)] auto-rows-[2rem] justify-start gap-1.5 overflow-y-auto pr-1"
       data-admin-icon-results
     >
-      <UTooltip v-for="item in filteredItems" :key="item.value" :text="item.label">
+      <UTooltip
+        v-for="item in filteredItems"
+        :key="item.value"
+        :text="item.label"
+      >
         <UButton
           :icon="item.value"
           :color="selected === item.value ? 'primary' : 'neutral'"
@@ -139,7 +149,10 @@ onMounted(loadFullCatalog);
     >
       完整目录加载失败，仍可使用常用图标
     </p>
-    <p v-else class="rounded-lg bg-elevated px-3 py-6 text-center text-xs text-muted">
+    <p
+      v-else
+      class="rounded-lg bg-elevated px-3 py-6 text-center text-xs text-muted"
+    >
       {{ emptyLabel }}
     </p>
   </div>

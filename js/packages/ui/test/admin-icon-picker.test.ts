@@ -10,26 +10,36 @@ const UButton = defineComponent({
   props: ["icon"],
   emits: ["click"],
   setup(props, { attrs, emit }) {
-    return () => h("button", { ...attrs, onClick: () => emit("click") }, props.icon as string);
+    return () =>
+      h(
+        "button",
+        { ...attrs, onClick: () => emit("click") },
+        props.icon as string,
+      );
   },
 });
 const UTooltip = defineComponent({
   name: "UTooltip",
   props: ["text"],
-  setup: (_props, { slots }) => () => slots.default?.(),
+  setup:
+    (_props, { slots }) =>
+    () =>
+      slots.default?.(),
 });
 const UInput = defineComponent({
   name: "UInput",
   inheritAttrs: false,
   props: ["modelValue"],
   emits: ["update:modelValue"],
-  setup: (props, { attrs, emit }) => () =>
-    h("input", {
-      ...attrs,
-      value: props.modelValue,
-      onInput: (event: Event) =>
-        emit("update:modelValue", (event.target as HTMLInputElement).value),
-    }),
+  setup:
+    (props, { attrs, emit }) =>
+    () =>
+      h("input", {
+        ...attrs,
+        value: props.modelValue,
+        onInput: (event: Event) =>
+          emit("update:modelValue", (event.target as HTMLInputElement).value),
+      }),
 });
 
 const global = { components: { UButton, UTooltip, UInput } };
@@ -46,9 +56,13 @@ describe("AdminIconPicker", () => {
       },
       global,
     });
-    expect(wrapper.get('[aria-label="选择应用"]').attributes("aria-pressed")).toBe("true");
+    expect(
+      wrapper.get('[aria-label="选择应用"]').attributes("aria-pressed"),
+    ).toBe("true");
     await wrapper.get('[aria-label="选择网站"]').trigger("click");
-    expect(wrapper.emitted("update:modelValue")).toEqual([["i-tabler-world-www"]]);
+    expect(wrapper.emitted("update:modelValue")).toEqual([
+      ["i-tabler-world-www"],
+    ]);
   });
 
   it("searches the preloaded Tabler management catalog by label and keyword", async () => {

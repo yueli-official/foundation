@@ -20,22 +20,24 @@ const slideover = defineComponent({
     ui: { type: Object, default: () => ({}) },
   },
   emits: ["update:open"],
-  setup: (props, { attrs, slots }) => () =>
-    props.open
-      ? h(
-          "section",
-          {
-            ...attrs,
-            "data-slideover": "",
-            "data-modal": String(props.modal),
-            "data-overlay": String(props.overlay),
-            "data-dismissible": String(props.dismissible),
-            "data-content-class": String(props.ui.content || ""),
-            "data-footer-class": String(props.ui.footer || ""),
-          },
-          [h("h2", props.title), slots.body?.(), slots.footer?.()],
-        )
-      : null,
+  setup:
+    (props, { attrs, slots }) =>
+    () =>
+      props.open
+        ? h(
+            "section",
+            {
+              ...attrs,
+              "data-slideover": "",
+              "data-modal": String(props.modal),
+              "data-overlay": String(props.overlay),
+              "data-dismissible": String(props.dismissible),
+              "data-content-class": String(props.ui.content || ""),
+              "data-footer-class": String(props.ui.footer || ""),
+            },
+            [h("h2", props.title), slots.body?.(), slots.footer?.()],
+          )
+        : null,
 });
 
 const host = defineComponent({
@@ -88,7 +90,11 @@ describe("EditorInspector", () => {
     expect(docked.attributes("data-content-class")).toContain("w-[25rem]");
     expect(docked.attributes("data-content-class")).toContain("z-40");
     expect(docked.attributes("data-footer-class")).toContain("hidden");
-    expect(wrapper.get("[data-y-editor-inspector]").attributes("data-inspector-mode")).toBe("docked");
+    expect(
+      wrapper
+        .get("[data-y-editor-inspector]")
+        .attributes("data-inspector-mode"),
+    ).toBe("docked");
     expect(wrapper.text()).toContain("Inspector body");
 
     mediaMatches = false;
@@ -104,7 +110,11 @@ describe("EditorInspector", () => {
       "data-overlay": "true",
       "data-dismissible": "true",
     });
-    expect(wrapper.get("[data-y-editor-inspector]").attributes("data-inspector-mode")).toBe("overlay");
+    expect(
+      wrapper
+        .get("[data-y-editor-inspector]")
+        .attributes("data-inspector-mode"),
+    ).toBe("overlay");
     expect(wrapper.text()).toContain("Save");
   });
 });

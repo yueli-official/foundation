@@ -79,7 +79,7 @@ test("public admin chrome exposes navigation, page ownership and remote search",
   await expect(page.getByRole("option", { name: /API Team/ })).toBeVisible();
 });
 
-test("two-level admin navigation keeps active ancestors open and exposes searchable leaves", async ({
+test("two-level admin navigation keeps active ancestors open and exposes direct leaves", async ({
   page,
 }, testInfo) => {
   await page.goto("/?section=footer");
@@ -92,12 +92,7 @@ test("two-level admin navigation keeps active ancestors open and exposes searcha
   await expect(footer).toBeVisible();
   await expect(footer).toHaveAttribute("data-active", "");
 
-  await page.locator("[data-admin-sidebar-search]").getByRole("button").click();
-  const search = page.getByPlaceholder("搜索页面与操作");
-  await search.fill("基础");
-  const result = page.getByText("站点设置 · 基础", { exact: true });
-  await expect(result).toBeVisible();
-  await result.click();
+  await navigation.getByRole("link", { name: "基础" }).click();
   await expect(page).toHaveURL(/section=site/);
   await expect(settings).toHaveAttribute("aria-expanded", "true");
   await expect(navigation.getByRole("link", { name: "基础" })).toHaveAttribute(

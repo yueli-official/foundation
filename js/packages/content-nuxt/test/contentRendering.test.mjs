@@ -79,9 +79,8 @@ test("editor toolbar controls expose names and stay in one mobile row", () => {
 });
 
 test("article media can switch from thumbnail to a named preview rendition", async () => {
-  const { contentAssetRenditionURL } = await import(
-    "../app/utils/contentMedia.ts"
-  );
+  const { contentAssetRenditionURL } =
+    await import("../app/utils/contentMedia.ts");
   assert.equal(
     contentAssetRenditionURL(
       "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=thumbnail&v=1",

@@ -199,7 +199,7 @@ try {
           "@nuxt/icon": "2.4.1",
           "@nuxt/ui": "4.9.0",
           "@yueli/ui": toFileSpecifier(tarball),
-          nuxt: "4.4.8",
+          nuxt: "4.5.1",
           tailwindcss: "4.3.1",
           vue: "3.5.39",
           "vue-router": "5.1.0",
@@ -408,22 +408,14 @@ void optimizeImageFile;
       "Packed consumer CSS is missing CollectionFrame Tailwind selectors.",
     );
   }
-  if (
-    !generatedCss.some((source) =>
-      source.includes("minmax(16rem,1.4fr)"),
-    )
-  ) {
+  if (!generatedCss.some((source) => source.includes("minmax(16rem,1.4fr)"))) {
     throw new Error(
       "Packed consumer CSS is missing CommentModerationCollection grid selectors.",
     );
   }
-  if (
-    !generatedCss.some((source) =>
-      source.includes("@xl\\:grid-cols-\\[minmax\\(14rem\\,1fr\\)_auto\\]"),
-    )
-  ) {
+  if (!generatedCss.some((source) => source.includes("minmax(14rem,1fr)"))) {
     throw new Error(
-      "Packed consumer CSS is missing CollectionTableToolbar responsive selectors.",
+      "Packed consumer CSS is missing CollectionTableToolbar container selectors.",
     );
   }
   if (!generatedCss.some((source) => source.includes("--yueli-surface-page"))) {

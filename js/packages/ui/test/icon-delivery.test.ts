@@ -51,9 +51,7 @@ describe("shared Tabler delivery", () => {
   });
 
   it("rejects icons outside the finite Tabler contract", () => {
-    expect(() => normalizeTablerIconName("i-lucide-house")).toThrow(
-      /Tabler/,
-    );
+    expect(() => normalizeTablerIconName("i-lucide-house")).toThrow(/Tabler/);
     expect(() => normalizeTablerIconName("i-tabler-../house")).toThrow(
       /Tabler/,
     );

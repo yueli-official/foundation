@@ -1,4 +1,6 @@
 // @vitest-environment happy-dom
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { mount } from "@vue/test-utils";
 import { defineComponent, h } from "vue";
 import { describe, expect, it } from "vitest";
@@ -6,6 +8,11 @@ import AdminPage from "../src/admin/components/AdminPage.vue";
 import AdminConsoleLayout from "../src/admin/components/AdminConsoleLayout.vue";
 import ManagePage from "../src/admin/components/ManagePage.vue";
 import AdminShell from "../src/admin/components/AdminShell.vue";
+
+const adminConsoleSource = readFileSync(
+  resolve(process.cwd(), "src/admin/components/AdminConsoleLayout.vue"),
+  "utf8",
+);
 
 const passthrough = (name: string, tag = "div") =>
   defineComponent({
@@ -121,8 +128,10 @@ const global = {
       name: "NuxtLink",
       inheritAttrs: false,
       props: { to: String },
-      setup: (props, { attrs, slots }) => () =>
-        h("a", { ...attrs, href: props.to }, slots.default?.()),
+      setup:
+        (props, { attrs, slots }) =>
+        () =>
+          h("a", { ...attrs, href: props.to }, slots.default?.()),
     }),
   },
   stubs: { BackToTop: true },
@@ -155,22 +164,24 @@ describe("admin template", () => {
 
     expect(wrapper.get("[data-admin-console]")).toBeTruthy();
     expect(wrapper.get("[data-admin-console-brand-icon]")).toBeTruthy();
+    expect(wrapper.get("[data-admin-sidebar-brand] a").classes()).toContain(
+      "min-h-11",
+    );
     expect(wrapper.get("[data-admin-console-breadcrumb]").text()).toContain(
       "Docs",
     );
     expect(wrapper.get("[data-admin-console-breadcrumb]").text()).toContain(
       "Overview",
     );
-    expect(wrapper.get("[data-admin-console-canvas]").text()).toBe(
-      "Workspace",
+    expect(wrapper.get("[data-admin-console-canvas]").text()).toBe("Workspace");
+    expect(adminConsoleSource).toContain(
+      ":toggle=\"{ class: 'size-11 shrink-0 lg:hidden' }\"",
     );
     expect(wrapper.text()).toContain("Account");
     const sidebar = wrapper.findComponent({ name: "UDashboardSidebar" });
     expect(sidebar.props("resizable")).toBe(false);
     expect(sidebar.props("collapsible")).toBe(false);
-    expect(sidebar.attributes("class")).toContain(
-      "yueli-admin-shell-surface",
-    );
+    expect(sidebar.attributes("class")).toContain("yueli-admin-shell-surface");
     expect(sidebar.attributes("class")).not.toContain("bg-elevated/45");
     expect(sidebar.attributes("class")).not.toContain("bg-default");
   });
@@ -218,8 +229,12 @@ describe("admin template", () => {
     expect(wrapper.get('[role="complementary"]')).toBeTruthy();
     expect(wrapper.get('nav[aria-label="Home"]')).toBeTruthy();
     expect(wrapper.get('nav[aria-label="Help"]')).toBeTruthy();
-    expect(wrapper.findComponent({ name: "UDashboardSearchButton" }).exists()).toBe(false);
-    expect(wrapper.findComponent({ name: "UDashboardSearch" }).exists()).toBe(false);
+    expect(
+      wrapper.findComponent({ name: "UDashboardSearchButton" }).exists(),
+    ).toBe(false);
+    expect(wrapper.findComponent({ name: "UDashboardSearch" }).exists()).toBe(
+      false,
+    );
     expect(wrapper.get("[data-main-id]").attributes("data-main-id")).toBe(
       "workspace-main",
     );

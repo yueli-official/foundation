@@ -1,4 +1,4 @@
-import type { LocationQuery, LocationQueryRaw, Router } from "vue-router";
+import type { LocationQuery, LocationQueryRaw } from "vue-router";
 import { onScopeDispose, shallowRef, type Ref } from "vue";
 import type { CollectionQuerySync } from "./workflow";
 import type {
@@ -8,9 +8,25 @@ import type {
 } from "./route-query";
 
 export interface VueRouterCollectionQuerySyncOptions<TQuery> {
-  readonly router: Pick<Router, "afterEach" | "currentRoute" | "replace">;
+  readonly router: CollectionRouterAdapter;
   readonly codec: RouteQueryCodec<TQuery>;
   readonly preserveUnknown?: boolean;
+}
+
+interface CollectionRouterLocation {
+  readonly path: string;
+  readonly hash: string;
+  readonly query: LocationQuery;
+}
+
+export interface CollectionRouterAdapter {
+  readonly currentRoute: Readonly<Ref<CollectionRouterLocation>>;
+  replace(location: {
+    path: string;
+    query: LocationQueryRaw;
+    hash: string;
+  }): Promise<unknown>;
+  afterEach(listener: (to: CollectionRouterLocation) => void): () => void;
 }
 
 export interface VueRouterCollectionQuery<TQuery extends object> {

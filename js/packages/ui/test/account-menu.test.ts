@@ -183,9 +183,9 @@ describe("AccountMenu", () => {
     expect(wrapper.get("button").classes()).toContain("w-full");
     expect(wrapper.get("button").text()).toContain("Lin");
     expect(wrapper.get("button").text()).toContain("lin@example.test");
-    expect(
-      wrapper.find('[data-icon-name="i-tabler-selector"]').exists(),
-    ).toBe(true);
+    expect(wrapper.find('[data-icon-name="i-tabler-selector"]').exists()).toBe(
+      true,
+    );
 
     await wrapper.setProps({ triggerMode: "collapsed" });
     expect(wrapper.get("button").classes()).toContain("aspect-square");

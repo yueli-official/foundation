@@ -21,16 +21,16 @@ test("create drafts can use a stable instance key while edit drafts keep entity 
     editorDraftStorageKey("docs:doc", "edit", "doc-1"),
     "docs:doc:doc-1",
   );
-  assert.equal(
-    editorDraftStorageKey("docs:doc", "create"),
-    "docs:doc:new",
-  );
+  assert.equal(editorDraftStorageKey("docs:doc", "create"), "docs:doc:new");
 });
 
 test("existing content still offers a different local draft without replacing it silently", () => {
   const current = { content: "server version" };
   const draft = parseEditorDraft(
-    serializeEditorDraft({ content: "local version" }, "2026-08-21T10:00:00.000Z"),
+    serializeEditorDraft(
+      { content: "local version" },
+      "2026-08-21T10:00:00.000Z",
+    ),
   );
 
   assert.ok(draft);

@@ -13,9 +13,11 @@ import { computed, ref } from "vue";
 // @mention menu, link popover and toolbar-overflow popover are dropped — the
 // shared editor uses a horizontally-scrollable fixed toolbar and the built-in
 // link handler.
-export const useEditorToolbar = (options: {
-  allowHeadingOne?: boolean;
-} = {}) => {
+export const useEditorToolbar = (
+  options: {
+    allowHeadingOne?: boolean;
+  } = {},
+) => {
   const selectedNode = ref<{ node: JSONContent; pos: number }>();
   const allowHeadingOne = options.allowHeadingOne !== false;
 

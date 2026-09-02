@@ -57,9 +57,15 @@ export const foundationUiPreset = Object.freeze({
       viewport: "sm:w-[22rem]",
     }),
   }),
-  input: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
-  inputNumber: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
-  textarea: Object.freeze({ slots: Object.freeze({ base: "yueli-field-border" }) }),
+  input: Object.freeze({
+    slots: Object.freeze({ base: "yueli-field-border" }),
+  }),
+  inputNumber: Object.freeze({
+    slots: Object.freeze({ base: "yueli-field-border" }),
+  }),
+  textarea: Object.freeze({
+    slots: Object.freeze({ base: "yueli-field-border" }),
+  }),
   select: Object.freeze({
     slots: Object.freeze({
       base: "yueli-field-border",

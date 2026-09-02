@@ -26,7 +26,9 @@ const headingId = computed(() => `${props.id}-title`);
     data-manage-page
   >
     <PageHeader :title="title" :icon="icon" :heading-id="headingId">
-      <template v-if="slots.subtitle" #subtitle><slot name="subtitle" /></template>
+      <template v-if="slots.subtitle" #subtitle
+        ><slot name="subtitle"
+      /></template>
       <template v-if="slots.actions" #actions><slot name="actions" /></template>
     </PageHeader>
 

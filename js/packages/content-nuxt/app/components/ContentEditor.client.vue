@@ -217,8 +217,17 @@ const handlers = {
 // different compatible patch see distinct nominal types even though Vite
 // resolves and deduplicates them to one runtime instance. Erase only at the
 // Nuxt UI prop boundary; node implementations retain their full types.
-const uiEditorExtensions = editorExtensions as any;
-const uiEditorHandlers = handlers as any;
+const uiEditorExtensions = editorExtensions as never;
+const uiEditorHandlers = handlers as unknown as typeof handlers & {
+  suggestion?: {
+    canExecute: (editor: Editor) => boolean;
+    execute: (
+      editor: Editor,
+      options: { pos?: number },
+    ) => ReturnType<Editor["chain"]>;
+    isActive: (editor: Editor) => boolean;
+  };
+};
 
 // 草稿与自动保存。
 const draftFormData = ref<{ content?: string }>({ content: props.modelValue });

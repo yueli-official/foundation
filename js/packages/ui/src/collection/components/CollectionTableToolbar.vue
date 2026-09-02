@@ -61,10 +61,7 @@ function submitSearch() {
 </script>
 
 <template>
-  <section
-    data-collection-table-toolbar
-    :aria-label="props.label"
-  >
+  <section data-collection-table-toolbar :aria-label="props.label">
     <div
       v-if="props.selectionCount > 0"
       data-collection-table-selection

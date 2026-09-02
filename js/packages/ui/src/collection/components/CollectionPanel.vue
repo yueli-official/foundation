@@ -150,7 +150,7 @@ function toggle(item: TItem, key: TKey) {
       <CollectionTableToolbar
         v-model:search="search"
         v-model:filters-open="filtersOpen"
-        :label="label || messages.searchPlaceholder"
+        :label="`${label || messages.searchPlaceholder} 工具栏`"
         :search-placeholder="messages.searchPlaceholder"
         :search-action="messages.searchAction || undefined"
         :filter-label="messages.filtersAction"

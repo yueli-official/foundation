@@ -81,7 +81,7 @@ export function normalizeFeedbackNotice(
             ? "i-tabler-circle-check"
             : tone === "info"
               ? "i-tabler-info-circle"
-          : undefined),
+              : undefined),
   };
 }
 
@@ -106,12 +106,11 @@ export function normalizeNuxtToastInput(
     title: input.title,
     description: input.description,
     tone: feedbackTones.has(input.color as FeedbackTone)
-      ? input.color as FeedbackTone
+      ? (input.color as FeedbackTone)
       : "neutral",
     duration: input.duration,
-    foreground: input.type === undefined
-      ? undefined
-      : input.type === "foreground",
+    foreground:
+      input.type === undefined ? undefined : input.type === "foreground",
     close: input.close,
     icon: input.icon,
   });

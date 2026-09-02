@@ -5,7 +5,5 @@ declare module "#imports" {
   export function useHead(
     input: ComputedRef<Readonly<Record<string, unknown>>>,
   ): void;
-  export function useRuntimeConfig(
-    event?: H3Event,
-  ): Record<string, unknown>;
+  export function useRuntimeConfig(event?: H3Event): Record<string, unknown>;
 }

@@ -170,7 +170,9 @@ describe("browser image optimization", () => {
   });
 
   it("flattens transparent pixels onto white before JPEG encoding", async () => {
-    const adapter = runtime(new Blob([new Uint8Array(100)], { type: "image/jpeg" }));
+    const adapter = runtime(
+      new Blob([new Uint8Array(100)], { type: "image/jpeg" }),
+    );
     const source = new File([new Uint8Array(200)], "cover.png", {
       type: "image/png",
     });

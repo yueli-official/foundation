@@ -13,26 +13,37 @@ import type {
 const collectionPanelStub = defineComponent({
   name: "CollectionPanel",
   props: { items: { type: Array, default: () => [] } },
-  setup: (props, { slots }) => () =>
-    h("section", { "data-panel-stub": "" }, [
-      slots.navigation?.(),
-      h("header", slots.columns?.()),
-      ...props.items.map((item) => h("article", slots.item?.({ item }))),
-      h("footer", slots["bulk-actions"]?.()),
-    ]),
+  setup:
+    (props, { slots }) =>
+    () =>
+      h("section", { "data-panel-stub": "" }, [
+        slots.navigation?.(),
+        h("header", slots.columns?.()),
+        ...props.items.map((item) => h("article", slots.item?.({ item }))),
+        h("footer", slots["bulk-actions"]?.()),
+      ]),
 });
 const passive = (name: string, tag = "span") =>
   defineComponent({
     name,
     inheritAttrs: false,
     props: { label: String, name: String, text: String },
-    setup: (props, { attrs, slots }) => () =>
-      h(tag, { ...attrs, "data-icon": props.name }, props.label || props.text || slots.default?.()),
+    setup:
+      (props, { attrs, slots }) =>
+      () =>
+        h(
+          tag,
+          { ...attrs, "data-icon": props.name },
+          props.label || props.text || slots.default?.(),
+        ),
   });
 
 describe("CommentModerationCollection", () => {
   it("publishes its nested component directory to Tailwind", () => {
-    const tailwind = readFileSync(join(process.cwd(), "src/tailwind.css"), "utf8");
+    const tailwind = readFileSync(
+      join(process.cwd(), "src/tailwind.css"),
+      "utf8",
+    );
     expect(tailwind).toContain('@source "./comments/admin/components";');
   });
 
@@ -94,32 +105,44 @@ describe("CommentModerationCollection", () => {
           CollectionLifecycleTabs: defineComponent({
             name: "CollectionLifecycleTabs",
             props: { items: { type: Array, default: () => [] } },
-            setup: (props, { slots }) => () =>
-              h("nav", [
-                ...props.items.map((item: any) =>
-                  h("button", { type: "button" }, [
-                    h("span", { "data-lifecycle-icon": item.icon }),
-                    item.label,
-                  ]),
-                ),
-                slots.actions?.(),
-              ]),
+            setup: (props, { slots }) => {
+              const items = props.items as Array<{
+                icon?: string;
+                label?: string;
+              }>;
+              return () =>
+                h("nav", [
+                  ...items.map((item) =>
+                    h("button", { type: "button" }, [
+                      h("span", { "data-lifecycle-icon": item.icon }),
+                      item.label,
+                    ]),
+                  ),
+                  slots.actions?.(),
+                ]);
+            },
           }),
           AdminRowActions: defineComponent({
             name: "AdminRowActions",
             props: { label: String },
-            setup: (props) => () => h("button", { "data-row-actions": "" }, props.label),
+            setup: (props) => () =>
+              h("button", { "data-row-actions": "" }, props.label),
           }),
           UButton: defineComponent({
             name: "UButton",
             props: { label: String },
             emits: ["click"],
-            setup: (props, { emit }) => () =>
-              h("button", { onClick: () => emit("click") }, props.label),
+            setup:
+              (props, { emit }) =>
+              () =>
+                h("button", { onClick: () => emit("click") }, props.label),
           }),
           UModal: defineComponent({
             name: "UModal",
-            setup: (_props, { slots }) => () => h("div", slots.default?.()),
+            setup:
+              (_props, { slots }) =>
+              () =>
+                h("div", slots.default?.()),
           }),
           UAvatar: passive("UAvatar"),
           UBadge: passive("UBadge"),
@@ -143,7 +166,7 @@ describe("CommentModerationCollection", () => {
     expect(wrapper.text()).toContain("测试图片");
     expect(wrapper.text()).toContain("匿名用户");
     expect(wrapper.find('[data-icon="i-tabler-photo"]').exists()).toBe(true);
-    expect(wrapper.find('[data-row-actions]').exists()).toBe(true);
+    expect(wrapper.find("[data-row-actions]").exists()).toBe(true);
     const approveButton = wrapper
       .findAll("button")
       .find((button) => button.text() === "通过");

@@ -109,9 +109,21 @@ describe("CollectionTableToolbar", () => {
     expect(wrapper.get("[data-collection-table-search]")).toBeTruthy();
     expect(wrapper.get("[data-collection-table-controls]")).toBeTruthy();
     const buttons = wrapper.findAllComponents(UButton);
-    expect(buttons.find((button) => button.props("label") === "Search")?.attributes("size")).toBe("sm");
-    expect(buttons.find((button) => button.props("label") === "Filters · 2")?.attributes("size")).toBe("sm");
-    expect(buttons.find((button) => button.props("label") === "Filters · 2")?.classes()).toContain("h-[1.875rem]");
+    expect(
+      buttons
+        .find((button) => button.props("label") === "Search")
+        ?.attributes("size"),
+    ).toBe("sm");
+    expect(
+      buttons
+        .find((button) => button.props("label") === "Filters · 2")
+        ?.attributes("size"),
+    ).toBe("sm");
+    expect(
+      buttons
+        .find((button) => button.props("label") === "Filters · 2")
+        ?.classes(),
+    ).toContain("h-[1.875rem]");
     expect(
       wrapper.get("[data-collection-table-filter-panel]").text(),
     ).toContain("All");
@@ -128,7 +140,9 @@ describe("CollectionTableToolbar", () => {
 
     expect(toolbarSource).toContain("container-type: inline-size");
     expect(toolbarSource).toContain("@container (min-width: 36rem)");
-    expect(toolbarSource).toContain("grid-template-columns: minmax(14rem, 1fr) auto");
+    expect(toolbarSource).toContain(
+      "grid-template-columns: minmax(14rem, 1fr) auto",
+    );
     expect(wrapper.html()).not.toContain("[&>*]:!w-full");
   });
 
@@ -162,9 +176,9 @@ describe("CollectionTableToolbar", () => {
     expect(wrapper.find("[data-collection-table-utilities]").exists()).toBe(
       false,
     );
-    expect(wrapper.get("[data-collection-table-active-filters]").text()).toContain(
-      "Status: Draft",
-    );
+    expect(
+      wrapper.get("[data-collection-table-active-filters]").text(),
+    ).toContain("Status: Draft");
     const selection = wrapper.get("[data-collection-table-selection]");
     expect(selection.text()).toContain("2 selected");
     expect(selection.classes()).toContain("min-h-24");

@@ -183,11 +183,7 @@ const menuUi = computed(() => ({
 </script>
 
 <template>
-  <UDropdownMenu
-    :items="menuItems"
-    :content="menuContent"
-    :ui="menuUi"
-  >
+  <UDropdownMenu :items="menuItems" :content="menuContent" :ui="menuUi">
     <UButton
       type="button"
       color="neutral"

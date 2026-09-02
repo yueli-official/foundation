@@ -9,9 +9,7 @@ export function editorDraftStorageKey(
   entityId?: string | number,
 ): string {
   if (mode === "create") {
-    return entityId
-      ? `${keyPrefix}:new:${entityId}`
-      : `${keyPrefix}:new`;
+    return entityId ? `${keyPrefix}:new:${entityId}` : `${keyPrefix}:new`;
   }
   return entityId ? `${keyPrefix}:${entityId}` : `${keyPrefix}:new`;
 }

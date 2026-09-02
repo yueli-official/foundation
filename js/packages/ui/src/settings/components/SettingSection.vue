@@ -11,7 +11,9 @@ withDefaults(
     :class="danger ? 'border-error/40' : 'border-muted'"
     data-setting-section
   >
-    <header class="flex min-w-0 items-start justify-between gap-4 border-b border-default bg-elevated/35 px-4 py-3 sm:px-5">
+    <header
+      class="flex min-w-0 items-start justify-between gap-4 border-b border-default bg-elevated/35 px-4 py-3 sm:px-5"
+    >
       <div class="min-w-0">
         <h2
           class="text-sm font-semibold"
@@ -24,7 +26,11 @@ withDefaults(
         </p>
         <slot name="aside" />
       </div>
-      <div v-if="$slots.actions" class="flex shrink-0 items-center gap-2" data-setting-section-actions>
+      <div
+        v-if="$slots.actions"
+        class="flex shrink-0 items-center gap-2"
+        data-setting-section-actions
+      >
         <slot name="actions" />
       </div>
     </header>

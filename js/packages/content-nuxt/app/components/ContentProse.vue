@@ -60,12 +60,20 @@ function prepareImages() {
     image.classList.add("content-previewable-image");
     image.tabIndex = 0;
     image.setAttribute("role", "button");
-    image.setAttribute("aria-label", image.alt ? `查看大图：${image.alt}` : "查看大图");
+    image.setAttribute(
+      "aria-label",
+      image.alt ? `查看大图：${image.alt}` : "查看大图",
+    );
   });
 }
 
 function previewFromEvent(event: MouseEvent | KeyboardEvent) {
-  if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") return;
+  if (
+    event instanceof KeyboardEvent &&
+    event.key !== "Enter" &&
+    event.key !== " "
+  )
+    return;
   const image = (event.target as HTMLElement | null)?.closest<HTMLImageElement>(
     "img[data-content-preview-url]",
   );
@@ -95,9 +103,17 @@ onMounted(() => nextTick(postRender));
     @keydown="previewFromEvent"
   />
   <ContentMermaidHydrator :target="el" />
-  <UModal v-model:open="previewOpen" :title="previewAlt" :ui="{ content: 'sm:max-w-6xl', body: 'p-2 sm:p-3' }">
+  <UModal
+    v-model:open="previewOpen"
+    :title="previewAlt"
+    :ui="{ content: 'sm:max-w-6xl', body: 'p-2 sm:p-3' }"
+  >
     <template #body>
-      <img :src="previewURL" :alt="previewAlt" class="mx-auto max-h-[80vh] max-w-full rounded-lg object-contain" />
+      <img
+        :src="previewURL"
+        :alt="previewAlt"
+        class="mx-auto max-h-[80vh] max-w-full rounded-lg object-contain"
+      />
     </template>
   </UModal>
 </template>

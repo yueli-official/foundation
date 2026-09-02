@@ -7,18 +7,9 @@ import type { AdminRowActionItem } from "../../admin/types";
 import type { RouteLocationRaw } from "vue-router";
 
 export type CommentModerationColor =
-  | "primary"
-  | "neutral"
-  | "success"
-  | "info"
-  | "warning"
-  | "error";
+  "primary" | "neutral" | "success" | "info" | "warning" | "error";
 export type CommentModerationLifecycle =
-  | "all"
-  | "pending"
-  | "approved"
-  | "spam"
-  | "trash";
+  "all" | "pending" | "approved" | "spam" | "trash";
 
 export interface CommentModerationStatus {
   readonly label: string;
@@ -44,8 +35,7 @@ export interface CommentModerationItem {
   readonly approve?: boolean;
   readonly approving?: boolean;
   readonly actions?:
-    | readonly AdminRowActionItem[]
-    | readonly (readonly AdminRowActionItem[])[];
+    readonly AdminRowActionItem[] | readonly (readonly AdminRowActionItem[])[];
   readonly status?: CommentModerationStatus;
   readonly source: CommentModerationSource;
 }
@@ -84,7 +74,8 @@ export interface CommentModerationCollectionActions {
   readonly retry: () => void | Promise<void>;
   readonly sort: () => void;
   readonly lifecycleChange: (value: CommentModerationLifecycle) => void;
-  readonly emptyTrash?: () => boolean | void | Promise<boolean | void>;
+  readonly emptyTrash?: () =>
+    boolean | undefined | Promise<boolean | undefined>;
   readonly approve?: (id: string) => void | Promise<void>;
   readonly pageChange: (page: number) => void;
   readonly pageSizeChange: (pageSize: number) => void;

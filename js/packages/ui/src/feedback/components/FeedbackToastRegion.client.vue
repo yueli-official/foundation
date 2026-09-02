@@ -11,10 +11,12 @@ interface ToastNotice extends NuxtToastInput {
 
 const toast = useToast();
 const timers = new Map<string | number, ReturnType<typeof setTimeout>>();
-const notices = computed(() => (toast.toasts.value as unknown as ToastNotice[])
-  .filter(notice => notice.open !== false)
-  .slice(-3)
-  .map(notice => normalizeNuxtToastInput(notice)));
+const notices = computed(() =>
+  (toast.toasts.value as unknown as ToastNotice[])
+    .filter((notice) => notice.open !== false)
+    .slice(-3)
+    .map((notice) => normalizeNuxtToastInput(notice)),
+);
 
 function clearTimer(id: string | number) {
   const timer = timers.get(id);
@@ -26,13 +28,22 @@ function schedule(notice: ToastNotice) {
   clearTimer(notice.id);
   const duration = notice.duration ?? 5000;
   if (duration <= 0) return;
-  timers.set(notice.id, setTimeout(() => toast.remove(notice.id), duration));
+  timers.set(
+    notice.id,
+    setTimeout(() => toast.remove(notice.id), duration),
+  );
 }
 
 watch(
-  () => notices.value.map(notice => `${notice.id}:${notice.duration ?? 5000}:${notice._duplicate ?? 0}`).join("|"),
+  () =>
+    notices.value
+      .map(
+        (notice) =>
+          `${notice.id}:${notice.duration ?? 5000}:${notice._duplicate ?? 0}`,
+      )
+      .join("|"),
   () => {
-    const visible = new Set(notices.value.map(notice => notice.id));
+    const visible = new Set(notices.value.map((notice) => notice.id));
     for (const id of timers.keys()) if (!visible.has(id)) clearTimer(id);
     for (const notice of notices.value) schedule(notice);
   },
@@ -48,7 +59,9 @@ function tone(notice: ToastNotice) {
 }
 
 function role(notice: ToastNotice) {
-  return notice.type === "foreground" || tone(notice) === "error" || tone(notice) === "warning"
+  return notice.type === "foreground" ||
+    tone(notice) === "error" ||
+    tone(notice) === "warning"
     ? "alert"
     : "status";
 }
@@ -62,7 +75,7 @@ function role(notice: ToastNotice) {
       class="yueli-toast-region"
       aria-label="通知"
     >
-      <article
+      <div
         v-for="notice in notices"
         :key="notice.id"
         class="yueli-toast-notice"
@@ -79,10 +92,16 @@ function role(notice: ToastNotice) {
           aria-hidden="true"
         />
         <div class="min-w-0 flex-1">
-          <p v-if="notice.title" class="line-clamp-2 text-sm font-semibold leading-5 text-highlighted">
+          <p
+            v-if="notice.title"
+            class="line-clamp-2 text-sm font-semibold leading-5 text-highlighted"
+          >
             {{ notice.title }}
           </p>
-          <p v-if="notice.description" class="mt-0.5 line-clamp-2 text-xs leading-5 text-muted">
+          <p
+            v-if="notice.description"
+            class="mt-0.5 line-clamp-2 text-xs leading-5 text-muted"
+          >
             {{ notice.description }}
           </p>
         </div>
@@ -97,7 +116,7 @@ function role(notice: ToastNotice) {
           class="-mr-1 -mt-1 shrink-0 text-dimmed"
           @click="toast.remove(notice.id)"
         />
-      </article>
+      </div>
     </TransitionGroup>
   </Teleport>
 </template>
@@ -125,6 +144,11 @@ function role(notice: ToastNotice) {
   background: var(--ui-bg);
   box-shadow: 0 14px 36px rgb(15 23 42 / 0.14);
   pointer-events: auto;
+}
+
+.yueli-toast-region[aria-hidden="true"] .yueli-toast-notice,
+.yueli-toast-leave-active {
+  pointer-events: none;
 }
 
 .yueli-toast-notice[data-tone="error"] {

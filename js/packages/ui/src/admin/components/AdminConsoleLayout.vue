@@ -118,7 +118,7 @@ const shellUi: AdminShellUi = {
       <NuxtLink
         :to="brandTo"
         :aria-label="collapsed ? brandLabel : undefined"
-        class="flex min-w-0 items-center gap-3 text-highlighted"
+        class="flex min-h-11 min-w-0 items-center gap-3 text-highlighted"
         @click="closeSidebar"
       >
         <span
@@ -150,7 +150,7 @@ const shellUi: AdminShellUi = {
       <template #header>
         <UDashboardNavbar
           v-if="!immersive"
-          :toggle="{ class: 'lg:hidden' }"
+          :toggle="{ class: 'size-11 shrink-0 lg:hidden' }"
           class="yueli-admin-shell-surface relative z-20 border-default"
           :ui="{
             root: 'min-h-16 border-b px-4 lg:px-8',

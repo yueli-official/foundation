@@ -29,14 +29,16 @@ const tabsStub = defineComponent({
   name: "UTabs",
   inheritAttrs: false,
   props: { items: Array, modelValue: String },
-  setup: (props, { attrs }) => () =>
-    h(
-      "div",
-      attrs,
-      (props.items as Array<{ label: string; value: string }>).map((item) =>
-        h("button", { "data-value": item.value }, item.label),
+  setup:
+    (props, { attrs }) =>
+    () =>
+      h(
+        "div",
+        attrs,
+        (props.items as Array<{ label: string; value: string }>).map((item) =>
+          h("button", { "data-value": item.value }, item.label),
+        ),
       ),
-    ),
 });
 const messages: DashboardMessages = {
   metrics: "Key metrics",
@@ -60,9 +62,9 @@ describe("dashboard Patterns", () => {
     expect(wrapper.get("h1").text()).toBe("Workspace");
     expect(wrapper.text()).toContain("Today at a glance");
     expect(wrapper.text()).toContain("Create");
-    expect(
-      wrapper.find('[name="i-tabler-layout-dashboard"]').exists(),
-    ).toBe(true);
+    expect(wrapper.find('[name="i-tabler-layout-dashboard"]').exists()).toBe(
+      true,
+    );
     expect(wrapper.get("[data-manage-page-actions]").text()).toBe("Create");
   });
 

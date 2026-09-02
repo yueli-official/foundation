@@ -7,7 +7,8 @@ const tablerIconifyName = /^tabler:([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 
 export function normalizeTablerIconName(value: string): string {
   const candidate = value.trim();
-  const match = tablerCssName.exec(candidate) ?? tablerIconifyName.exec(candidate);
+  const match =
+    tablerCssName.exec(candidate) ?? tablerIconifyName.exec(candidate);
   if (!match) {
     throw new Error(
       `Expected a finite Tabler icon name (i-tabler-* or tabler:*), received ${JSON.stringify(value)}`,
@@ -24,9 +25,7 @@ export function createTablerIconDelivery(dynamicIcons: readonly string[] = []) {
         ...ADMIN_TABLER_ICON_OPTIONS.map((icon) => icon.value),
         ...PUBLIC_COMMENT_TABLER_ICONS,
         ...dynamicIcons,
-      ].map(
-        normalizeTablerIconName,
-      ),
+      ].map(normalizeTablerIconName),
     ),
   ).sort();
 

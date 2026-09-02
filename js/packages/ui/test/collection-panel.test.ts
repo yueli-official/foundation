@@ -132,6 +132,9 @@ describe("CollectionPanel", () => {
         "@3xl/collection:grid-cols-3",
       ]),
     );
+    expect(
+      wrapper.get("[data-collection-table-toolbar]").attributes("aria-label"),
+    ).toBe("Records 工具栏");
   });
 
   it("owns search, item selection and result anatomy through one Interface", async () => {
