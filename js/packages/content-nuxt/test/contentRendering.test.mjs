@@ -84,10 +84,10 @@ test("article media can switch from thumbnail to a named preview rendition", asy
   );
   assert.equal(
     contentAssetRenditionURL(
-      "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=thumbnail",
+      "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=thumbnail&v=1",
       "content",
     ),
-    "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=content",
+    "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=content&v=1",
   );
   assert.equal(
     contentAssetRenditionURL("https://external.example/image.png", "content"),
