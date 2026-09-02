@@ -29,14 +29,22 @@ const tabsStub = defineComponent({
   name: "UTabs",
   inheritAttrs: false,
   props: { items: Array, modelValue: String },
+  emits: ["update:modelValue"],
   setup:
-    (props, { attrs }) =>
+    (props, { attrs, emit }) =>
     () =>
       h(
         "div",
         attrs,
         (props.items as Array<{ label: string; value: string }>).map((item) =>
-          h("button", { "data-value": item.value }, item.label),
+          h(
+            "button",
+            {
+              "data-value": item.value,
+              onClick: () => emit("update:modelValue", item.value),
+            },
+            item.label,
+          ),
         ),
       ),
 });
@@ -68,7 +76,7 @@ describe("dashboard Patterns", () => {
     expect(wrapper.get("[data-manage-page-actions]").text()).toBe("Create");
   });
 
-  it("keeps same-page workflows inside one shared tabbed surface", () => {
+  it("keeps same-page workflows inside one shared tabbed surface", async () => {
     const wrapper = mount(TabbedSurface, {
       props: {
         modelValue: "library",
@@ -91,6 +99,8 @@ describe("dashboard Patterns", () => {
       "Storage",
     ]);
     expect(wrapper.text()).toContain("Active workflow");
+    await wrapper.findAll("button")[1]!.trigger("click");
+    expect(wrapper.emitted("update:modelValue")).toEqual([["storage"]]);
   });
 
   it("keeps the complete dashboard decision order and labelled regions", () => {

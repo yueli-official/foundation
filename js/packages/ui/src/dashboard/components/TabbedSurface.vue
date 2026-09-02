@@ -15,6 +15,10 @@ const props = defineProps<{
   navigationLabel: string;
 }>();
 const tabItems = computed(() => [...props.items]);
+
+function updateActive(value: string | number) {
+  active.value = String(value);
+}
 </script>
 
 <template>
@@ -27,13 +31,14 @@ const tabItems = computed(() => [...props.items]);
       class="overflow-x-auto overflow-y-hidden border-b border-default px-2 pt-2 [scrollbar-width:none] sm:px-5 sm:pt-3 [&::-webkit-scrollbar]:hidden"
     >
       <UTabs
-        v-model="active"
+        :model-value="active"
         :items="tabItems"
         :content="false"
         variant="link"
         class="w-max min-w-full"
         :ui="{ list: 'min-w-max', trigger: 'min-w-max' }"
         :aria-label="navigationLabel"
+        @update:model-value="updateActive"
       />
     </nav>
     <slot />
