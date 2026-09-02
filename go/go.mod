@@ -5,7 +5,7 @@ go 1.25.13
 retract v0.3.0 // Built with vulnerable Go 1.25.12; use v0.3.1 or later.
 
 require (
-	github.com/casbin/casbin/v3 v3.10.0
+	github.com/casbin/casbin/v3 v3.11.0
 	github.com/go-jose/go-jose/v4 v4.1.4
 	github.com/gogf/gf/v2 v2.10.2
 	github.com/google/uuid v1.6.0
