@@ -112,7 +112,7 @@ onMounted(loadFullCatalog);
     />
     <div
       v-if="filteredItems.length"
-      class="grid max-h-52 grid-cols-[repeat(5,2rem)] auto-rows-[2rem] justify-start gap-1.5 overflow-y-auto pr-1"
+      class="grid max-h-56 grid-cols-[repeat(auto-fill,minmax(2rem,1fr))] auto-rows-[2rem] gap-2 overflow-y-auto pr-1"
       data-admin-icon-results
     >
       <UTooltip
@@ -126,7 +126,7 @@ onMounted(loadFullCatalog);
           :variant="selected === item.value ? 'soft' : 'outline'"
           size="sm"
           square
-          class="grid size-8 place-items-center p-0"
+          class="grid size-8 place-items-center justify-self-center p-0"
           :ui="{ leadingIcon: 'mx-auto size-4 shrink-0' }"
           :aria-label="`选择${item.label}`"
           :aria-pressed="selected === item.value"

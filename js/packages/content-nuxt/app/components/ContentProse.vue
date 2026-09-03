@@ -19,6 +19,13 @@ const el = ref<HTMLElement>();
 const previewOpen = ref(false);
 const previewURL = ref("");
 const previewAlt = ref("");
+const copyResetTimers = new Set<ReturnType<typeof setTimeout>>();
+
+function setCopyButtonState(button: HTMLButtonElement, label: string) {
+  button.textContent = label;
+  button.setAttribute("aria-label", label);
+  button.title = label;
+}
 
 // 为普通代码块补充复制按钮。
 function addCopyButtons() {
@@ -29,14 +36,20 @@ function addCopyButtons() {
     const btn = document.createElement("button");
     btn.className = "copy-btn";
     btn.type = "button";
-    btn.textContent = "复制";
+    setCopyButtonState(btn, "复制代码");
     btn.addEventListener("click", async () => {
       const code = pre.querySelector("code")?.textContent ?? "";
-      await navigator.clipboard.writeText(code);
-      btn.textContent = "已复制";
-      setTimeout(() => {
-        btn.textContent = "复制";
-      }, 1500);
+      try {
+        await writeClipboardText(code);
+        setCopyButtonState(btn, "已复制");
+      } catch {
+        setCopyButtonState(btn, "复制失败");
+      }
+      const timer = setTimeout(() => {
+        setCopyButtonState(btn, "复制代码");
+        copyResetTimers.delete(timer);
+      }, 1800);
+      copyResetTimers.add(timer);
     });
     pre.style.position = "relative";
     pre.appendChild(btn);
@@ -91,6 +104,10 @@ function postRender() {
 
 watch(html, () => nextTick(postRender));
 onMounted(() => nextTick(postRender));
+onBeforeUnmount(() => {
+  for (const timer of copyResetTimers) clearTimeout(timer);
+  copyResetTimers.clear();
+});
 </script>
 
 <template>

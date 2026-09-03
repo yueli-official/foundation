@@ -350,7 +350,9 @@ defineExpose({
       >
         <!-- toolbar (rounded-t to follow the frame; bg must not overflow the corner) -->
         <div
-          class="sticky top-0 z-10 flex flex-nowrap items-center gap-1 overflow-x-auto rounded-t-xl border-b border-default bg-default/95 px-2 py-1.5 backdrop-blur"
+          class="sticky z-20 flex flex-nowrap items-center gap-1 overflow-x-auto rounded-t-xl border-b border-default bg-default/95 px-2 py-1.5 backdrop-blur"
+          style="top: var(--content-editor-toolbar-top, 0px)"
+          data-content-editor-toolbar
         >
           <UEditorToolbar
             :editor="editor"
@@ -363,6 +365,9 @@ defineExpose({
             name="i-tabler-loader-2"
             class="ml-auto size-4 shrink-0 animate-spin text-muted"
           />
+          <div v-if="$slots['toolbar-actions']" class="ml-auto flex shrink-0 items-center gap-1">
+            <slot name="toolbar-actions" />
+          </div>
         </div>
 
         <!-- selection bubble -->

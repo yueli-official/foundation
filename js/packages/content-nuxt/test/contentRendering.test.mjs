@@ -75,6 +75,7 @@ test("editor toolbar controls expose names and stay in one mobile row", () => {
     assert.match(toolbar, new RegExp(`"aria-label": "${label}"`, "u"));
   }
   assert.match(editor, /flex-nowrap[^"\n]*overflow-x-auto/u);
+  assert.match(editor, /slot name="toolbar-actions"/u);
   assert.doesNotMatch(editor, /flex-wrap items-center/u);
 });
 
@@ -95,4 +96,10 @@ test("article media can switch from thumbnail to a named preview rendition", asy
   const prose = read("app/components/ContentProse.vue");
   assert.match(prose, /data-content-preview-url/);
   assert.match(prose, /<UModal/);
+  assert.match(prose, /writeClipboardText\(code\)/);
+  const clipboard = read("app/utils/clipboard.ts");
+  assert.match(clipboard, /navigator\.clipboard\?\.writeText/);
+  assert.match(clipboard, /document\.execCommand\("copy"\)/);
+  assert.match(prose, /setCopyButtonState\(btn, "已复制"\)/);
+  assert.match(prose, /setCopyButtonState\(btn, "复制失败"\)/);
 });

@@ -51,8 +51,13 @@ describe("ReadingTableOfContents", () => {
     expect(wrapper.findAll("a")[0]?.attributes("data-toc-depth")).toBe("0");
     expect(wrapper.findAll("a")[1]?.attributes("data-toc-depth")).toBe("1");
     expect(wrapper.findAll("a")[1]?.attributes("style")).toContain(
-      "padding-left: 20px",
+      "padding-left: 16px",
     );
+    expect(wrapper.get("ul").classes()).toContain("overflow-y-auto");
+    expect(wrapper.get("ul").classes()).toContain("overflow-x-hidden");
+    expect(wrapper.get("ul").classes()).toContain("border-l");
+    expect(wrapper.findAll("a")[0]?.classes()).toContain("truncate");
+    expect(wrapper.findAll("a")[0]?.attributes("title")).toBe("Install");
   });
 
   it("navigates with a real fragment link and marks the selected heading", async () => {
