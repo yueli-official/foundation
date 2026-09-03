@@ -25,6 +25,7 @@ func (adapter *PostgresAdapter) loadState(
 	lock bool,
 ) (registryState, error) {
 	state := emptyState()
+	refsByStorageID := make(map[string]normalizedRef)
 	query := `SELECT revision FROM ` + adapter.table("instances") + ` WHERE instance_key = $1`
 	if lock {
 		query += ` FOR UPDATE`
@@ -82,6 +83,7 @@ WHERE instance_key = $1`, adapter.instanceKey)
 			ref.ChangedAt = changedAt.Time.UTC()
 		}
 		state.Refs[lookup.ref.key] = ref
+		refsByStorageID[storageRefID(lookup.ref)] = lookup.ref
 	}
 	if err := refRows.Close(); err != nil {
 		return registryState{}, unavailable("close references", err)
@@ -106,13 +108,7 @@ WHERE instance_key = $1`, adapter.instanceKey)
 			return registryState{}, unavailable("scan route", err)
 		}
 		key := RouteKey{Resource: ResourceKey{Kind: ResourceKind(kind), ID: id}, Variant: variant}
-		var canonical normalizedRef
-		for _, ref := range state.Refs {
-			if storageRefID(ref.Ref) == canonicalRefID {
-				canonical = ref.Ref
-				break
-			}
-		}
+		canonical := refsByStorageID[canonicalRefID]
 		if canonical.key == "" {
 			_ = routeRows.Close()
 			return registryState{}, &Error{Kind: ErrorCorruptState, Field: "postgres.route", Message: "canonical reference is missing"}
@@ -163,13 +159,7 @@ WHERE instance_key = $1`, adapter.instanceKey)
 			_ = overlayRows.Close()
 			return registryState{}, unavailable("scan overlay", err)
 		}
-		var source normalizedRef
-		for _, ref := range state.Refs {
-			if storageRefID(ref.Ref) == refID {
-				source = ref.Ref
-				break
-			}
-		}
+		source := refsByStorageID[refID]
 		if source.key == "" {
 			_ = overlayRows.Close()
 			return registryState{}, &Error{Kind: ErrorCorruptState, Field: "postgres.overlay", Message: "base reference is missing"}
