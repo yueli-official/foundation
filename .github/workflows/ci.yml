@@ -50,7 +50,7 @@ jobs:
       - name: 验证 JS 工作区
         run: pnpm verify:js
       - name: 扫描生产依赖
-        run: pnpm audit --prod --audit-level moderate
+        run: pnpm audit:prod
       - name: 检查全部公共包内容
         run: pnpm --filter "./js/packages/*" --recursive pack --dry-run
       - name: 验证独立 UI 制品消费者

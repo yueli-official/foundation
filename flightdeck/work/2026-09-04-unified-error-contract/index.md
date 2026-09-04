@@ -42,6 +42,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 - 2026-09-04：完成 Go race/vet/govulncheck 与 JS lint/typecheck/unit/build；HTTP Runtime 升 0.2.0。确认 JS bundle 尚被两个既存格式项及 content-nuxt/ui 未升版阻断，需进入 Foundation 统一发布顺序处理。
 - 2026-09-04：按实际公开变化将 content-nuxt/UI 升至 0.2.0/0.3.0，修复格式并更新 lock；`verify:js`、release validator、全包 pack、UI tarball consumer 全绿，形成 Go 0.4.0 + JS 0.7.0 候选。
 - 2026-09-04：Foundation 候选提交为 `bc8a00b`；Docs `6d4da27`、Asset `3172282`、Identity `b04d2ea` 和 Workspace `3f14274` 已提交并从对应 committed revision 重建真实组合。
+- 2026-09-04：首次发布标签暴露知识 Markdown 格式门禁，修复后形成 `go/v0.4.1` 与 `js-v0.7.1`；后者两次均仅因 npm audit API 超时或 503 中止。保留不可变标签，增加仅针对网络错误与 5xx 的有限审计重试，补丁候选推进为 JS 0.7.2（content-nuxt/http-runtime/UI 0.2.2/0.2.2/0.3.2）；漏洞结果仍立即失败。
 
 ## References
 

@@ -33,6 +33,7 @@
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck",
     "verify:js": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "audit:prod": "node scripts/audit-production.mjs",
     "verify:go": "cd go && go test ./..."
   },
   "devDependencies": {
