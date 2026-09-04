@@ -4,7 +4,7 @@ packages:
   - "js/apps/*"
 
 overrides:
-  "@types/node": 24.13.3
+  "@types/node": 26.4.0
   typescript: 6.0.3
 
 catalog:
@@ -16,7 +16,7 @@ catalog:
   "@nuxt/kit": 4.5.1
   "@nuxt/ui": 4.9.0
   "@playwright/test": 1.61.1
-  "@types/node": 24.13.3
+  "@types/node": 26.4.0
   "@vitejs/plugin-vue": 6.0.8
   "@vue/test-utils": 2.4.6
   ajv: 8.20.0
