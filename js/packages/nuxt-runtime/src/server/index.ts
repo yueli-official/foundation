@@ -183,6 +183,14 @@ export function createBffHandler(
         response.headers,
         options.profile,
       );
+      if (options.profile !== "asset" && [201, 202].includes(response.status)) {
+        const location = publicCreationLocation(
+          response.headers.get("location"),
+          target.pathPrefix,
+          mountPath,
+        );
+        if (location !== undefined) responseHeaders.set("location", location);
+      }
       const responseBody =
         event.method === "HEAD" || isBodylessStatus(response.status)
           ? null
@@ -422,6 +430,39 @@ function copyAllowedResponseHeaders(
     if (value) headers.set(name, value);
   }
   return headers;
+}
+
+// Only rewrite creation/job references within the configured API boundary.
+// Invalid optional metadata must not turn a completed write into a retryable error.
+function publicCreationLocation(
+  location: string | null,
+  targetPrefix: string,
+  mountPath: string,
+): string | undefined {
+  if (
+    !location ||
+    location.length > 8192 ||
+    /\s/u.test(location) ||
+    containsControlCharacter(location)
+  ) {
+    return undefined;
+  }
+  const suffixIndex = location.search(/[?#]/u);
+  const path = suffixIndex < 0 ? location : location.slice(0, suffixIndex);
+  const suffix = suffixIndex < 0 ? "" : location.slice(suffixIndex);
+  try {
+    validateRelativePath(path);
+  } catch {
+    return undefined;
+  }
+  if (
+    targetPrefix &&
+    path !== targetPrefix &&
+    !path.startsWith(`${targetPrefix}/`)
+  ) {
+    return undefined;
+  }
+  return `${mountPath}${path.slice(targetPrefix.length)}${suffix}`;
 }
 
 function isBodylessStatus(status: number): boolean {

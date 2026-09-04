@@ -10,6 +10,11 @@ Open
 
 ## Current
 
+Nav 验收推动共享 BFF 修复：API profile 对 201/202 的安全根相对 Location 按 targetPrefix → mountPath 重写；
+越界、穿越及编码分隔符被过滤，非法可选头不改变成功状态/正文，API 3xx 与 Asset profile 保持原行为。
+nuxt-runtime 补丁候选为 0.1.4，39 个模块测试、typecheck/lint、HTTP conformance 构建与 Playwright 3/3、
+独立 tarball HTTP smoke、版本 validator 均通过；Nav 真实 Playwright 5/5 通过。此候选尚未发布。
+
 Foundation 已交付 Project v1 通用生成器、JSON Schema 和独立 Operation Errors v1。`httpcontract -project` 可运行产品 OpenAPI producer，从真实 OpenAPI 投影完整 operation，校验失效错误路由和 catalog 使用覆盖，并生成 Go/TypeScript/i18n/legacy；`-check` 使用临时 OpenAPI防止覆盖后自证。产品只拥有 project config 与业务 operation-errors 文件。
 
 主流一手资料调研已完成。RFC 9457、OAuth 2、GraphQL、gRPC/Google AIP-193、Stripe、GitHub、OpenTelemetry 与 W3C 的共同方向是：协议状态、稳定机器原因、类型化上下文、最终用户文案和内部 cause 必须分离；重试需要同时考虑幂等性、执行状态和服务端 hint；字段违规需要可定位；trace、operation 与 durable identity 必须各自定义生命周期。研究已形成 canonical failure 候选模型、10 条设计约束和首阶段范围。
@@ -28,7 +33,9 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Project v1 与严格集合规则已完成本地实现。Docs、Blog、Asset、Identity、Shortlink、Notification、Commerce 已完成产品/服务迁移；Shortlink review 修正了 4 个伪 resource 集合、204 客户端类型和后台共享组件偏移，并以全量 Go/JS 与 37 项 CLI Playwright 复验。远端消费者仍使用 Foundation v0.4.1 分步门禁，因为 Project v1 尚未发布；这不影响本地继续迁移。Resource 单站 Work 已建立但尚未修改产品实现，下一会话从 Resource 开始。不创建版本、标签或 Release。
+Resource 与 Nav 单站本地迁移及 review 已完成。后续消费者按 Workspace 选定的单站 Work 推进；Project v1 发布后再切换
+远端消费者的单命令 freshness 门禁。nuxt-runtime 0.1.4 的 BFF Location 修复已形成并验证本地候选，交由发布加固 Work
+在取得明确发布授权后发布并更新消费者精确制品引用；当前不执行 push/tag/Release。
 
 ## Progress
 

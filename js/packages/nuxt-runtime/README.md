@@ -48,6 +48,10 @@ HTTP Problem 会转换成只包含机器安全字段的 Nuxt error。
 
 ## BFF
 
+从 0.1.4 起，默认 API profile 在 201/202 响应中保留安全的根相对 `Location`，并把私有 target pathPrefix
+改写为公开 mountPath。只接受目标前缀边界内的路径；外部 URL、路径穿越和编码分隔符被省略，成功状态与正文仍然保留。
+API 的 3xx Location 过滤及 Asset profile 保持原行为。消费者继续使用已有 BFF 配置，无需增加产品代理或回退逻辑。
+
 ```ts
 import { createBffHandler } from "@yueli/nuxt-runtime/server";
 

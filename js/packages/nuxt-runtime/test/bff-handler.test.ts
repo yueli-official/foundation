@@ -332,6 +332,80 @@ describe("createBffHandler", () => {
     expect(downstreamRequests).toBe(0);
   });
 
+  it.each([201, 202])(
+    "rewrites a %i Location into the public API mount",
+    async (status) => {
+      let requests = 0;
+      const downstream = await listen(
+        createServer((request, response) => {
+          requests += 1;
+          if (request.method === "POST") {
+            response.statusCode = status;
+            response.setHeader("location", "/internal/v1/items/new?view=full");
+          }
+          response.setHeader("content-type", "application/json");
+          response.end(JSON.stringify({ id: "new" }));
+        }),
+      );
+      const bff = await startBff({ downstreamOrigin: downstream.origin });
+      const response = await fetch(`${bff.origin}/api/bff/content/items`, {
+        method: "POST",
+      });
+      expect(response.status).toBe(status);
+      expect(response.headers.get("location")).toBe(
+        "/api/bff/content/items/new?view=full",
+      );
+      expect(await response.json()).toEqual({ id: "new" });
+      expect(requests).toBe(1);
+      const created = await fetch(
+        new URL(response.headers.get("location")!, bff.origin),
+      );
+      expect(created.status).toBe(200);
+      expect(await created.json()).toEqual({ id: "new" });
+    },
+  );
+
+  it.each([
+    "https://evil.test/items/new",
+    "//evil.test/items/new",
+    "items/new",
+    "/outside/items/new",
+    "/internal/v10/items/new",
+    "/internal/v1/../private",
+    "/internal/v1/%2e%2e/private",
+    "/internal/v1/%252e%252e/private",
+    "/internal/v1/a%2fb",
+    "/internal/v1/a%255cb",
+    "/internal/v1/a%0ab",
+    "/internal/v1/a\\b",
+    "/internal/v1//items",
+    "/internal/v1/%broken",
+  ])(
+    "omits unsafe creation Location %s without failing the write",
+    async (location) => {
+      let requests = 0;
+      const downstream = await listen(
+        createServer((_request, response) => {
+          requests += 1;
+          response.statusCode = 201;
+          response.setHeader("location", location);
+          response.end("created");
+        }),
+      );
+      const bff = await startBff({
+        downstreamOrigin: downstream.origin,
+        profile: "api",
+      });
+      const response = await fetch(`${bff.origin}/api/bff/content/items`, {
+        method: "POST",
+      });
+      expect(response.status).toBe(201);
+      expect(await response.text()).toBe("created");
+      expect(response.headers.get("location")).toBeNull();
+      expect(requests).toBe(1);
+    },
+  );
+
   it("does not follow downstream redirects", async () => {
     let trapRequests = 0;
     const trap = await listen(
