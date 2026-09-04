@@ -24,11 +24,11 @@ TypeScript HTTP Runtime 现提供纯 `resolveFailureFeedback` Interface，把 re
 
 Asset operation 现实际兑现资产读取 raw DTO、删除空 204、上传初始化 201、完成 201；全量 Go 通过。Workspace 按 source digest 替换 Identity/Asset Provider 后，Docs 真实 AE 双语导入再次通过，144 个节点与 2 份去重图片完成预检/确认，证明新 Asset 201、Docs 201/202/204、OAuth Provider 与现有 Consumer SDK/BFF 可共同工作；浏览器链路耗时约 2.7 分钟。
 
-Foundation 发布候选已完整收口：Go `httpcontract` 有 public-beta module metadata，候选 `go/v0.4.0`；JS bundle 候选 `js-v0.7.0`，变化包为 content-nuxt 0.2.0、http-runtime 0.2.0、UI 0.3.0。Go race/vet/govulncheck、JS `verify:js`、release validator、全部公共 package pack 和 UI 独立 tarball consumer 全绿。尚未提交、tag 或发布。
+Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract` 有 public-beta module metadata，候选 `go/v0.4.0`；JS bundle候选 `js-v0.7.0`，变化包为 content-nuxt 0.2.0、http-runtime 0.2.0、UI 0.3.0。Go race/vet/govulncheck、JS `verify:js`、release validator、全部公共 package pack 和 UI 独立 tarball consumer 全绿。尚未 tag 或发布。
 
 ## Next
 
-经用户确认后提交 Foundation 候选；再次确认后由发布加固 Work 创建 `go/v0.4.0` 与 `js-v0.7.0`。发布后更新 Docs/Asset 锁定依赖并消费 `resolveFailureFeedback`。
+取得最终发布确认后由发布加固 Work 创建 `go/v0.4.0` 与 `js-v0.7.0`。发布后更新 Docs/Asset 锁定依赖并消费 `resolveFailureFeedback`。
 
 ## Progress
 
@@ -41,6 +41,7 @@ Foundation 发布候选已完整收口：Go `httpcontract` 有 public-beta modul
 - 2026-09-04：Asset 兑现 raw get、空 204、上传 init/finalize 201；替换真实 Provider 后由 Docs 完成 2.7 分钟浏览器导入确认，验证 Identity OAuth、Asset 新状态和 Docs Result 合同组合兼容。
 - 2026-09-04：完成 Go race/vet/govulncheck 与 JS lint/typecheck/unit/build；HTTP Runtime 升 0.2.0。确认 JS bundle 尚被两个既存格式项及 content-nuxt/ui 未升版阻断，需进入 Foundation 统一发布顺序处理。
 - 2026-09-04：按实际公开变化将 content-nuxt/UI 升至 0.2.0/0.3.0，修复格式并更新 lock；`verify:js`、release validator、全包 pack、UI tarball consumer 全绿，形成 Go 0.4.0 + JS 0.7.0 候选。
+- 2026-09-04：Foundation 候选提交为 `bc8a00b`；Docs `6d4da27`、Asset `3172282`、Identity `b04d2ea` 和 Workspace `3f14274` 已提交并从对应 committed revision 重建真实组合。
 
 ## References
 
