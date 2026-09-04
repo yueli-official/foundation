@@ -228,10 +228,10 @@ func runProject(path string, check bool) error {
 	if err != nil {
 		return err
 	}
-	operationErrors := project.Operations.Errors
+	var operationErrors map[string][]string
 	var operationIDs map[string]string
 	var operationOverrides map[string]httpcontract.OperationOverride
-	if project.Operations.ErrorsFile != "" {
+	{
 		errorData, err := os.ReadFile(project.Operations.ErrorsFile)
 		if err != nil {
 			return fmt.Errorf("read project operation errors: %w", err)

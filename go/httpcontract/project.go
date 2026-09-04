@@ -35,9 +35,8 @@ type ProjectOpenAPIProducer struct {
 	Env       map[string]string `json:"env,omitempty"`
 }
 type ProjectOperations struct {
-	Output     string              `json:"output"`
-	ErrorsFile string              `json:"errorsFile,omitempty"`
-	Errors     map[string][]string `json:"errors,omitempty"`
+	Output     string `json:"output"`
+	ErrorsFile string `json:"errorsFile,omitempty"`
 }
 type ProjectGenerate struct {
 	GoOutput   string `json:"goOutput"`
@@ -77,8 +76,8 @@ func (project Project) Validate() error {
 	if len(project.OpenAPI.Producer.Command) == 0 || strings.TrimSpace(project.OpenAPI.Producer.Command[0]) == "" {
 		return errors.New("httpcontract: project openapi.producer.command is required")
 	}
-	if (project.Operations.ErrorsFile == "") == (project.Operations.Errors == nil) {
-		return errors.New("httpcontract: project operations requires exactly one of errorsFile or errors")
+	if project.Operations.ErrorsFile == "" {
+		return errors.New("httpcontract: project operations.errorsFile is required")
 	}
 	if strings.TrimSpace(project.OpenAPI.Producer.OutputEnv) == "" {
 		return errors.New("httpcontract: project openapi.producer.outputEnv is required")
@@ -154,16 +153,16 @@ func ParseOperationErrors(data []byte) (OperationErrors, error) {
 		}
 	}
 	for route, id := range result.IDs {
-		if _, ok := result.Operations[route]; !ok {
-			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors id route %q has no operation declaration", route)
+		if !validOperationRoute(route) {
+			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors id route %q is invalid", route)
 		}
 		if !operationIDPattern.MatchString(id) || !strings.HasPrefix(id, result.Namespace+".") {
 			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors route %q has invalid id %q", route, id)
 		}
 	}
 	for route, override := range result.Overrides {
-		if _, ok := result.Operations[route]; !ok {
-			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors override route %q has no operation declaration", route)
+		if !validOperationRoute(route) {
+			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors override route %q is invalid", route)
 		}
 		if override.Success != nil {
 			if err := override.Success.validate("problem"); err != nil {
@@ -178,9 +177,9 @@ func OperationErrorsFromOperations(operations Operations) OperationErrors {
 	result := OperationErrors{SchemaVersion: OperationErrorsSchemaVersion, Namespace: operations.Namespace, Operations: make(map[string][]string), IDs: make(map[string]string), Overrides: make(map[string]OperationOverride)}
 	for _, operation := range operations.Operations {
 		key := operation.Method + " " + operation.Path
+		result.IDs[key] = operation.ID
 		if len(operation.Errors) > 0 {
 			result.Operations[key] = append([]string(nil), operation.Errors...)
-			result.IDs[key] = operation.ID
 		}
 		if operation.Success.Kind == "binary" || operation.Success.Kind == "redirect" || operation.FailureProtocol != "" || len(operation.AdditionalSuccesses) > 0 {
 			success := operation.Success
@@ -188,6 +187,11 @@ func OperationErrorsFromOperations(operations Operations) OperationErrors {
 		}
 	}
 	return result
+}
+
+func validOperationRoute(route string) bool {
+	parts := strings.SplitN(route, " ", 2)
+	return len(parts) == 2 && validMethod(parts[0]) && strings.HasPrefix(parts[1], "/")
 }
 
 func EncodeOperationErrors(declarations OperationErrors) ([]byte, error) {
@@ -249,10 +253,21 @@ func OperationsFromOpenAPIWithIDs(data []byte, namespace string, operationErrors
 			if id == "" {
 				id = projectOperationID(namespace, method, path)
 			}
-			item := Operation{ID: id, Method: strings.ToUpper(method), Path: path, Success: Success{Status: status, Kind: projectResponseKind(status, ref, document.Components.Schemas), SchemaRef: ref}, Errors: operationErrors[key]}
-			if override, ok := operationOverrides[key]; ok {
+			override, hasOverride := operationOverrides[key]
+			var success Success
+			if hasOverride && override.Success != nil {
+				success = *override.Success
+			} else {
+				kind, err := projectResponseKind(status, ref, document.Components.Schemas)
+				if err != nil {
+					return Operations{}, fmt.Errorf("httpcontract: OpenAPI %s %s: %w", strings.ToUpper(method), path, err)
+				}
+				success = Success{Status: status, Kind: kind, SchemaRef: ref}
+			}
+			item := Operation{ID: id, Method: strings.ToUpper(method), Path: path, Success: success, Errors: operationErrors[key]}
+			if hasOverride {
 				if override.Success != nil {
-					item.Success = *override.Success
+					item.Success = success
 				}
 				item.FailureProtocol = override.FailureProtocol
 				item.AdditionalSuccesses = append([]Success(nil), override.AdditionalSuccesses...)
@@ -380,25 +395,32 @@ func projectSchemaRef(response openAPIResponse) string {
 	}
 	return ""
 }
-func projectResponseKind(status int, ref string, schemas map[string]openAPISchema) string {
+func projectResponseKind(status int, ref string, schemas map[string]openAPISchema) (string, error) {
 	if status == 204 {
-		return "empty"
+		return "empty", nil
 	}
 	if status == 202 {
-		return "operation"
+		return "operation", nil
 	}
 	properties := schemas[strings.TrimPrefix(ref, "#/components/schemas/")].Properties
 	_, items := properties["items"]
-	_, list := properties["list"]
-	_, entries := properties["entries"]
 	_, total := properties["total"]
-	if total && (items || list || entries) {
-		return "page"
+	_, page := properties["page"]
+	_, size := properties["size"]
+	_, nextCursor := properties["nextCursor"]
+	if items && total && page && size {
+		return "page", nil
 	}
-	if items || list || entries {
-		return "collection"
+	if items && total {
+		return "", errors.New("page DTO with items/total must also declare page and size")
 	}
-	return "resource"
+	if items && nextCursor {
+		return "cursorPage", nil
+	}
+	if items {
+		return "collection", nil
+	}
+	return "resource", nil
 }
 func projectOperationID(namespace, method, path string) string {
 	parts := []string{namespace, strings.ToLower(method)}

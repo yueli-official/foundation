@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Docs、Blog、Asset、Identity、Shortlink 与 Notification 已完成 Project v1。Notification 交付 16 个错误、24/24 operation、202/200 异步幂等双结果、201/204 和 Provider 原文隔离。下一步按单站 Work 迁移 Commerce；不创建新版本、标签或 Release。
+Review 修复已落地：Notification 发送固定 200，Replay 使用标准 `{id,status}` 202 OperationDTO；Project 只接受 errorsFile，只把 `items` 识别为集合，并拒绝缺少 page/size 的页码分页。Docs 已修正列表/搜索模型；Identity 9 个旧非标准集合以显式过渡 override 保持兼容，不能再被自动认可。下一步迁移这些 Identity DTO，并继续 Commerce；不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -60,7 +60,8 @@ Docs、Blog、Asset、Identity、Shortlink 与 Notification 已完成 Project v1
 - 2026-09-04：Project Operation Errors 增加稳定 route→ID 与协议/成功形状 override，修复 Asset 初次迁移造成的 breaking ID/binary drift；Asset 最终仅有两条 errors behavioral change。Identity 80 条普通 API Project diff 为零，OAuth/OIDC 9 条保持独立 manifest。
 - 2026-09-04：Shortlink 建立 8 个产品错误、24/24 operation 与统一反馈，移除 SDK/BFF raw provider body，CI 改用 OSV；公开页 6 项和完整登录/创建/302/编辑/治理/410 flow 通过，真实断言举报 201 与删除 204，功能分支 fast-forward 合并本地 main。
 - 2026-09-05：Project producer 支持声明非敏感静态 env，Notification 使用 config.example 成功生成并检查 16 个错误和 24/24 operation；敏感值继续禁止进入 project config。
-- 2026-09-05：Notification 完成状态、管理 DTO、CI 与真实 HTTP integration；首次发送 202，幂等重放 200 且复用 messageId，管理查询不含 Provider lastError。仓库无独立 Workspace target，因此不虚构组合验收。
+- 2026-09-05：Notification 完成状态、管理 DTO、CI 与真实 HTTP integration；管理查询不含 Provider lastError。后续 review 将发送统一收敛为 200，并保留 Replay 的标准 202 OperationDTO。仓库无独立 Workspace target，因此不虚构组合验收。
+- 2026-09-05：双轴 review 发现 Notification 滥用 additionalSuccesses/非标准 OperationDTO、Project 放行 list/entries 和不完整分页。已修复生成器与 Notification；6 个消费者新版 check 中 Blog/Asset/Shortlink 直接通过，Docs 修正模型后通过，Identity 以 9 个显式 transitional overrides 保持 diff 为零。
 
 ## References
 

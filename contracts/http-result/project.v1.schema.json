@@ -24,16 +24,11 @@
     },
     "errorCatalog": { "$ref": "#/$defs/path" },
     "operations": {
-      "type": "object", "additionalProperties": false, "required": ["output"],
+      "type": "object", "additionalProperties": false, "required": ["output", "errorsFile"],
       "properties": {
         "output": { "$ref": "#/$defs/path" },
-        "errorsFile": { "$ref": "#/$defs/path" },
-        "errors": { "$ref": "operation-errors.v1.schema.json#/$defs/operations" }
-      },
-      "oneOf": [
-        { "required": ["errorsFile"], "not": { "required": ["errors"] } },
-        { "required": ["errors"], "not": { "required": ["errorsFile"] } }
-      ]
+        "errorsFile": { "$ref": "#/$defs/path" }
+      }
     },
     "generate": {
       "type": "object", "additionalProperties": false,

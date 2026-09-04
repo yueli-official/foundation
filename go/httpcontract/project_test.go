@@ -29,6 +29,14 @@ func TestOperationsFromOpenAPIRejectsStaleErrorRoute(t *testing.T) {
 	}
 }
 
+func TestOperationsFromOpenAPIRejectsIncompletePage(t *testing.T) {
+	openAPI := []byte(`{"paths":{"/widgets":{"get":{"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Widgets"}}}}}}}},"components":{"schemas":{"Widgets":{"properties":{"items":{"type":"array"},"total":{"type":"integer"}}}}}}`)
+	_, err := httpcontract.OperationsFromOpenAPI(openAPI, "docs", map[string][]string{})
+	if err == nil || !strings.Contains(err.Error(), "page and size") {
+		t.Fatalf("error=%v", err)
+	}
+}
+
 func TestGenerateLegacyCatalog(t *testing.T) {
 	catalog, err := httpcontract.ParseErrorCatalog([]byte(validCatalog))
 	if err != nil {
