@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Review 修复及 Identity、Commerce 推广已落地。Identity 删除 9 个过渡 override，并额外修正 GitHub 绑定历史与批量公开用户，11 个列表由真实 `items` collection/page DTO 驱动；Commerce 38/38 operation 完成 201/202、标准分页、恢复错误脱敏及真实 PostgreSQL HTTP 验收。下一步建立 Paste 单站 Work 并接入 Project v1；不创建新版本、标签或 Release。
+Review 修复及 Identity、Commerce 推广已落地。Identity 删除 9 个过渡 override，并额外修正 GitHub 绑定历史与批量公开用户，11 个列表由真实 `items` collection/page DTO 驱动；Commerce 38/38 operation 完成 201/202、标准分页、恢复错误脱敏及真实 PostgreSQL HTTP 验收。Paste checkout 有未提交前端工作，按并发写入规则暂不介入；下一步推进干净的 Resource 单站 Work 并接入 Project v1。不创建新版本、标签或 Release。
 
 ## Progress
 
