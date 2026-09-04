@@ -132,6 +132,24 @@ func ParseOperationErrors(data []byte) (OperationErrors, error) {
 	return result, nil
 }
 
+func OperationErrorsFromOperations(operations Operations) OperationErrors {
+	result := OperationErrors{SchemaVersion: OperationErrorsSchemaVersion, Namespace: operations.Namespace, Operations: make(map[string][]string)}
+	for _, operation := range operations.Operations {
+		if len(operation.Errors) > 0 {
+			result.Operations[operation.Method+" "+operation.Path] = append([]string(nil), operation.Errors...)
+		}
+	}
+	return result
+}
+
+func EncodeOperationErrors(declarations OperationErrors) ([]byte, error) {
+	data, err := json.MarshalIndent(declarations, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append(data, '\n'), nil
+}
+
 type openAPIDocument struct {
 	Paths      map[string]map[string]openAPIOperation `json:"paths"`
 	Components struct {

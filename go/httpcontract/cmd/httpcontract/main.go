@@ -23,6 +23,8 @@ func run(args []string) error {
 	flags := flag.NewFlagSet("httpcontract", flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
 	projectPath := flags.String("project", "", "generate a complete product contract from project config")
+	extractOperationErrors := flags.String("extract-operation-errors", "", "extract product-owned error declarations from an operations manifest")
+	extractedOutput := flags.String("operation-errors-output", "", "write extracted operation error declarations here")
 	errorPath := flags.String("errors", "", "path to a public error catalog")
 	operationsPath := flags.String("operations", "", "path to an HTTP operations manifest")
 	baseErrorPath := flags.String("base-errors", "", "compare errors against this previous catalog")
@@ -35,6 +37,24 @@ func run(args []string) error {
 	check := flags.Bool("check", false, "verify generated outputs without rewriting them")
 	if err := flags.Parse(args); err != nil {
 		return err
+	}
+	if *extractOperationErrors != "" {
+		if flags.NArg() != 0 || *extractedOutput == "" {
+			return fmt.Errorf("-extract-operation-errors requires -operation-errors-output")
+		}
+		data, err := os.ReadFile(*extractOperationErrors)
+		if err != nil {
+			return err
+		}
+		operations, err := httpcontract.ParseOperations(data)
+		if err != nil {
+			return err
+		}
+		generated, err := httpcontract.EncodeOperationErrors(httpcontract.OperationErrorsFromOperations(operations))
+		if err != nil {
+			return err
+		}
+		return writeGenerated(*extractedOutput, generated, *check)
 	}
 	if *projectPath != "" {
 		if flags.NArg() != 0 || *errorPath != "" || *operationsPath != "" {

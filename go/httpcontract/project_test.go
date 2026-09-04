@@ -71,3 +71,21 @@ func TestParseOperationErrors(t *testing.T) {
 		t.Fatal("invalid route was accepted")
 	}
 }
+
+func TestOperationErrorsFromOperations(t *testing.T) {
+	operations, err := httpcontract.ParseOperations([]byte(validOperations))
+	if err != nil {
+		t.Fatal(err)
+	}
+	declarations := httpcontract.OperationErrorsFromOperations(operations)
+	if len(declarations.Operations) != 1 {
+		t.Fatalf("%#v", declarations)
+	}
+	encoded, err := httpcontract.EncodeOperationErrors(declarations)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := httpcontract.ParseOperationErrors(encoded); err != nil {
+		t.Fatal(err)
+	}
+}

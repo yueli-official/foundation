@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-用本地构建的 Foundation CLI 让 Docs 删除自有 OpenAPI 投影、coverage checker 和生成编排代码，改用 Project v1 配置与 Operation Errors v1；完成消费者门禁，不要求先发布；不创建新版本、标签或 Release。
+Docs 已用 Workspace State Root 中的本地 Foundation CLI 完成 Project v1 generate/check。下一步让 Docs CI 在不破坏远端构建的前提下采用通用入口：发布前保留旧命令作远端兼容，新增本地 project 门禁；随后迁移 Blog 配置。不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -54,6 +54,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 - 2026-09-04：Docs 全量迁移证明各产品复制 `cmd/httpcontracts`、OpenAPI 投影和 coverage checker 会持续漂移；决定在本 Work 增加 Foundation 通用 project generator，各站仅保留声明式配置与业务 operation-error 数据。
 - 2026-09-04：实现 Project v1 Go model、严格解析、OpenAPI operation 投影、stale route/catalog coverage、legacy projection 与 CLI producer/`-check` 流程；`httpcontract` 专项和 Foundation 普通全量测试通过，最终全量 race 尚待重跑。
 - 2026-09-04：补齐 Project/Operation Errors JSON Schema、独立 errorsFile 严格解析与 CLI 端到端 generate/check 测试，确认临时 OpenAPI drift 检查和六类输出可由同一命令完成。
+- 2026-09-04：增加从既有 operations manifest 机械提取 Operation Errors v1 的迁移入口；本地构建固定 CLI 后，Docs 70 operation generate/check 通过，证明消费者迁移不依赖先发布 Foundation。
 
 ## References
 
