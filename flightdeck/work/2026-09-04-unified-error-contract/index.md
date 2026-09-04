@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Docs 已用 Workspace State Root 中的本地 Foundation CLI 完成 Project v1 generate/check。下一步让 Docs CI 在不破坏远端构建的前提下采用通用入口：发布前保留旧命令作远端兼容，新增本地 project 门禁；随后迁移 Blog 配置。不创建新版本、标签或 Release。
+Docs 已完成 Project v1 消费者迁移和真实浏览器验收；发布前保留旧命令作远端 CI 兼容。下一步迁移 Blog 的 project/operation-errors 配置并用本地 Foundation CLI generate/check；随后处理 Identity、Asset。不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -55,6 +55,7 @@ Docs 已用 Workspace State Root 中的本地 Foundation CLI 完成 Project v1 g
 - 2026-09-04：实现 Project v1 Go model、严格解析、OpenAPI operation 投影、stale route/catalog coverage、legacy projection 与 CLI producer/`-check` 流程；`httpcontract` 专项和 Foundation 普通全量测试通过，最终全量 race 尚待重跑。
 - 2026-09-04：补齐 Project/Operation Errors JSON Schema、独立 errorsFile 严格解析与 CLI 端到端 generate/check 测试，确认临时 OpenAPI drift 检查和六类输出可由同一命令完成。
 - 2026-09-04：增加从既有 operations manifest 机械提取 Operation Errors v1 的迁移入口；本地构建固定 CLI 后，Docs 70 operation generate/check 通过，证明消费者迁移不依赖先发布 Foundation。
+- 2026-09-04：Docs 以 Project v1 完成 70/70 operation 与六类产物 generate/check；Workspace 管理、编辑器及 AE 双语导入 Playwright 全绿，验证 201/202/204 和安全错误反馈。
 
 ## References
 
