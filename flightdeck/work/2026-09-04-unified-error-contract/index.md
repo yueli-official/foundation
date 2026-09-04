@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-使用 Identity 的 revoke/end_session manifest 验证新增 OAuth `200 empty` 与 `additionalSuccesses`，完成全量 Go/JS 门禁后形成仅本地候选提交；不创建新版本、标签或 Release。随后继续逐站推广。
+设计并实现 Foundation `httpcontract project` 一键生成器：产品只维护声明式 project config 与 operation errors，CLI 负责运行产品 OpenAPI producer、生成完整 operation manifest、Go/TS/i18n、legacy projection，并支持 `-check`。先让 Docs 删除自有编排代码并完成消费者验收；不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -51,6 +51,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 - 2026-09-04：Dependabot 重建继续检出发布仅 36 小时的间接依赖 `@iconify/collections@1.0.733`；不扩大排除范围，覆盖到已满足成熟期的 1.0.732。精确 Dependabot 安装命令、冻结安装和 OSV 复验通过。
 - 2026-09-04：Identity 推广发现 RFC 7009 revoke 合法使用 `200 + empty`，end_session 同一端点可返回 302 redirect 或 204 empty。Operation v1 保留主 `success` 并新增可选 `additionalSuccesses`；仅 OAuth 允许 200 empty，普通 Problem API 仍强制 204。解析、Schema 与兼容性 diff 回归测试通过。
 - 2026-09-04：暂停推广并完成双轴审查；明确把编辑器/依赖 cooldown 归回各自 Work，Asset/Identity 修复声明式 catalog 单一事实源、生成 freshness 与 compatibility diff，Identity 修复 Provider raw error，Asset Task 改 typed DTO。
+- 2026-09-04：Docs 全量迁移证明各产品复制 `cmd/httpcontracts`、OpenAPI 投影和 coverage checker 会持续漂移；决定在本 Work 增加 Foundation 通用 project generator，各站仅保留声明式配置与业务 operation-error 数据。
 
 ## References
 
