@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Review 修复已落地：Notification 发送固定 200，Replay 使用标准 `{id,status}` 202 OperationDTO；Project 只接受 errorsFile，只把 `items` 识别为集合，并拒绝缺少 page/size 的页码分页。Docs 已修正列表/搜索模型；Identity 9 个旧非标准集合以显式过渡 override 保持兼容，不能再被自动认可。下一步迁移这些 Identity DTO，并继续 Commerce；不创建新版本、标签或 Release。
+Review 修复及 Identity、Commerce 推广已落地。Identity 删除 9 个过渡 override，并额外修正 GitHub 绑定历史与批量公开用户，11 个列表由真实 `items` collection/page DTO 驱动；Commerce 38/38 operation 完成 201/202、标准分页、恢复错误脱敏及真实 PostgreSQL HTTP 验收。下一步建立 Paste 单站 Work 并接入 Project v1；不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -62,6 +62,8 @@ Review 修复已落地：Notification 发送固定 200，Replay 使用标准 `{i
 - 2026-09-05：Project producer 支持声明非敏感静态 env，Notification 使用 config.example 成功生成并检查 16 个错误和 24/24 operation；敏感值继续禁止进入 project config。
 - 2026-09-05：Notification 完成状态、管理 DTO、CI 与真实 HTTP integration；管理查询不含 Provider lastError。后续 review 将发送统一收敛为 200，并保留 Replay 的标准 202 OperationDTO。仓库无独立 Workspace target，因此不虚构组合验收。
 - 2026-09-05：双轴 review 发现 Notification 滥用 additionalSuccesses/非标准 OperationDTO、Project 放行 list/entries 和不完整分页。已修复生成器与 Notification；6 个消费者新版 check 中 Blog/Asset/Shortlink 直接通过，Docs 修正模型后通过，Identity 以 9 个显式 transitional overrides 保持 diff 为零。
+- 2026-09-05：Commerce 完成 38/38 Project v1、12 个业务错误、31 个 200/5 个 201/2 个 202、6 个分页与 4 个集合；移除恢复 `lastError`，真实 PostgreSQL HTTP integration、race/vet/govuln 通过，单站 Work Finished。
+- 2026-09-05：Identity 将 9 个过渡 override 全部迁为真实 DTO，并补迁 GitHub 绑定历史与批量公开用户；Account/Nuxt 消费者、Go HTTP e2e、全量门禁及 CLI Playwright 通过，单服务 Work Finished。兼容性 CI 改为比较最近正式发布 tag，而非把尚未发布的 main 提交误作公开基线。
 
 ## References
 
