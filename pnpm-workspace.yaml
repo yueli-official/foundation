@@ -3,6 +3,9 @@ packages:
   - "js/conformance/*"
   - "js/apps/*"
 
+minimumReleaseAgeExclude:
+  - "@tiptap/*"
+
 overrides:
   "@types/node": 24.13.3
   typescript: 6.0.3
