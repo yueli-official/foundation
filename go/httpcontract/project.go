@@ -105,9 +105,16 @@ func (project Project) Validate() error {
 }
 
 type OperationErrors struct {
-	SchemaVersion string              `json:"schemaVersion"`
-	Namespace     string              `json:"namespace"`
-	Operations    map[string][]string `json:"operations"`
+	SchemaVersion string                       `json:"schemaVersion"`
+	Namespace     string                       `json:"namespace"`
+	Operations    map[string][]string          `json:"operations"`
+	IDs           map[string]string            `json:"ids,omitempty"`
+	Overrides     map[string]OperationOverride `json:"overrides,omitempty"`
+}
+type OperationOverride struct {
+	Success             *Success  `json:"success,omitempty"`
+	FailureProtocol     string    `json:"failureProtocol,omitempty"`
+	AdditionalSuccesses []Success `json:"additionalSuccesses,omitempty"`
 }
 
 func ParseOperationErrors(data []byte) (OperationErrors, error) {
@@ -140,14 +147,38 @@ func ParseOperationErrors(data []byte) (OperationErrors, error) {
 			seen[code] = struct{}{}
 		}
 	}
+	for route, id := range result.IDs {
+		if _, ok := result.Operations[route]; !ok {
+			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors id route %q has no operation declaration", route)
+		}
+		if !operationIDPattern.MatchString(id) || !strings.HasPrefix(id, result.Namespace+".") {
+			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors route %q has invalid id %q", route, id)
+		}
+	}
+	for route, override := range result.Overrides {
+		if _, ok := result.Operations[route]; !ok {
+			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors override route %q has no operation declaration", route)
+		}
+		if override.Success != nil {
+			if err := override.Success.validate("problem"); err != nil {
+				return OperationErrors{}, fmt.Errorf("httpcontract: operation errors override route %q: %w", route, err)
+			}
+		}
+	}
 	return result, nil
 }
 
 func OperationErrorsFromOperations(operations Operations) OperationErrors {
-	result := OperationErrors{SchemaVersion: OperationErrorsSchemaVersion, Namespace: operations.Namespace, Operations: make(map[string][]string)}
+	result := OperationErrors{SchemaVersion: OperationErrorsSchemaVersion, Namespace: operations.Namespace, Operations: make(map[string][]string), IDs: make(map[string]string), Overrides: make(map[string]OperationOverride)}
 	for _, operation := range operations.Operations {
+		key := operation.Method + " " + operation.Path
 		if len(operation.Errors) > 0 {
-			result.Operations[operation.Method+" "+operation.Path] = append([]string(nil), operation.Errors...)
+			result.Operations[key] = append([]string(nil), operation.Errors...)
+			result.IDs[key] = operation.ID
+		}
+		if operation.Success.Kind == "binary" || operation.Success.Kind == "redirect" || operation.FailureProtocol != "" || len(operation.AdditionalSuccesses) > 0 {
+			success := operation.Success
+			result.Overrides[key] = OperationOverride{Success: &success, FailureProtocol: operation.FailureProtocol, AdditionalSuccesses: append([]Success(nil), operation.AdditionalSuccesses...)}
 		}
 	}
 	return result
@@ -182,12 +213,20 @@ type openAPISchema struct {
 }
 
 func OperationsFromOpenAPI(data []byte, namespace string, operationErrors map[string][]string) (Operations, error) {
+	return OperationsFromOpenAPIWithIDs(data, namespace, operationErrors, nil)
+}
+
+func OperationsFromOpenAPIWithIDs(data []byte, namespace string, operationErrors map[string][]string, operationIDs map[string]string, overrides ...map[string]OperationOverride) (Operations, error) {
 	var document openAPIDocument
 	if err := json.Unmarshal(data, &document); err != nil {
 		return Operations{}, fmt.Errorf("httpcontract: decode OpenAPI: %w", err)
 	}
 	manifest := Operations{SchemaVersion: OperationsSchemaVersion, Namespace: namespace}
 	routes := make(map[string]struct{})
+	var operationOverrides map[string]OperationOverride
+	if len(overrides) > 0 {
+		operationOverrides = overrides[0]
+	}
 	for path, methods := range document.Paths {
 		for method, operation := range methods {
 			status, response, ok := projectSuccessResponse(operation.Responses)
@@ -200,12 +239,34 @@ func OperationsFromOpenAPI(data []byte, namespace string, operationErrors map[st
 			}
 			key := strings.ToUpper(method) + " " + path
 			routes[key] = struct{}{}
-			manifest.Operations = append(manifest.Operations, Operation{ID: projectOperationID(namespace, method, path), Method: strings.ToUpper(method), Path: path, Success: Success{Status: status, Kind: projectResponseKind(status, ref, document.Components.Schemas), SchemaRef: ref}, Errors: operationErrors[key]})
+			id := operationIDs[key]
+			if id == "" {
+				id = projectOperationID(namespace, method, path)
+			}
+			item := Operation{ID: id, Method: strings.ToUpper(method), Path: path, Success: Success{Status: status, Kind: projectResponseKind(status, ref, document.Components.Schemas), SchemaRef: ref}, Errors: operationErrors[key]}
+			if override, ok := operationOverrides[key]; ok {
+				if override.Success != nil {
+					item.Success = *override.Success
+				}
+				item.FailureProtocol = override.FailureProtocol
+				item.AdditionalSuccesses = append([]Success(nil), override.AdditionalSuccesses...)
+			}
+			manifest.Operations = append(manifest.Operations, item)
 		}
 	}
 	for route := range operationErrors {
 		if _, ok := routes[route]; !ok {
 			return Operations{}, fmt.Errorf("httpcontract: project operation errors contain stale route %q", route)
+		}
+	}
+	for route := range operationIDs {
+		if _, ok := routes[route]; !ok {
+			return Operations{}, fmt.Errorf("httpcontract: project operation ids contain stale route %q", route)
+		}
+	}
+	for route := range operationOverrides {
+		if _, ok := routes[route]; !ok {
+			return Operations{}, fmt.Errorf("httpcontract: project operation overrides contain stale route %q", route)
 		}
 	}
 	sort.Slice(manifest.Operations, func(i, j int) bool { return manifest.Operations[i].ID < manifest.Operations[j].ID })

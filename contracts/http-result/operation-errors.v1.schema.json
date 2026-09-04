@@ -8,7 +8,24 @@
   "properties": {
     "schemaVersion": { "const": "http.yueli.dev/operation-errors/v1" },
     "namespace": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{1,63}$" },
-    "operations": { "$ref": "#/$defs/operations" }
+    "operations": { "$ref": "#/$defs/operations" },
+    "ids": {
+      "type": "object",
+      "propertyNames": { "pattern": "^(GET|POST|PUT|PATCH|DELETE) /" },
+      "additionalProperties": { "type": "string", "pattern": "^[a-z][A-Za-z0-9._-]{1,127}$" }
+    },
+    "overrides": {
+      "type": "object",
+      "propertyNames": { "pattern": "^(GET|POST|PUT|PATCH|DELETE) /" },
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "success": { "$ref": "operations.v1.schema.json#/$defs/success" },
+          "failureProtocol": { "enum": ["problem", "oauth"] },
+          "additionalSuccesses": { "type": "array", "minItems": 1, "items": { "$ref": "operations.v1.schema.json#/$defs/success" } }
+        }
+      }
+    }
   },
   "$defs": {
     "operations": {

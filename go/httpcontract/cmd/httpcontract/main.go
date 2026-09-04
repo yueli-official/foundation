@@ -226,6 +226,8 @@ func runProject(path string, check bool) error {
 		return err
 	}
 	operationErrors := project.Operations.Errors
+	var operationIDs map[string]string
+	var operationOverrides map[string]httpcontract.OperationOverride
 	if project.Operations.ErrorsFile != "" {
 		errorData, err := os.ReadFile(project.Operations.ErrorsFile)
 		if err != nil {
@@ -239,8 +241,10 @@ func runProject(path string, check bool) error {
 			return fmt.Errorf("httpcontract: operation errors namespace %q does not match project %q", declarations.Namespace, project.Namespace)
 		}
 		operationErrors = declarations.Operations
+		operationIDs = declarations.IDs
+		operationOverrides = declarations.Overrides
 	}
-	operations, err := httpcontract.OperationsFromOpenAPI(openAPI, project.Namespace, operationErrors)
+	operations, err := httpcontract.OperationsFromOpenAPIWithIDs(openAPI, project.Namespace, operationErrors, operationIDs, operationOverrides)
 	if err != nil {
 		return err
 	}

@@ -81,6 +81,9 @@ func TestOperationErrorsFromOperations(t *testing.T) {
 	if len(declarations.Operations) != 1 {
 		t.Fatalf("%#v", declarations)
 	}
+	if declarations.IDs["GET /api/v1/collections"] != "docs.collections.list" {
+		t.Fatalf("ids=%#v", declarations.IDs)
+	}
 	encoded, err := httpcontract.EncodeOperationErrors(declarations)
 	if err != nil {
 		t.Fatal(err)
