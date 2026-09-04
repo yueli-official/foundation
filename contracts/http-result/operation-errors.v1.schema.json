@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.yueli.dev/http-result/operation-errors.v1.schema.json",
+  "title": "Yueli HTTP Operation Errors v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "namespace", "operations"],
+  "properties": {
+    "schemaVersion": { "const": "http.yueli.dev/operation-errors/v1" },
+    "namespace": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{1,63}$" },
+    "operations": { "$ref": "#/$defs/operations" }
+  },
+  "$defs": {
+    "operations": {
+      "type": "object",
+      "propertyNames": { "pattern": "^(GET|POST|PUT|PATCH|DELETE) /" },
+      "additionalProperties": {
+        "type": "array", "uniqueItems": true,
+        "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$" }
+      }
+    }
+  }
+}

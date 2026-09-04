@@ -42,3 +42,32 @@ func TestGenerateLegacyCatalog(t *testing.T) {
 		t.Fatalf("%s", data)
 	}
 }
+
+func TestParseProjectWithOperationErrorsFile(t *testing.T) {
+	project, err := httpcontract.ParseProject([]byte(`{
+      "schemaVersion":"http.yueli.dev/project/v1","namespace":"docs",
+      "openapi":{"output":"openapi.json","producer":{"command":["go","run","./cmd/docs"],"outputEnv":"DOCS_OPENAPI_OUTPUT"}},
+      "errorCatalog":"errors.json","operations":{"output":"operations.json","errorsFile":"operation-errors.json"},
+      "generate":{"goOutput":"catalog_gen.go","goPackage":"docserr","tsOutput":"failure.ts","tsType":"DocsFailure","i18nOutput":"i18n.json"}
+    }`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if project.Operations.ErrorsFile != "operation-errors.json" {
+		t.Fatalf("%#v", project.Operations)
+	}
+}
+
+func TestParseOperationErrors(t *testing.T) {
+	declarations, err := httpcontract.ParseOperationErrors([]byte(`{"schemaVersion":"http.yueli.dev/operation-errors/v1","namespace":"docs","operations":{"POST /api/v1/docs":["docs.invalid_input"]}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(declarations.Operations) != 1 {
+		t.Fatalf("%#v", declarations)
+	}
+	_, err = httpcontract.ParseOperationErrors([]byte(`{"schemaVersion":"http.yueli.dev/operation-errors/v1","namespace":"docs","operations":{"BROKEN":["docs.invalid_input"]}}`))
+	if err == nil {
+		t.Fatal("invalid route was accepted")
+	}
+}

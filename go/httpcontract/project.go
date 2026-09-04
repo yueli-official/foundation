@@ -12,6 +12,7 @@ import (
 )
 
 const ProjectSchemaVersion = "http.yueli.dev/project/v1"
+const OperationErrorsSchemaVersion = "http.yueli.dev/operation-errors/v1"
 
 type Project struct {
 	SchemaVersion string                `json:"schemaVersion"`
@@ -32,8 +33,9 @@ type ProjectOpenAPIProducer struct {
 	OutputEnv string   `json:"outputEnv"`
 }
 type ProjectOperations struct {
-	Output string              `json:"output"`
-	Errors map[string][]string `json:"errors,omitempty"`
+	Output     string              `json:"output"`
+	ErrorsFile string              `json:"errorsFile,omitempty"`
+	Errors     map[string][]string `json:"errors,omitempty"`
 }
 type ProjectGenerate struct {
 	GoOutput   string `json:"goOutput"`
@@ -73,6 +75,9 @@ func (project Project) Validate() error {
 	if len(project.OpenAPI.Producer.Command) == 0 || strings.TrimSpace(project.OpenAPI.Producer.Command[0]) == "" {
 		return errors.New("httpcontract: project openapi.producer.command is required")
 	}
+	if (project.Operations.ErrorsFile == "") == (project.Operations.Errors == nil) {
+		return errors.New("httpcontract: project operations requires exactly one of errorsFile or errors")
+	}
 	if strings.TrimSpace(project.OpenAPI.Producer.OutputEnv) == "" {
 		return errors.New("httpcontract: project openapi.producer.outputEnv is required")
 	}
@@ -86,6 +91,45 @@ func (project Project) Validate() error {
 		return errors.New("httpcontract: project legacyCatalog output and schemaVersion are required")
 	}
 	return nil
+}
+
+type OperationErrors struct {
+	SchemaVersion string              `json:"schemaVersion"`
+	Namespace     string              `json:"namespace"`
+	Operations    map[string][]string `json:"operations"`
+}
+
+func ParseOperationErrors(data []byte) (OperationErrors, error) {
+	var result OperationErrors
+	if err := decodeStrict(data, &result); err != nil {
+		return OperationErrors{}, fmt.Errorf("httpcontract: decode operation errors: %w", err)
+	}
+	if result.SchemaVersion != OperationErrorsSchemaVersion {
+		return OperationErrors{}, fmt.Errorf("httpcontract: unsupported operation errors schemaVersion %q", result.SchemaVersion)
+	}
+	if !namespacePattern.MatchString(result.Namespace) {
+		return OperationErrors{}, errors.New("httpcontract: operation errors namespace is invalid")
+	}
+	if result.Operations == nil {
+		return OperationErrors{}, errors.New("httpcontract: operation errors requires operations")
+	}
+	for route, codes := range result.Operations {
+		parts := strings.SplitN(route, " ", 2)
+		if len(parts) != 2 || !validMethod(parts[0]) || !strings.HasPrefix(parts[1], "/") {
+			return OperationErrors{}, fmt.Errorf("httpcontract: operation errors route %q is invalid", route)
+		}
+		seen := make(map[string]struct{}, len(codes))
+		for _, code := range codes {
+			if !codePattern.MatchString(code) {
+				return OperationErrors{}, fmt.Errorf("httpcontract: operation errors route %q contains invalid code %q", route, code)
+			}
+			if _, ok := seen[code]; ok {
+				return OperationErrors{}, fmt.Errorf("httpcontract: operation errors route %q contains duplicate code %q", route, code)
+			}
+			seen[code] = struct{}{}
+		}
+	}
+	return result, nil
 }
 
 type openAPIDocument struct {

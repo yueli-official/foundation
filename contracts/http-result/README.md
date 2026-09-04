@@ -16,3 +16,8 @@ Success responses use the HTTP status and the endpoint DTO directly:
 Failures use the sibling HTTP Problem v1 contract. OAuth/OIDC endpoints retain their protocol-defined error format.
 
 `error-catalog.v1.schema.json` describes product-owned stable error semantics. `operations.v1.schema.json` describes only an operation's success status/body kind and public failure set; product DTO fields remain owned by OpenAPI and are referenced rather than duplicated.
+
+`project.v1.schema.json` declares the product OpenAPI producer and generated outputs. Run
+`httpcontract -project <project.json>` to regenerate the complete contract, or add `-check` in CI.
+Route-to-error declarations use `operation-errors.v1.schema.json`, keeping generated operations out
+of the handwritten source-of-truth set.
