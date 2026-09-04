@@ -21,12 +21,13 @@ type Operations struct {
 }
 
 type Operation struct {
-	ID              string   `json:"id"`
-	Method          string   `json:"method"`
-	Path            string   `json:"path"`
-	FailureProtocol string   `json:"failureProtocol,omitempty"`
-	Success         Success  `json:"success"`
-	Errors          []string `json:"errors,omitempty"`
+	ID                  string    `json:"id"`
+	Method              string    `json:"method"`
+	Path                string    `json:"path"`
+	FailureProtocol     string    `json:"failureProtocol,omitempty"`
+	Success             Success   `json:"success"`
+	AdditionalSuccesses []Success `json:"additionalSuccesses,omitempty"`
+	Errors              []string  `json:"errors,omitempty"`
 }
 
 type Success struct {
@@ -72,15 +73,25 @@ func (manifest Operations) Validate() error {
 		if !strings.HasPrefix(operation.Path, "/") || len(operation.Path) > 2048 {
 			return fmt.Errorf("httpcontract: %s.path is invalid", location)
 		}
-		if err := operation.Success.validate(); err != nil {
-			return fmt.Errorf("httpcontract: %s.success: %w", location, err)
-		}
 		protocol := operation.FailureProtocol
 		if protocol == "" {
 			protocol = "problem"
 		}
 		if protocol != "problem" && protocol != "oauth" {
 			return fmt.Errorf("httpcontract: %s.failureProtocol is invalid", location)
+		}
+		if err := operation.Success.validate(protocol); err != nil {
+			return fmt.Errorf("httpcontract: %s.success: %w", location, err)
+		}
+		successStatuses := map[int]struct{}{operation.Success.Status: {}}
+		for successIndex, success := range operation.AdditionalSuccesses {
+			if err := success.validate(protocol); err != nil {
+				return fmt.Errorf("httpcontract: %s.additionalSuccesses[%d]: %w", location, successIndex, err)
+			}
+			if _, exists := successStatuses[success.Status]; exists {
+				return fmt.Errorf("httpcontract: %s.additionalSuccesses contains duplicate status %d", location, success.Status)
+			}
+			successStatuses[success.Status] = struct{}{}
 		}
 		errorSeen := map[string]struct{}{}
 		for _, code := range operation.Errors {
@@ -100,7 +111,7 @@ func (manifest Operations) Validate() error {
 	return nil
 }
 
-func (success Success) validate() error {
+func (success Success) validate(protocol string) error {
 	needsSchema := false
 	switch success.Kind {
 	case "resource":
@@ -119,8 +130,8 @@ func (success Success) validate() error {
 			return errors.New("operation status must be 202")
 		}
 	case "empty":
-		if success.Status != 204 {
-			return errors.New("empty status must be 204")
+		if success.Status != 204 && !(protocol == "oauth" && success.Status == 200) {
+			return errors.New("empty status must be 204, or 200 for oauth")
 		}
 	case "binary":
 		if success.Status < 200 || success.Status > 299 || success.Status == 204 {

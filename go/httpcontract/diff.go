@@ -114,6 +114,19 @@ func DiffOperations(before, after Operations) CompatibilityReport {
 		if !reflect.DeepEqual(oldValue.Success, newValue.Success) {
 			result.add(ChangeBreaking, path+"/success", "success contract changed")
 		}
+		oldAdditional := successesByStatus(oldValue.AdditionalSuccesses)
+		newAdditional := successesByStatus(newValue.AdditionalSuccesses)
+		for status, oldSuccess := range oldAdditional {
+			newSuccess, ok := newAdditional[status]
+			if !ok || !reflect.DeepEqual(oldSuccess, newSuccess) {
+				result.add(ChangeBreaking, fmt.Sprintf("%s/additionalSuccesses/%d", path, status), "additional success contract was removed or changed")
+			}
+		}
+		for status := range newAdditional {
+			if _, ok := oldAdditional[status]; !ok {
+				result.add(ChangeAdditive, fmt.Sprintf("%s/additionalSuccesses/%d", path, status), "additional success contract was added")
+			}
+		}
 		if !reflect.DeepEqual(sortedStrings(oldValue.Errors), sortedStrings(newValue.Errors)) {
 			result.add(ChangeBehavioral, path+"/errors", "declared failure set changed")
 		}
@@ -124,6 +137,14 @@ func DiffOperations(before, after Operations) CompatibilityReport {
 		}
 	}
 	result.sort()
+	return result
+}
+
+func successesByStatus(values []Success) map[int]Success {
+	result := make(map[int]Success, len(values))
+	for _, value := range values {
+		result[value.Status] = value
+	}
 	return result
 }
 

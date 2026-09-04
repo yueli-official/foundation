@@ -12,6 +12,7 @@
 - 异步受理：`202 + OperationDTO`；Operation 自己拥有稳定 `id/status`。
 - 成功且无正文：`204`，不得再写 `{deleted:true}`、空对象或其他 JSON。
 - 文件、流、条件请求与重定向使用专用 Adapter，不套 JSON Envelope。
+- 一个 operation 通常只有一个稳定成功结果。协议原生端点确有多个合法结果时保留主 `success`，并用 `additionalSuccesses` 明确列出；不得借此表达普通业务分支。OAuth 等外部协议允许规范要求的 `200 + empty`，普通 Problem API 的 empty 仍必须是 204。
 
 产品 DTO schema 仍由产品和 OpenAPI 拥有。Foundation operation declaration 只记录 method、path、成功 status/body kind、DTO schema 引用和可能的公开错误，不复制 DTO 字段。
 

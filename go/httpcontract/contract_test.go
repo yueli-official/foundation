@@ -97,6 +97,47 @@ func TestParseOperationsKeepsOAuthWireErrorsProtocolNative(t *testing.T) {
 	}
 }
 
+func TestParseOperationsSupportsOAuthEmptyAndMultipleSuccesses(t *testing.T) {
+	manifest, err := httpcontract.ParseOperations([]byte(`{
+      "schemaVersion":"http.yueli.dev/operations/v1",
+      "namespace":"identity",
+      "operations":[
+        {
+          "id":"identity.oauth.revoke",
+          "method":"POST",
+          "path":"/oauth2/revoke",
+          "failureProtocol":"oauth",
+          "success":{"status":200,"kind":"empty"}
+        },
+        {
+          "id":"identity.oidc.endSession",
+          "method":"GET",
+          "path":"/oauth2/end_session",
+          "failureProtocol":"oauth",
+          "success":{"status":302,"kind":"redirect"},
+          "additionalSuccesses":[{"status":204,"kind":"empty"}]
+        }
+      ]
+    }`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := manifest.Operations[1].AdditionalSuccesses; len(got) != 1 || got[0].Status != 204 {
+		t.Fatalf("additional successes = %#v", got)
+	}
+}
+
+func TestParseOperationsRejectsHTTP200EmptyOutsideOAuth(t *testing.T) {
+	_, err := httpcontract.ParseOperations([]byte(`{
+      "schemaVersion":"http.yueli.dev/operations/v1",
+      "namespace":"docs",
+      "operations":[{"id":"docs.delete","method":"DELETE","path":"/docs","success":{"status":200,"kind":"empty"}}]
+    }`))
+	if err == nil || !strings.Contains(err.Error(), "empty status must be 204") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
 func TestParseOperationsRejectsWrongSuccessShape(t *testing.T) {
 	tests := []struct {
 		from string
@@ -219,6 +260,24 @@ func TestCompatibilityDiffClassifiesChanges(t *testing.T) {
 	operationReport := httpcontract.DiffOperations(oldOperations, newOperations)
 	if !operationReport.HasBreaking() || len(operationReport.Changes) != 1 {
 		t.Fatalf("operation report = %#v", operationReport)
+	}
+}
+
+func TestCompatibilityDiffClassifiesAdditionalSuccesses(t *testing.T) {
+	before, err := httpcontract.ParseOperations([]byte(validOperations))
+	if err != nil {
+		t.Fatal(err)
+	}
+	after := before
+	after.Operations = append([]httpcontract.Operation(nil), before.Operations...)
+	after.Operations[0].AdditionalSuccesses = []httpcontract.Success{{Status: 201, Kind: "resource", SchemaRef: "#/components/schemas/Collection"}}
+	report := httpcontract.DiffOperations(before, after)
+	if report.HasBreaking() || len(report.Changes) != 1 || report.Changes[0].Severity != httpcontract.ChangeAdditive {
+		t.Fatalf("add report = %#v", report)
+	}
+	removed := httpcontract.DiffOperations(after, before)
+	if !removed.HasBreaking() || len(removed.Changes) != 1 {
+		t.Fatalf("remove report = %#v", removed)
 	}
 }
 

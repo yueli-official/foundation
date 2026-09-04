@@ -48,6 +48,11 @@
           "default": "problem"
         },
         "success": { "$ref": "#/$defs/success" },
+        "additionalSuccesses": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/success" }
+        },
         "errors": {
           "type": "array",
           "uniqueItems": true,
