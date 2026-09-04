@@ -9,6 +9,20 @@ import { EditableInlineMath } from "../extensions/EditableInlineMath";
 import { MathBlock } from "../extensions/MathBlock";
 import { MermaidBlock } from "../extensions/MermaidBlock";
 
+interface ChainBoundary {
+  deleteSelection(): ChainBoundary;
+  focus(): ChainBoundary;
+  insertContent(content: unknown): ChainBoundary;
+  run(): boolean;
+}
+
+interface EditorBoundary {
+  chain(): ChainBoundary;
+  getAttributes(name: string): { alt?: string; src?: string };
+  isActive(name: string, attributes?: Record<string, unknown>): boolean;
+  isEditable: boolean;
+}
+
 // Markdown 富文本编辑器与 ContentProse 共用文档语义。代码、公式、Mermaid、
 // 提示块、草稿、表情和字数统计都封装在本基础库内，产品只负责保存内容和上传图片。
 const props = withDefaults(
@@ -145,19 +159,21 @@ function onDragOver(event: DragEvent) {
 
 // 工具栏、气泡菜单和建议菜单共用命令处理器。
 const calloutHandler = (type: CalloutType) => ({
-  canExecute: (editor: Editor) => editor.isEditable,
-  execute: (editor: Editor) => editor.chain().focus().setCallout({ type }),
-  isActive: (editor: Editor) => editor.isActive("callout", { type }),
+  canExecute: (editor: EditorBoundary) => editor.isEditable,
+  execute: (editor: EditorBoundary) =>
+    (editor as unknown as Editor).chain().focus().setCallout({ type }),
+  isActive: (editor: EditorBoundary) => editor.isActive("callout", { type }),
 });
 
 const handlers = {
   image: {
-    canExecute: (editor: Editor) => editor.isEditable && !!props.imageUploader,
-    execute: (editor: Editor) => {
+    canExecute: (editor: EditorBoundary) =>
+      editor.isEditable && !!props.imageUploader,
+    execute: (editor: EditorBoundary) => {
       pickImage();
       return editor.chain();
     },
-    isActive: (_editor: Editor) => false,
+    isActive: (_editor: EditorBoundary) => false,
   },
   "callout-note": calloutHandler("note"),
   "callout-tip": calloutHandler("tip"),
@@ -165,8 +181,8 @@ const handlers = {
   "callout-warning": calloutHandler("warning"),
   "callout-caution": calloutHandler("caution"),
   "math-inline": {
-    canExecute: (editor: Editor) => editor.isEditable,
-    execute: (editor: Editor) =>
+    canExecute: (editor: EditorBoundary) => editor.isEditable,
+    execute: (editor: EditorBoundary) =>
       editor
         .chain()
         .focus()
@@ -174,26 +190,29 @@ const handlers = {
           type: "inlineMath",
           attrs: { latex: "E = mc^2", editing: true },
         }),
-    isActive: (_editor: Editor) => false,
+    isActive: (_editor: EditorBoundary) => false,
   },
   "math-block": {
-    canExecute: (editor: Editor) => editor.isEditable,
-    execute: (editor: Editor) =>
-      editor.chain().focus().setMathBlock({ latex: "E = mc^2", editing: true }),
-    isActive: (editor: Editor) => editor.isActive("blockMath"),
+    canExecute: (editor: EditorBoundary) => editor.isEditable,
+    execute: (editor: EditorBoundary) =>
+      (editor as unknown as Editor)
+        .chain()
+        .focus()
+        .setMathBlock({ latex: "E = mc^2", editing: true }),
+    isActive: (editor: EditorBoundary) => editor.isActive("blockMath"),
   },
   "mermaid-block": {
-    canExecute: (editor: Editor) => editor.isEditable,
-    execute: (editor: Editor) =>
-      editor
+    canExecute: (editor: EditorBoundary) => editor.isEditable,
+    execute: (editor: EditorBoundary) =>
+      (editor as unknown as Editor)
         .chain()
         .focus()
         .setMermaidBlock({ code: "graph TD\n    A-->B", editing: true }),
-    isActive: (editor: Editor) => editor.isActive("mermaidBlock"),
+    isActive: (editor: EditorBoundary) => editor.isActive("mermaidBlock"),
   },
   "download-image": {
-    canExecute: (editor: Editor) => editor.isActive("image"),
-    execute: (editor: Editor) => {
+    canExecute: (editor: EditorBoundary) => editor.isActive("image"),
+    execute: (editor: EditorBoundary) => {
       const attrs = editor.getAttributes("image");
       if (attrs.src) {
         const a = document.createElement("a");
@@ -204,12 +223,13 @@ const handlers = {
       }
       return editor.chain();
     },
-    isActive: (_editor: Editor) => false,
+    isActive: (_editor: EditorBoundary) => false,
   },
   "remove-image": {
-    canExecute: (editor: Editor) => editor.isActive("image"),
-    execute: (editor: Editor) => editor.chain().focus().deleteSelection(),
-    isActive: (_editor: Editor) => false,
+    canExecute: (editor: EditorBoundary) => editor.isActive("image"),
+    execute: (editor: EditorBoundary) =>
+      editor.chain().focus().deleteSelection(),
+    isActive: (_editor: EditorBoundary) => false,
   },
 };
 
@@ -218,16 +238,7 @@ const handlers = {
 // resolves and deduplicates them to one runtime instance. Erase only at the
 // Nuxt UI prop boundary; node implementations retain their full types.
 const uiEditorExtensions = editorExtensions as never;
-const uiEditorHandlers = handlers as unknown as typeof handlers & {
-  suggestion?: {
-    canExecute: (editor: Editor) => boolean;
-    execute: (
-      editor: Editor,
-      options: { pos?: number },
-    ) => ReturnType<Editor["chain"]>;
-    isActive: (editor: Editor) => boolean;
-  };
-};
+const uiEditorHandlers = handlers;
 
 // 草稿与自动保存。
 const draftFormData = ref<{ content?: string }>({ content: props.modelValue });
