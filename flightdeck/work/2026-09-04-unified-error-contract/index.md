@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Docs 已完成 Project v1 消费者迁移和真实浏览器验收；发布前保留旧命令作远端 CI 兼容。下一步迁移 Blog 的 project/operation-errors 配置并用本地 Foundation CLI generate/check；随后处理 Identity、Asset。不创建新版本、标签或 Release。
+Docs、Blog 已完成 Project v1，Asset generate/check 也已通过。下一步扩展 Project 对 OAuth 独立 manifest/failureProtocol/additionalSuccesses 的声明，迁移 Identity；随后重跑 Foundation 全量门禁。不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -56,6 +56,7 @@ Docs 已完成 Project v1 消费者迁移和真实浏览器验收；发布前保
 - 2026-09-04：补齐 Project/Operation Errors JSON Schema、独立 errorsFile 严格解析与 CLI 端到端 generate/check 测试，确认临时 OpenAPI drift 检查和六类输出可由同一命令完成。
 - 2026-09-04：增加从既有 operations manifest 机械提取 Operation Errors v1 的迁移入口；本地构建固定 CLI 后，Docs 70 operation generate/check 通过，证明消费者迁移不依赖先发布 Foundation。
 - 2026-09-04：Docs 以 Project v1 完成 70/70 operation 与六类产物 generate/check；Workspace 管理、编辑器及 AE 双语导入 Playwright 全绿，验证 201/202/204 和安全错误反馈。
+- 2026-09-04：Blog 68 operation 与 Asset 54 operation 通过本地 Project generate/check。Asset 证明部分 catalog code 只作为成功 DTO 内嵌 issue/errorCode；Project 增加显式 allowUnusedErrors，仍拒绝未声明豁免和真正 Problem 漏挂。
 
 ## References
 

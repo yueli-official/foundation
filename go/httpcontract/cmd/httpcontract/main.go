@@ -244,7 +244,7 @@ func runProject(path string, check bool) error {
 	if err != nil {
 		return err
 	}
-	if err := httpcontract.VerifyProjectCatalogCoverage(catalog, operations); err != nil {
+	if err := httpcontract.VerifyProjectCatalogCoverage(catalog, operations, project.AllowUnusedErrors...); err != nil {
 		return err
 	}
 	operationsData, err := httpcontract.EncodeOperations(operations)

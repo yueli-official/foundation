@@ -89,3 +89,20 @@ func TestOperationErrorsFromOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestVerifyProjectCatalogCoverageAllowsDeclaredEmbeddedCode(t *testing.T) {
+	catalog, err := httpcontract.ParseErrorCatalog([]byte(validCatalog))
+	if err != nil {
+		t.Fatal(err)
+	}
+	operations, err := httpcontract.ParseOperations([]byte(validOperations))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := httpcontract.VerifyProjectCatalogCoverage(catalog, operations, "docs.import.compression_unsupported"); err != nil {
+		t.Fatal(err)
+	}
+	if err := httpcontract.VerifyProjectCatalogCoverage(catalog, operations, "docs.unknown"); err == nil {
+		t.Fatal("undeclared exemption accepted")
+	}
+}

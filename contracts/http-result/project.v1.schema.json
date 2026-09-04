@@ -46,6 +46,10 @@
     "legacyCatalog": {
       "type": "object", "additionalProperties": false, "required": ["output", "schemaVersion"],
       "properties": { "output": { "$ref": "#/$defs/path" }, "schemaVersion": { "type": "string", "minLength": 1 } }
+    },
+    "allowUnusedErrors": {
+      "type": "array", "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$" }
     }
   },
   "$defs": { "path": { "type": "string", "minLength": 1, "maxLength": 2048 } }

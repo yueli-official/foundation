@@ -15,13 +15,14 @@ const ProjectSchemaVersion = "http.yueli.dev/project/v1"
 const OperationErrorsSchemaVersion = "http.yueli.dev/operation-errors/v1"
 
 type Project struct {
-	SchemaVersion string                `json:"schemaVersion"`
-	Namespace     string                `json:"namespace"`
-	OpenAPI       ProjectOpenAPI        `json:"openapi"`
-	ErrorCatalog  string                `json:"errorCatalog"`
-	Operations    ProjectOperations     `json:"operations"`
-	Generate      ProjectGenerate       `json:"generate"`
-	LegacyCatalog *ProjectLegacyCatalog `json:"legacyCatalog,omitempty"`
+	SchemaVersion     string                `json:"schemaVersion"`
+	Namespace         string                `json:"namespace"`
+	OpenAPI           ProjectOpenAPI        `json:"openapi"`
+	ErrorCatalog      string                `json:"errorCatalog"`
+	Operations        ProjectOperations     `json:"operations"`
+	Generate          ProjectGenerate       `json:"generate"`
+	LegacyCatalog     *ProjectLegacyCatalog `json:"legacyCatalog,omitempty"`
+	AllowUnusedErrors []string              `json:"allowUnusedErrors,omitempty"`
 }
 
 type ProjectOpenAPI struct {
@@ -89,6 +90,16 @@ func (project Project) Validate() error {
 	}
 	if project.LegacyCatalog != nil && (project.LegacyCatalog.Output == "" || project.LegacyCatalog.SchemaVersion == "") {
 		return errors.New("httpcontract: project legacyCatalog output and schemaVersion are required")
+	}
+	seenUnused := make(map[string]struct{}, len(project.AllowUnusedErrors))
+	for _, code := range project.AllowUnusedErrors {
+		if !codePattern.MatchString(code) || !strings.HasPrefix(code, project.Namespace+".") {
+			return fmt.Errorf("httpcontract: project allowUnusedErrors contains invalid code %q", code)
+		}
+		if _, ok := seenUnused[code]; ok {
+			return fmt.Errorf("httpcontract: project allowUnusedErrors contains duplicate code %q", code)
+		}
+		seenUnused[code] = struct{}{}
 	}
 	return nil
 }
@@ -204,11 +215,15 @@ func OperationsFromOpenAPI(data []byte, namespace string, operationErrors map[st
 	return manifest, nil
 }
 
-func VerifyProjectCatalogCoverage(catalog ErrorCatalog, operations Operations) error {
+func VerifyProjectCatalogCoverage(catalog ErrorCatalog, operations Operations, allowUnused ...string) error {
 	if err := VerifyReferences(catalog, operations); err != nil {
 		return err
 	}
 	used := make(map[string]struct{})
+	allowed := make(map[string]struct{}, len(allowUnused))
+	for _, code := range allowUnused {
+		allowed[code] = struct{}{}
+	}
 	for _, operation := range operations.Operations {
 		for _, code := range operation.Errors {
 			used[code] = struct{}{}
@@ -217,7 +232,22 @@ func VerifyProjectCatalogCoverage(catalog ErrorCatalog, operations Operations) e
 	missing := make([]string, 0)
 	for _, definition := range catalog.Errors {
 		if _, ok := used[definition.Code]; !ok {
+			if _, exempt := allowed[definition.Code]; exempt {
+				continue
+			}
 			missing = append(missing, definition.Code)
+		}
+	}
+	for code := range allowed {
+		found := false
+		for _, definition := range catalog.Errors {
+			if definition.Code == code {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("httpcontract: project allowUnusedErrors references undeclared code %q", code)
 		}
 	}
 	sort.Strings(missing)
