@@ -16,7 +16,8 @@
           "type": "object", "additionalProperties": false, "required": ["command", "outputEnv"],
           "properties": {
             "command": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-            "outputEnv": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" }
+            "outputEnv": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
+            "env": { "type": "object", "propertyNames": { "pattern": "^[A-Z][A-Z0-9_]+$" }, "additionalProperties": { "type": "string" } }
           }
         }
       }

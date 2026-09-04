@@ -30,8 +30,9 @@ type ProjectOpenAPI struct {
 	Producer ProjectOpenAPIProducer `json:"producer"`
 }
 type ProjectOpenAPIProducer struct {
-	Command   []string `json:"command"`
-	OutputEnv string   `json:"outputEnv"`
+	Command   []string          `json:"command"`
+	OutputEnv string            `json:"outputEnv"`
+	Env       map[string]string `json:"env,omitempty"`
 }
 type ProjectOperations struct {
 	Output     string              `json:"output"`
@@ -81,6 +82,11 @@ func (project Project) Validate() error {
 	}
 	if strings.TrimSpace(project.OpenAPI.Producer.OutputEnv) == "" {
 		return errors.New("httpcontract: project openapi.producer.outputEnv is required")
+	}
+	for name := range project.OpenAPI.Producer.Env {
+		if name == "" || strings.Contains(name, "=") || name == project.OpenAPI.Producer.OutputEnv {
+			return fmt.Errorf("httpcontract: project openapi.producer.env contains invalid name %q", name)
+		}
 	}
 	if !regexpTypeName.MatchString(project.Generate.TSType) {
 		return errors.New("httpcontract: project generate.tsType is invalid")

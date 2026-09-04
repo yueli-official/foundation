@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Docs、Blog、Asset、Identity 与 Shortlink 已完成 Project v1。Shortlink 从旧 OpenAPI 19 条校正为真实 24 条，完成 error/result/前端/SDK/CI/Playwright，并按用户授权 fast-forward 合并本地 main。下一步按单站 Work 迁移 Notification；不创建新版本、标签或 Release。
+Docs、Blog、Asset、Identity 与 Shortlink 已完成 Project v1；Notification 24/24 合同基线已生成。Notification producer 证明部分服务需要非敏感静态配置，Project 新增 `producer.env`，输出路径变量仍由 Foundation控制，密钥仅从调用环境继承。下一步完成 Notification 状态/DTO/Provider 错误安全与本地 HTTP 验收；不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -59,6 +59,7 @@ Docs、Blog、Asset、Identity 与 Shortlink 已完成 Project v1。Shortlink �
 - 2026-09-04：Blog 68 operation 与 Asset 54 operation 通过本地 Project generate/check。Asset 证明部分 catalog code 只作为成功 DTO 内嵌 issue/errorCode；Project 增加显式 allowUnusedErrors，仍拒绝未声明豁免和真正 Problem 漏挂。
 - 2026-09-04：Project Operation Errors 增加稳定 route→ID 与协议/成功形状 override，修复 Asset 初次迁移造成的 breaking ID/binary drift；Asset 最终仅有两条 errors behavioral change。Identity 80 条普通 API Project diff 为零，OAuth/OIDC 9 条保持独立 manifest。
 - 2026-09-04：Shortlink 建立 8 个产品错误、24/24 operation 与统一反馈，移除 SDK/BFF raw provider body，CI 改用 OSV；公开页 6 项和完整登录/创建/302/编辑/治理/410 flow 通过，真实断言举报 201 与删除 204，功能分支 fast-forward 合并本地 main。
+- 2026-09-05：Project producer 支持声明非敏感静态 env，Notification 使用 config.example 成功生成并检查 16 个错误和 24/24 operation；敏感值继续禁止进入 project config。
 
 ## References
 

@@ -200,6 +200,9 @@ func runProject(path string, check bool) error {
 	}
 	command := exec.Command(project.OpenAPI.Producer.Command[0], project.OpenAPI.Producer.Command[1:]...)
 	command.Env = append(os.Environ(), project.OpenAPI.Producer.OutputEnv+"="+producerOutput)
+	for name, value := range project.OpenAPI.Producer.Env {
+		command.Env = append(command.Env, name+"="+value)
+	}
 	command.Stdout, command.Stderr = os.Stdout, os.Stderr
 	if err := command.Run(); err != nil {
 		return fmt.Errorf("run OpenAPI producer: %w", err)
