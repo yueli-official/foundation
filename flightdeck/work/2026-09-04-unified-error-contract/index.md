@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Docs、Blog 已完成 Project v1，Asset generate/check 也已通过。下一步扩展 Project 对 OAuth 独立 manifest/failureProtocol/additionalSuccesses 的声明，迁移 Identity；随后重跑 Foundation 全量门禁。不创建新版本、标签或 Release。
+Docs、Blog、Asset、Identity 已完成 Project v1 本地 generate/check；Asset 历史 operation ID 与 binary/特殊 DTO override 保持兼容，Identity 80 条普通 API diff 为零，9 条 OAuth/OIDC 继续使用独立协议 manifest。下一步重跑 Foundation 全量 Go/JS 与 Schema 门禁，形成仅本地候选；不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -57,6 +57,7 @@ Docs、Blog 已完成 Project v1，Asset generate/check 也已通过。下一步
 - 2026-09-04：增加从既有 operations manifest 机械提取 Operation Errors v1 的迁移入口；本地构建固定 CLI 后，Docs 70 operation generate/check 通过，证明消费者迁移不依赖先发布 Foundation。
 - 2026-09-04：Docs 以 Project v1 完成 70/70 operation 与六类产物 generate/check；Workspace 管理、编辑器及 AE 双语导入 Playwright 全绿，验证 201/202/204 和安全错误反馈。
 - 2026-09-04：Blog 68 operation 与 Asset 54 operation 通过本地 Project generate/check。Asset 证明部分 catalog code 只作为成功 DTO 内嵌 issue/errorCode；Project 增加显式 allowUnusedErrors，仍拒绝未声明豁免和真正 Problem 漏挂。
+- 2026-09-04：Project Operation Errors 增加稳定 route→ID 与协议/成功形状 override，修复 Asset 初次迁移造成的 breaking ID/binary drift；Asset 最终仅有两条 errors behavioral change。Identity 80 条普通 API Project diff 为零，OAuth/OIDC 9 条保持独立 manifest。
 
 ## References
 
