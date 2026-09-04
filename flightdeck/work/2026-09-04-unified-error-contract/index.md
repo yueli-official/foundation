@@ -10,7 +10,7 @@ Open
 
 ## Current
 
-Foundation 已有 HTTP Problem v1、Go Problem/GoFrame/HTTP Client 与 TypeScript HTTP Runtime，但产品错误目录、公共 taxonomy、重试语义、Operation 关联、i18n 完整性和 UI 降级仍分散。Yotta 已验证 canonical envelope、单次语义投影、operationId、retryable、durable identity、transport violation 和 i18n inventory 的价值，但其 Wails 模型不能直接替代 Web Problem 合同。
+Foundation 已交付 HTTP Problem v1、Go/TypeScript Runtime、声明式错误与 operation 合同，并开始提供通用 project generator。`httpcontract -project` 可运行产品 OpenAPI producer，从真实 OpenAPI 投影完整 operation，校验失效错误路由和 catalog 使用覆盖，并生成 Go/TypeScript/i18n/legacy；`-check` 使用临时 OpenAPI 防止覆盖后自证。产品仍只拥有 project config 与业务 operation errors。
 
 主流一手资料调研已完成。RFC 9457、OAuth 2、GraphQL、gRPC/Google AIP-193、Stripe、GitHub、OpenTelemetry 与 W3C 的共同方向是：协议状态、稳定机器原因、类型化上下文、最终用户文案和内部 cause 必须分离；重试需要同时考虑幂等性、执行状态和服务端 hint；字段违规需要可定位；trace、operation 与 durable identity 必须各自定义生命周期。研究已形成 canonical failure 候选模型、10 条设计约束和首阶段范围。
 
@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-设计并实现 Foundation `httpcontract project` 一键生成器：产品只维护声明式 project config 与 operation errors，CLI 负责运行产品 OpenAPI producer、生成完整 operation manifest、Go/TS/i18n、legacy projection，并支持 `-check`。先让 Docs 删除自有编排代码并完成消费者验收；不创建新版本、标签或 Release。
+补齐 project config JSON Schema、CLI integration tests 和独立 operation-errors 输入；随后用本地构建的 Foundation CLI 让 Docs 删除自有编排代码并完成消费者验收，不要求先发布；不创建新版本、标签或 Release。
 
 ## Progress
 
@@ -52,6 +52,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 - 2026-09-04：Identity 推广发现 RFC 7009 revoke 合法使用 `200 + empty`，end_session 同一端点可返回 302 redirect 或 204 empty。Operation v1 保留主 `success` 并新增可选 `additionalSuccesses`；仅 OAuth 允许 200 empty，普通 Problem API 仍强制 204。解析、Schema 与兼容性 diff 回归测试通过。
 - 2026-09-04：暂停推广并完成双轴审查；明确把编辑器/依赖 cooldown 归回各自 Work，Asset/Identity 修复声明式 catalog 单一事实源、生成 freshness 与 compatibility diff，Identity 修复 Provider raw error，Asset Task 改 typed DTO。
 - 2026-09-04：Docs 全量迁移证明各产品复制 `cmd/httpcontracts`、OpenAPI 投影和 coverage checker 会持续漂移；决定在本 Work 增加 Foundation 通用 project generator，各站仅保留声明式配置与业务 operation-error 数据。
+- 2026-09-04：实现 Project v1 Go model、严格解析、OpenAPI operation 投影、stale route/catalog coverage、legacy projection 与 CLI producer/`-check` 流程；`httpcontract` 专项和 Foundation 普通全量测试通过，最终全量 race 尚待重跑。
 
 ## References
 

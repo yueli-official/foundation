@@ -6,6 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/yueli-official/foundation/go/httpcontract"
 )
@@ -20,6 +22,7 @@ func main() {
 func run(args []string) error {
 	flags := flag.NewFlagSet("httpcontract", flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
+	projectPath := flags.String("project", "", "generate a complete product contract from project config")
 	errorPath := flags.String("errors", "", "path to a public error catalog")
 	operationsPath := flags.String("operations", "", "path to an HTTP operations manifest")
 	baseErrorPath := flags.String("base-errors", "", "compare errors against this previous catalog")
@@ -32,6 +35,12 @@ func run(args []string) error {
 	check := flags.Bool("check", false, "verify generated outputs without rewriting them")
 	if err := flags.Parse(args); err != nil {
 		return err
+	}
+	if *projectPath != "" {
+		if flags.NArg() != 0 || *errorPath != "" || *operationsPath != "" {
+			return fmt.Errorf("-project cannot be combined with individual contract inputs")
+		}
+		return runProject(*projectPath, *check)
 	}
 	if flags.NArg() != 0 || (*errorPath == "" && *operationsPath == "") {
 		return fmt.Errorf("usage: httpcontract [-errors catalog.json] [-operations operations.json]")
@@ -147,6 +156,100 @@ func run(args []string) error {
 	} else {
 		fmt.Println("HTTP result contracts are valid")
 	}
+	return nil
+}
+
+func runProject(path string, check bool) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("read project config: %w", err)
+	}
+	project, err := httpcontract.ParseProject(data)
+	if err != nil {
+		return err
+	}
+	openAPIPath := project.OpenAPI.Output
+	producerOutput := openAPIPath
+	if check {
+		directory, err := os.MkdirTemp("", "httpcontract-project-")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(directory)
+		producerOutput = filepath.Join(directory, "openapi.json")
+	}
+	command := exec.Command(project.OpenAPI.Producer.Command[0], project.OpenAPI.Producer.Command[1:]...)
+	command.Env = append(os.Environ(), project.OpenAPI.Producer.OutputEnv+"="+producerOutput)
+	command.Stdout, command.Stderr = os.Stdout, os.Stderr
+	if err := command.Run(); err != nil {
+		return fmt.Errorf("run OpenAPI producer: %w", err)
+	}
+	openAPI, err := os.ReadFile(producerOutput)
+	if err != nil {
+		return fmt.Errorf("read produced OpenAPI: %w", err)
+	}
+	if check {
+		current, err := os.ReadFile(openAPIPath)
+		if err != nil {
+			return fmt.Errorf("read committed OpenAPI: %w", err)
+		}
+		if !httpcontract.EqualGenerated(current, openAPI) {
+			return fmt.Errorf("generated output is stale: %s", openAPIPath)
+		}
+	}
+	catalogData, err := os.ReadFile(project.ErrorCatalog)
+	if err != nil {
+		return fmt.Errorf("read project error catalog: %w", err)
+	}
+	catalog, err := httpcontract.ParseErrorCatalog(catalogData)
+	if err != nil {
+		return err
+	}
+	operations, err := httpcontract.OperationsFromOpenAPI(openAPI, project.Namespace, project.Operations.Errors)
+	if err != nil {
+		return err
+	}
+	if err := httpcontract.VerifyProjectCatalogCoverage(catalog, operations); err != nil {
+		return err
+	}
+	operationsData, err := httpcontract.EncodeOperations(operations)
+	if err != nil {
+		return err
+	}
+	if err := writeGenerated(project.Operations.Output, operationsData, check); err != nil {
+		return err
+	}
+	goData, err := httpcontract.GenerateGo(catalog, project.Generate.GoPackage)
+	if err != nil {
+		return err
+	}
+	if err := writeGenerated(project.Generate.GoOutput, goData, check); err != nil {
+		return err
+	}
+	tsData, err := httpcontract.GenerateTypeScript(catalog, project.Generate.TSType)
+	if err != nil {
+		return err
+	}
+	if err := writeGenerated(project.Generate.TSOutput, tsData, check); err != nil {
+		return err
+	}
+	i18nData, err := httpcontract.GenerateI18nInventory(catalog)
+	if err != nil {
+		return err
+	}
+	if err := writeGenerated(project.Generate.I18nOutput, i18nData, check); err != nil {
+		return err
+	}
+	if project.LegacyCatalog != nil {
+		legacyData, err := httpcontract.GenerateLegacyCatalog(catalog, project.LegacyCatalog.SchemaVersion)
+		if err != nil {
+			return err
+		}
+		if err := writeGenerated(project.LegacyCatalog.Output, legacyData, check); err != nil {
+			return err
+		}
+	}
+	fmt.Printf("HTTP project contracts are current (%d operations)\n", len(operations.Operations))
 	return nil
 }
 
