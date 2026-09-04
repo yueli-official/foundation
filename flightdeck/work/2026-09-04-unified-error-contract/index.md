@@ -46,6 +46,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 - 2026-09-04：发布 `go/v0.4.1` 与 `js-v0.7.2`。npm audit API 在 CI 有限重试后仍持续超时；Dependabot 无开放告警，随后本地完整复跑 `verify:js`、release validator、全包 pack 与两组 Playwright conformance（3 + 12）并发布 7 个 tarball、manifest 和 SHA256SUMS。远端标签、7 项制品校验和及 Go module resolution 已复核。
 - 2026-09-04：后续 main CI 证明 npm audit API 仍是持续单点故障；改用固定提交的 OSV Scanner 直接扫描 `pnpm-lock.yaml`。新门禁实际检出 Tiptap 1 个中危与 fast-uri 5 个高危，升级 Tiptap/Nuxt UI 并覆盖 fast-uri 后扫描为零；`verify:js` 与两组 Playwright conformance 复跑通过。本次只推进 main 与本地消费者，不创建新版本、标签或 Release。
 - 2026-09-04：Dependabot 的四个 JS 更新任务因其强制 3 天 `minimumReleaseAge` 与 Nuxt UI 自动安装的最新 Tiptap peers 冲突而同时失败。保留全局成熟期，仅对必须锁步解析且受 OSV 门禁保护的 `@tiptap/*` 设置定向排除；精确复现命令 `pnpm install --lockfile-only --config.minimumReleaseAge=4320`、冻结安装、OSV 和 `verify:js` 均通过。
+- 2026-09-04：Dependabot 重建继续检出发布仅 36 小时的间接依赖 `@iconify/collections@1.0.733`；不扩大排除范围，覆盖到已满足成熟期的 1.0.732。精确 Dependabot 安装命令、冻结安装和 OSV 复验通过。
 
 ## References
 
