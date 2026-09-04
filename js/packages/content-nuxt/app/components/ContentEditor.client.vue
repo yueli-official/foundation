@@ -217,7 +217,9 @@ const handlers = {
       if (attrs.src) {
         const a = document.createElement("a");
         a.href = attrs.src;
-        a.download = attrs.alt || "image";
+        // Let the delivery response choose the real filename and extension.
+        // Alt text is descriptive content, not a reliable download filename.
+        a.download = "";
         a.target = "_blank";
         a.click();
       }
