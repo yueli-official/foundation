@@ -32,6 +32,8 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Progress
 
+范围说明：发布、npm/OSV、Dependabot cooldown 与包版本处置归属 Workspace 的 Foundation 发布加固 Work；ContentEditor 跨 checkout 类型修复归属编辑器能力。它们因同一提交链与消费者验收出现在下方历史中，但不属于本 Work 的 Result 合同交付范围。
+
 - 2026-09-04：建立统一错误合同 Work，确认先以一手规范和主流平台实践校准设计，再进入合同与迁移方案。
 - 2026-09-04：完成主流错误实践调研，覆盖 HTTP/OAuth/GraphQL/gRPC、Stripe/GitHub、OpenTelemetry、重试幂等、前端无障碍、本地化、安全与生成治理；收敛 10 条 Foundation 设计约束。
 - 2026-09-04：完成最小运行时、声明式 compiler、caller-first 三案比较；决定深化 HTTP Problem + 声明生成的混合 Interface，并把成功响应限定为 raw resource/page/cursor/operation/empty。
@@ -48,6 +50,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 - 2026-09-04：Dependabot 的四个 JS 更新任务因其强制 3 天 `minimumReleaseAge` 与 Nuxt UI 自动安装的最新 Tiptap peers 冲突而同时失败。保留全局成熟期，仅对必须锁步解析且受 OSV 门禁保护的 `@tiptap/*` 设置定向排除；精确复现命令 `pnpm install --lockfile-only --config.minimumReleaseAge=4320`、冻结安装、OSV 和 `verify:js` 均通过。
 - 2026-09-04：Dependabot 重建继续检出发布仅 36 小时的间接依赖 `@iconify/collections@1.0.733`；不扩大排除范围，覆盖到已满足成熟期的 1.0.732。精确 Dependabot 安装命令、冻结安装和 OSV 复验通过。
 - 2026-09-04：Identity 推广发现 RFC 7009 revoke 合法使用 `200 + empty`，end_session 同一端点可返回 302 redirect 或 204 empty。Operation v1 保留主 `success` 并新增可选 `additionalSuccesses`；仅 OAuth 允许 200 empty，普通 Problem API 仍强制 204。解析、Schema 与兼容性 diff 回归测试通过。
+- 2026-09-04：暂停推广并完成双轴审查；明确把编辑器/依赖 cooldown 归回各自 Work，Asset/Identity 修复声明式 catalog 单一事实源、生成 freshness 与 compatibility diff，Identity 修复 Provider raw error，Asset Task 改 typed DTO。
 
 ## References
 
