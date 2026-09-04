@@ -1,8 +1,12 @@
 # Foundation 工作台
 
+## Focus
+
+- [统一 HTTP 结果合同](work/2026-09-04-unified-error-contract/index.md)
+
 ## Open Work
 
-None.
+- [统一 HTTP 结果合同](work/2026-09-04-unified-error-contract/index.md)：统一站群成功响应模型、错误合同、产品目录生成、前端反馈与跨仓治理门禁。
 
 ## 最近完成
 

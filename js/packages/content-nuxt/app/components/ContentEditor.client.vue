@@ -365,7 +365,10 @@ defineExpose({
             name="i-tabler-loader-2"
             class="ml-auto size-4 shrink-0 animate-spin text-muted"
           />
-          <div v-if="$slots['toolbar-actions']" class="ml-auto flex shrink-0 items-center gap-1">
+          <div
+            v-if="$slots['toolbar-actions']"
+            class="ml-auto flex shrink-0 items-center gap-1"
+          >
             <slot name="toolbar-actions" />
           </div>
         </div>

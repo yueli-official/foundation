@@ -1,7 +1,6 @@
 # `@yueli/http-runtime`
 
-Framework-neutral JSON HTTP state machine for the public site foundation. This package currently
-remains private while Batch A conformance is built; it has no runtime dependencies.
+Framework-neutral JSON HTTP state machine for the public site foundation. The package is public beta and has no runtime dependencies.
 
 ## Owns
 
@@ -12,6 +11,7 @@ remains private while Batch A conformance is built; it has no runtime dependenci
 - query/JSON body construction, timeout/abort and response limits;
 - refreshable-auth single-flight with at most one safe replay;
 - an in-memory Transport Adapter under `@yueli/http-runtime/testing`.
+- pure failure feedback resolution with field-level RFC 6901 violation projection, safe localized fallback, and code/trace details kept separate from primary copy.
 
 ## Does not own
 
@@ -54,7 +54,7 @@ Run `pnpm --filter @yueli/http-runtime test` and
 
 ## 维护说明
 
-- 生命周期：实验性公共 HTTP runtime，完成契约验证前保持私有。
+- 生命周期：public beta HTTP runtime；兼容新增按 minor 发布，不兼容 Interface 调整必须提供迁移说明。
 - 权威来源：本包公开子路径、类型定义和单元测试。
 - 维护边界：只维护框架无关的 JSON/Problem 状态机；业务端点、认证实现、翻译和 UI 由调用方负责。
 - 变更要求：请求、重放、失败归一化或安全限制变化时，必须同步更新测试与 conformance consumer。

@@ -63,9 +63,9 @@ describe("AdminIconPicker", () => {
     expect(wrapper.emitted("update:modelValue")).toEqual([
       ["i-tabler-world-www"],
     ]);
-    expect(wrapper.get("[data-admin-icon-results]").attributes("class")).toContain(
-      "repeat(auto-fill,minmax(2rem,1fr))",
-    );
+    expect(
+      wrapper.get("[data-admin-icon-results]").attributes("class"),
+    ).toContain("repeat(auto-fill,minmax(2rem,1fr))");
   });
 
   it("searches the preloaded Tabler management catalog by label and keyword", async () => {

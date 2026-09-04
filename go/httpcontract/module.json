@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "httpcontract",
+  "entrypoint": "github.com/yueli-official/foundation/go/httpcontract",
+  "owner": "foundation",
+  "status": "public-beta",
+  "responsibility": "Validate, diff and compile product-owned HTTP error catalogs and success result shapes into deterministic Go, TypeScript and i18n artifacts.",
+  "nonResponsibilities": [
+    "product DTO field schemas and business cause mapping",
+    "wrapping successful DTOs in a universal response envelope",
+    "product translations and UI feedback placement",
+    "replacing OAuth or OIDC protocol error responses"
+  ],
+  "runtimeDependencies": [],
+  "evidence": {
+    "docs": ["httpcontract/README.md", "../contracts/http-result/README.md"],
+    "tests": ["httpcontract/*_test.go"],
+    "consumers": ["docs", "asset", "identity"]
+  }
+}

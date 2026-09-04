@@ -500,3 +500,10 @@ export {
   type Violation,
 } from "./failure";
 export { failureFromProblemResponse, readTextWithinLimit } from "./problem";
+export {
+  resolveFailureFeedback,
+  type FailureFeedback,
+  type FailureText,
+  type FailureTextResolver,
+  type ResolveFailureOptions,
+} from "./presentation";
