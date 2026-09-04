@@ -21,10 +21,17 @@ Foundation 是 polyglot 仓库，不使用仓库统一版本。
 CI 必须执行：
 
 - Go：`go mod tidy` diff、`go test -race ./...`、`go vet ./...`、`govulncheck ./...`；
-- JS：frozen install、format/lint/typecheck/unit/build、生产依赖 audit、全部公共 package pack dry-run；
+- JS：frozen install、format/lint/typecheck/unit/build、OSV lockfile 漏洞扫描、全部公共 package pack dry-run；
 - 制品：至少一个独立 tarball 消费者；覆盖 Web 的 conformance 必须使用 CLI Playwright；
 - Identifier：Go/JS conformance 向量、最终 tarball 隔离消费者和站群跨仓静态门禁；
 - 发布相关 Action 使用完整 commit SHA，Dependabot 负责提出更新。
+
+## 发布授权门槛
+
+- 本地 checkout、workspace overlay、tarball 和提交足以完成开发与组合验证，不以“本地使用”为由推导发布授权。
+- 只有用户当前消息明确要求“推送/发布”，并明确目标版本或 tag 时，才允许创建远端 tag、GitHub Release 或其他公开制品。
+- “同意”“继续”“通过”“提交”等未明确包含发布动作与目标的回复，只授权继续本地工作或对应提交，不授权 push/tag/release。
+- 发布前必须复述仓库、目标 tag/version 和将发生的远端写入；任何歧义都停在已提交候选。
 
 ## JS bundle 发布
 
