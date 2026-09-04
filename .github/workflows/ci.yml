@@ -49,8 +49,13 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: 验证 JS 工作区
         run: pnpm verify:js
-      - name: 扫描生产依赖
-        run: pnpm audit:prod
+      - name: 扫描依赖漏洞
+        uses: google/osv-scanner-action/osv-scanner-action@06b2ab4348248b456ee06c9e953637f55e03504f # v2.5.0
+        with:
+          scan-args: |-
+            scan
+            source
+            --lockfile=pnpm-lock.yaml
       - name: 检查全部公共包内容
         run: pnpm --filter "./js/packages/*" --recursive pack --dry-run
       - name: 验证独立 UI 制品消费者

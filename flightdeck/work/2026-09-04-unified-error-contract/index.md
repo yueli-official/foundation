@@ -44,6 +44,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 - 2026-09-04：Foundation 候选提交为 `bc8a00b`；Docs `6d4da27`、Asset `3172282`、Identity `b04d2ea` 和 Workspace `3f14274` 已提交并从对应 committed revision 重建真实组合。
 - 2026-09-04：首次发布标签暴露知识 Markdown 格式门禁，修复后形成 `go/v0.4.1` 与 `js-v0.7.1`；后者两次均仅因 npm audit API 超时或 503 中止。保留不可变标签，增加仅针对网络错误与 5xx 的有限审计重试，补丁候选推进为 JS 0.7.2（content-nuxt/http-runtime/UI 0.2.2/0.2.2/0.3.2）；漏洞结果仍立即失败。
 - 2026-09-04：发布 `go/v0.4.1` 与 `js-v0.7.2`。npm audit API 在 CI 有限重试后仍持续超时；Dependabot 无开放告警，随后本地完整复跑 `verify:js`、release validator、全包 pack 与两组 Playwright conformance（3 + 12）并发布 7 个 tarball、manifest 和 SHA256SUMS。远端标签、7 项制品校验和及 Go module resolution 已复核。
+- 2026-09-04：后续 main CI 证明 npm audit API 仍是持续单点故障；改用固定提交的 OSV Scanner 直接扫描 `pnpm-lock.yaml`。新门禁实际检出 Tiptap 1 个中危与 fast-uri 5 个高危，升级 Tiptap/Nuxt UI 并覆盖 fast-uri 后扫描为零；`verify:js` 与两组 Playwright conformance 复跑通过。本次只推进 main 与本地消费者，不创建新版本、标签或 Release。
 
 ## References
 
