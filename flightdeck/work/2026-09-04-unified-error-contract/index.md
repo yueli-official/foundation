@@ -28,7 +28,7 @@ Foundation 发布候选已完整收口并提交为 `bc8a00b`：Go `httpcontract`
 
 ## Next
 
-Review 修复及 Identity、Commerce 推广已落地。Identity 删除 9 个过渡 override，并额外修正 GitHub 绑定历史与批量公开用户，11 个列表由真实 `items` collection/page DTO 驱动；Commerce 38/38 operation 完成 201/202、标准分页、恢复错误脱敏及真实 PostgreSQL HTTP 验收。Paste checkout 有未提交前端工作，按并发写入规则暂不介入；下一步推进干净的 Resource 单站 Work 并接入 Project v1。不创建新版本、标签或 Release。
+Project v1 与严格集合规则已完成本地实现。Docs、Blog、Asset、Identity、Shortlink、Notification、Commerce 已完成产品/服务迁移；Shortlink review 修正了 4 个伪 resource 集合、204 客户端类型和后台共享组件偏移，并以全量 Go/JS 与 37 项 CLI Playwright 复验。远端消费者仍使用 Foundation v0.4.1 分步门禁，因为 Project v1 尚未发布；这不影响本地继续迁移。Resource 单站 Work 已建立但尚未修改产品实现，下一会话从 Resource 开始。不创建版本、标签或 Release。
 
 ## Progress
 
@@ -64,6 +64,8 @@ Review 修复及 Identity、Commerce 推广已落地。Identity 删除 9 个过�
 - 2026-09-05：双轴 review 发现 Notification 滥用 additionalSuccesses/非标准 OperationDTO、Project 放行 list/entries 和不完整分页。已修复生成器与 Notification；6 个消费者新版 check 中 Blog/Asset/Shortlink 直接通过，Docs 修正模型后通过，Identity 以 9 个显式 transitional overrides 保持 diff 为零。
 - 2026-09-05：Commerce 完成 38/38 Project v1、12 个业务错误、31 个 200/5 个 201/2 个 202、6 个分页与 4 个集合；移除恢复 `lastError`，真实 PostgreSQL HTTP integration、race/vet/govuln 通过，单站 Work Finished。
 - 2026-09-05：Identity 将 9 个过渡 override 全部迁为真实 DTO，并补迁 GitHub 绑定历史与批量公开用户；Account/Nuxt 消费者、Go HTTP e2e、全量门禁及 CLI Playwright 通过，单服务 Work Finished。兼容性 CI 改为比较最近正式发布 tag，而非把尚未发布的 main 提交误作公开基线。
+- 2026-09-05：Shortlink 双轴 review 的 3 个合同问题和 3 个硬性后台规范偏移已修复并提交 `37ad546`；Project 24/24、Impeccable detector、Go/JS 全量和 CLI Playwright 22 passed/15 条件跳过/0 failed。单站 Work Finished；远端 `-project -check` 切换移交发布 Work。
+- 2026-09-05：Resource 单站 Work 已建立为下一执行点；仅 Flightdeck 提交 `8803eb9`，实现尚未开始，Paste 等存在未提交 UI 工作的 checkout 暂不介入。
 
 ## References
 
