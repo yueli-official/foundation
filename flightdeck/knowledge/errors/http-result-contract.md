@@ -36,4 +36,3 @@
 - OAuth/OIDC endpoint 遵守 RFC 6749/OIDC 的 `error` wire format，通过专用 Adapter 投影，不强制改成 Problem。
 
 依据：[RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)、[RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html)、[RFC 6749](https://www.rfc-editor.org/rfc/rfc6749.html)。
-

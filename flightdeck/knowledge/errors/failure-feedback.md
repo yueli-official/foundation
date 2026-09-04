@@ -24,4 +24,3 @@
 `retryable` 不是“立刻自动重试”。客户端同时检查：请求是否幂等、是否持有 idempotency key、服务端是否已经开始执行、`Retry-After`、最大次数和用户意图。产生副作用的请求在结果不确定时不得自行重复创建；后台任务优先通过其稳定 ID 查询最终状态。
 
 依据：[WAI 表单通知](https://www.w3.org/WAI/tutorials/forms/notifications/)、[WCAG 错误识别](https://www.w3.org/WAI/WCAG22/Understanding/error-identification)、[Stripe 幂等请求](https://docs.stripe.com/api/idempotent_requests)。
-

@@ -29,4 +29,3 @@
 生成器从 catalog 产生 Go Descriptor/常量、TypeScript discriminated union、message/recovery metadata、i18n inventory 和公开目录。CI 使用 `-check` 阻止生成物漂移，并对前后 catalog/operation 执行 compatibility diff。
 
 删除或改名 code、修改 status、删除/收紧参数、把可选参数改为必填、改变 violation policy 或 operation 成功 status/body kind 都是 breaking change。新增 code 和可选参数通常是 additive；改变 message/recovery key 是 behavioral change。
-
