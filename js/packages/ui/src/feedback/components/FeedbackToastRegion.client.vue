@@ -125,7 +125,7 @@ function role(notice: ToastNotice) {
 .yueli-toast-region {
   position: fixed;
   z-index: 110;
-  bottom: 1rem;
+  bottom: calc(1rem + var(--yueli-mobile-bottom-space, 0px));
   right: 1rem;
   display: flex;
   width: min(22rem, calc(100vw - 2rem));

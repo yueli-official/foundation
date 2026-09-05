@@ -327,3 +327,33 @@
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
+/* One mobile navigation per document. Portals inherit the same occupied space. */
+:root:has([data-mobile-bottom-nav]) {
+  --yueli-mobile-bottom-space: calc(49px + env(safe-area-inset-bottom, 0px));
+}
+
+[data-mobile-bottom-spacer] {
+  height: var(--yueli-mobile-bottom-space, 0px);
+}
+
+[data-mobile-bottom-nav] {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+body:has(input:focus, textarea:focus, [contenteditable="true"]:focus)
+  [data-mobile-bottom-nav] {
+  visibility: hidden;
+}
+
+@media (min-width: 768px) {
+  :root:has([data-mobile-bottom-nav]) {
+    --yueli-mobile-bottom-space: 0px;
+  }
+
+  [data-mobile-bottom-nav],
+  [data-mobile-bottom-spacer] {
+    display: none;
+  }
+}

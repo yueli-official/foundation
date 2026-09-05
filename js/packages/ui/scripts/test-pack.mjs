@@ -143,6 +143,9 @@ try {
     "package/src/messages.ts",
     "package/src/module.ts",
     "package/src/navigation/back-to-top.ts",
+    "package/src/navigation/components/MobileBottomNav.vue",
+    "package/src/navigation/mobile-bottom-nav.ts",
+    "package/src/navigation/mobile-bottom-nav.types.ts",
     "package/src/navigation/components/BackToTop.vue",
     "package/src/navigation/components/ReadingTableOfContents.vue",
     "package/src/navigation/table-of-contents.ts",
@@ -239,6 +242,8 @@ import { useActionFeedback } from "@yueli/ui/feedback";
 import { evaluateImageOptimization } from "@yueli/ui/image";
 import { optimizeImageFile } from "@yueli/ui/image/browser";
 import { ReadingTableOfContents } from "@yueli/ui/navigation/table-of-contents";
+import { MobileBottomNav, type MobileBottomNavItem } from "@yueli/ui/navigation/mobile-bottom-nav";
+const mobileItems: readonly MobileBottomNavItem[] = [{ id: "home", label: "Home", icon: "i-tabler-home", to: "/", active: true }, { id: "create", label: "Create", icon: "i-tabler-plus" }];
 import { ContentShareActions } from "@yueli/ui/sharing/content-share";
 import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import type { RemoteSelectLoader, RemoteSelectMessages, RemoteSelectValue } from "@yueli/ui/remote-select";
@@ -352,6 +357,7 @@ void optimizeImageFile;
 </script>
 
 <template>
+  <MobileBottomNav :items="mobileItems" label="Primary" />
   <YAdminConsoleLayout brand-label="Packed admin" brand-icon="i-tabler-layout-dashboard" brand-to="/" :navigation="navigation" :search-groups="searchGroups" :messages="shellMessages" storage-key="packed-admin" main-id="main-content" back-to-top-label="Top">
     <template #account="{ collapsed }">
       <YAccountMenu name="Packed user" :messages="accountMessages" :appearance="accountAppearance" :trigger-mode="collapsed ? 'collapsed' : 'sidebar'" :logout="() => undefined" />
@@ -441,6 +447,7 @@ void optimizeImageFile;
     !packedPackage.exports?.["./feedback/pattern"] ||
     !packedPackage.exports?.["./image"] ||
     !packedPackage.exports?.["./image/browser"] ||
+    !packedPackage.exports?.["./navigation/mobile-bottom-nav"] ||
     !packedPackage.exports?.["./navigation/back-to-top"] ||
     !packedPackage.exports?.["./navigation/table-of-contents"] ||
     !packedPackage.exports?.["./sharing/content-share"] ||

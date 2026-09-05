@@ -356,3 +356,78 @@ not change.
 Remove conflicting local mobile-enlargement utilities when opting in. Version
 0.4.0 is a local release candidate; publication and remote artifact URL updates
 are separate actions.
+
+### Mobile bottom navigation (0.4.0 candidate)
+
+`@yueli/ui/navigation/mobile-bottom-nav` exports `MobileBottomNav` and
+`MobileBottomNavItem`; Nuxt module consumers can also use `YMobileBottomNav`.
+Place one navigation as the last child of the public flex-column shell, after main.
+Import the shared Tailwind/theme styles and set viewport `width=device-width,
+initial-scale=1, viewport-fit=cover` in the consumer's document head.
+
+```vue
+<script setup lang="ts">
+import {
+  MobileBottomNav,
+  type MobileBottomNavItem,
+} from "@yueli/ui/navigation/mobile-bottom-nav";
+const route = useRoute();
+const items = computed<readonly MobileBottomNavItem[]>(() => [
+  {
+    id: "home",
+    label: "Home",
+    icon: "i-tabler-home",
+    to: "/",
+    active: route.path === "/",
+  },
+  { id: "create", label: "Create", icon: "i-tabler-plus" },
+  {
+    id: "inbox",
+    label: "Inbox",
+    icon: "i-tabler-mail",
+    to: "/inbox",
+    badge: 3,
+    ariaLabel: "Inbox, 3 unread",
+    active: route.path === "/inbox",
+  },
+]);
+function select(item: MobileBottomNavItem) {
+  if (item.id === "create") {
+    /* Product opens its composer. */
+  }
+}
+</script>
+<template>
+  <div class="flex min-h-dvh flex-col">
+    <main class="flex-1"><slot /></main>
+    <MobileBottomNav
+      :items="items"
+      label="Primary navigation"
+      @select="select"
+    />
+  </div>
+</template>
+```
+
+Use 3–5 short labels. Items with `to` are links; items without it are buttons.
+`select` reports activation; the product owns action effects, active route matching,
+login and permission filtering. Disabled items cannot activate. `hidden` or an empty
+list removes both navigation and reservation. Supply meaningful `ariaLabel` for badges.
+
+Below 768px the bar is 48px plus 1px border and safe area, with 20px Tabler icons and
+11px labels. The spacer reserves its full height on SSR. Input focus hides navigation
+without moving content. At 768px it hides and releases the reservation. This is a
+compact mobile pattern, not a replacement for desktop navigation or same-page Tabs.
+
+`--yueli-mobile-bottom-space` is available at document root while the navigation is
+mounted; use `bottom: var(--yueli-mobile-bottom-space, 0px)` for sticky business actions.
+Do not add another content padding or safe-area inset on top of the built-in spacer.
+FeedbackToastRegion consumes the variable automatically; BackToTop discovers the bar
+through its existing `data-y-dock` avoidance contract. Modal surfaces remain above the
+bar and own focus. Input focus is an editing policy, not keyboard detection.
+
+BVideo migrated from its local sample by replacing the component import and deleting
+product-owned navigation CSS. The public dependency URL remains on the published
+release until 0.4.0 is authorized and published; local validation uses the explicit
+Workspace source overlay and an independent tarball consumer. Existing consumers
+without MobileBottomNav retain their previous spacing and Toast placement.

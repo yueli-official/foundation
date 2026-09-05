@@ -24,6 +24,27 @@ export interface PublicUiManifestEntry {
 
 export const publicUiManifest = [
   {
+    id: "mobile-bottom-nav",
+    kind: "pattern",
+    status: "experimental",
+    entrypoint: "@yueli/ui/navigation/mobile-bottom-nav",
+    owner: "foundation",
+    responsibility:
+      "Own compact mobile navigation, safe-area reservation and shared floating-control avoidance.",
+    nonResponsibilities: [
+      "route matching",
+      "authorization",
+      "business actions",
+    ],
+    runtimeDependencies: ["vue", "@nuxt/ui", "tailwindcss"],
+    evidence: {
+      docs: ["README.md"],
+      tests: ["test/mobile-bottom-nav.test.ts", "scripts/test-pack.mjs"],
+      consumers: ["bvideo"],
+      accessibility: ["js/conformance/ui/test/e2e/mobile-bottom-nav.spec.ts"],
+    },
+  },
+  {
     id: "theme",
     kind: "contract",
     status: "experimental",
