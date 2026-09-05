@@ -89,9 +89,9 @@ const shellUi: AdminShellUi = {
   sidebarBody: "min-h-0 flex-1 overflow-y-auto",
   sidebarFooter: "shrink-0",
   navigationLink:
-    "group relative min-h-12 rounded-xl border border-transparent px-2.5 py-2 text-muted transition-colors after:pointer-events-none after:absolute after:start-2.5 after:top-1/2 after:size-8 after:-translate-y-1/2 after:rounded-lg after:bg-muted after:content-[''] hover:border-default hover:bg-primary/5 hover:text-default data-[active]:border-primary/25 data-[active]:bg-primary/10 data-[active]:text-highlighted data-[active]:shadow-[inset_2px_0_var(--ui-primary)] data-[active]:after:bg-primary/10",
+    "group relative min-h-[var(--yueli-admin-navigation-height,3rem)] rounded-xl border border-transparent px-2.5 py-[var(--yueli-admin-navigation-padding,0.5rem)] text-muted transition-colors after:pointer-events-none after:absolute after:start-2.5 after:top-1/2 after:size-[var(--yueli-admin-navigation-icon-size,2rem)] after:-translate-y-1/2 after:rounded-lg after:bg-muted after:content-[''] hover:border-default hover:bg-primary/5 hover:text-default data-[active]:border-primary/25 data-[active]:bg-primary/10 data-[active]:text-highlighted data-[active]:shadow-[inset_2px_0_var(--ui-primary)] data-[active]:after:bg-primary/10",
   navigationIcon:
-    "relative z-10 size-8 bg-current text-muted opacity-100 [mask-position:center] [mask-repeat:no-repeat] [mask-size:1rem_1rem] group-data-[active]:!text-primary",
+    "relative z-10 size-[var(--yueli-admin-navigation-icon-size,2rem)] bg-current text-muted opacity-100 [mask-position:center] [mask-repeat:no-repeat] [mask-size:1rem_1rem] group-data-[active]:!text-primary",
 };
 </script>
 
@@ -150,7 +150,10 @@ const shellUi: AdminShellUi = {
       <template #header>
         <UDashboardNavbar
           v-if="!immersive"
-          :toggle="{ class: 'size-11 shrink-0 lg:hidden' }"
+          :toggle="{
+            class:
+              'size-[var(--yueli-admin-toggle-size,2.75rem)] shrink-0 lg:hidden',
+          }"
           class="yueli-admin-shell-surface relative z-20 border-default"
           :ui="{
             root: 'min-h-16 border-b px-4 lg:px-8',

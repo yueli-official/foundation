@@ -341,3 +341,18 @@ tarball allowlist, installs it into a temporary standalone Nuxt 4 consumer and r
 - 权威来源：显式公开子路径、maturity manifest、单元测试及 UI conformance consumer。
 - 维护边界：共享查询、选择、加载时序与消息引用；Nuxt UI primitives、业务字段、翻译和产品动作由调用方拥有。
 - 变更要求：公开接口或路由同步行为变化时，必须同步更新单测、生产模式 Playwright 和 Work 证据。
+
+### Compact density (0.4.0)
+
+Set `data-yueli-density="compact"` on the document HTML element in the
+consumer's SSR head configuration (for Nuxt, use `useHead({ htmlAttrs: {
+"data-yueli-density": "compact" } })`). Import the normal
+`@yueli/ui/theme.css`. The document-level attribute also covers portalled UI.
+It selects shared tokens for page headings, navigation, row/account controls
+and comments, and keeps form text at 14px across breakpoints. Omitting the
+attribute preserves previous sizes. Business and authorization behavior does
+not change.
+
+Remove conflicting local mobile-enlargement utilities when opting in. Version
+0.4.0 is a local release candidate; publication and remote artifact URL updates
+are separate actions.

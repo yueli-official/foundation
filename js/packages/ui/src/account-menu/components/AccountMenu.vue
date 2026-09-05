@@ -191,7 +191,7 @@ const menuUi = computed(() => ({
       :block="triggerMode === 'sidebar'"
       :square="triggerMode === 'collapsed'"
       :class="[
-        'min-h-11 gap-2 px-1.5 data-[state=open]:bg-elevated data-[state=open]:text-highlighted',
+        'min-h-[var(--yueli-account-control-height,2.75rem)] gap-2 px-1.5 data-[state=open]:bg-elevated data-[state=open]:text-highlighted',
         triggerMode === 'sidebar' && 'w-full justify-start',
         triggerMode === 'collapsed' && 'aspect-square justify-center px-0',
       ]"

@@ -174,9 +174,7 @@ describe("admin template", () => {
       "Overview",
     );
     expect(wrapper.get("[data-admin-console-canvas]").text()).toBe("Workspace");
-    expect(adminConsoleSource).toContain(
-      ":toggle=\"{ class: 'size-11 shrink-0 lg:hidden' }\"",
-    );
+    expect(adminConsoleSource).toContain("--yueli-admin-toggle-size,2.75rem");
     expect(wrapper.text()).toContain("Account");
     const sidebar = wrapper.findComponent({ name: "UDashboardSidebar" });
     expect(sidebar.props("resizable")).toBe(false);

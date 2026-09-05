@@ -66,8 +66,8 @@ describe("AdminRowActions", () => {
     for (const action of actions) {
       expect(action.classes()).toEqual(
         expect.arrayContaining([
-          "size-11",
-          "sm:size-6",
+          "size-[var(--yueli-row-action-size,2.75rem)]",
+          "sm:size-[var(--yueli-row-action-size,1.5rem)]",
           "items-center",
           "justify-center",
           "p-0",

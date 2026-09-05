@@ -131,11 +131,11 @@ async function submitDraft(parentId = "") {
   <section class="space-y-5" data-public-comment-thread>
     <header class="flex flex-wrap items-center justify-between gap-3">
       <h2
-        class="font-display flex items-center gap-2 text-base font-semibold text-highlighted sm:text-lg"
+        class="font-display flex items-center gap-2 text-[length:var(--yueli-comment-heading-size,1rem)] leading-[var(--yueli-comment-heading-leading,1.5rem)] font-semibold text-highlighted sm:text-[length:var(--yueli-comment-heading-size,1.125rem)] sm:leading-[var(--yueli-comment-heading-leading,1.75rem)]"
       >
         <UIcon
           name="i-tabler-messages"
-          class="size-5 shrink-0 text-primary"
+          class="size-[var(--yueli-comment-heading-icon-size,1.25rem)] shrink-0 text-primary"
           aria-hidden="true"
         />
         {{ messages.count(total) }}

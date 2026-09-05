@@ -62,8 +62,12 @@ watch(
       :rows="compact ? 2 : 4"
       :maxlength="maxLength"
       :placeholder="compact ? messages.writeReply : messages.writeComment"
-      class="block min-h-24 w-full resize-y border-0 bg-transparent px-3 py-3 text-sm leading-6 text-highlighted outline-none placeholder:text-dimmed disabled:cursor-not-allowed disabled:opacity-60"
-      :class="compact ? 'min-h-20' : 'sm:min-h-28'"
+      class="block h-[var(--yueli-comment-composer-height,auto)] min-h-[var(--yueli-comment-composer-min-height,6rem)] w-full resize-y border-0 bg-transparent px-3 py-[var(--yueli-comment-composer-padding,0.75rem)] text-sm leading-6 text-highlighted outline-none placeholder:text-dimmed disabled:cursor-not-allowed disabled:opacity-60"
+      :class="
+        compact
+          ? 'min-h-[var(--yueli-comment-composer-min-height,5rem)]'
+          : 'sm:min-h-[var(--yueli-comment-composer-min-height,7rem)]'
+      "
       :disabled="busy"
       @keydown.meta.enter.prevent="emit('submit')"
       @keydown.ctrl.enter.prevent="emit('submit')"
@@ -112,7 +116,7 @@ watch(
     </div>
 
     <footer
-      class="flex min-h-11 flex-wrap items-center gap-3 border-t border-default bg-elevated/35 px-3 py-2"
+      class="flex min-h-[var(--yueli-comment-footer-height,2.75rem)] flex-wrap items-center gap-3 border-t border-default bg-elevated/35 px-3 py-[var(--yueli-comment-footer-padding,0.5rem)]"
     >
       <div class="min-w-0 flex-1 text-xs text-muted">
         <span

@@ -78,7 +78,7 @@ function activate(item: AdminRowActionItem, event: MouseEvent) {
           square
           :disabled="item.disabled"
           :loading="item.loading"
-          class="inline-flex size-11 shrink-0 items-center justify-center p-0 sm:size-6"
+          class="inline-flex size-[var(--yueli-row-action-size,2.75rem)] shrink-0 items-center justify-center p-0 sm:size-[var(--yueli-row-action-size,1.5rem)]"
           :class="
             item.tone === 'danger'
               ? 'text-muted hover:text-error focus-visible:text-error'
@@ -103,7 +103,7 @@ function activate(item: AdminRowActionItem, event: MouseEvent) {
         variant="ghost"
         size="xs"
         square
-        class="inline-flex size-11 shrink-0 items-center justify-center p-0 sm:size-8"
+        class="inline-flex size-[var(--yueli-row-action-size,2.75rem)] shrink-0 items-center justify-center p-0 sm:size-[var(--yueli-row-action-size,2rem)]"
         :aria-label="label"
         data-admin-row-action-overflow
       >

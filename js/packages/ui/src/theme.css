@@ -298,3 +298,32 @@
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--ui-text-muted);
 }
+
+/* Compact is explicitly selected by the Nuxt consumer. These tokens retain
+   the existing component fallbacks for applications that do not opt in. */
+:root[data-yueli-density="compact"] {
+  --yueli-page-heading-size: 1.25rem;
+  --yueli-page-heading-leading: 1.75rem;
+  --yueli-page-icon-size: 2rem;
+  --yueli-admin-navigation-height: 2.25rem;
+  --yueli-admin-navigation-padding: 0.25rem;
+  --yueli-admin-navigation-icon-size: 1.5rem;
+  --yueli-admin-toggle-size: 2rem;
+  --yueli-row-action-size: 1.75rem;
+  --yueli-account-control-height: 2rem;
+  --yueli-comment-heading-size: 0.875rem;
+  --yueli-comment-heading-leading: 1.25rem;
+  --yueli-comment-heading-icon-size: 1rem;
+  --yueli-comment-composer-height: 5rem;
+  --yueli-comment-composer-min-height: 4rem;
+  --yueli-comment-composer-padding: 0.5rem;
+  --yueli-comment-footer-height: 2rem;
+  --yueli-comment-footer-padding: 0.25rem;
+}
+
+/* The shared field class is also used inside portalled editors. Do not let
+   the upstream mobile 16px variant invert a consumer's compact scale. */
+:root[data-yueli-density="compact"] .yueli-field-border {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

@@ -19,7 +19,7 @@ withDefaults(
     <div class="flex min-w-0 items-center gap-3.5">
       <span
         v-if="icon"
-        class="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 sm:size-11"
+        class="grid size-[var(--yueli-page-icon-size,2.5rem)] shrink-0 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 sm:size-[var(--yueli-page-icon-size,2.75rem)]"
         data-manage-page-icon
       >
         <UIcon :name="icon" class="size-5" />
@@ -30,7 +30,9 @@ withDefaults(
           :id="headingId"
           class="font-display font-semibold tracking-[-0.025em] text-highlighted"
           :class="
-            size === 'compact' ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'
+            size === 'compact'
+              ? 'text-[length:var(--yueli-page-heading-size,1.25rem)] leading-[var(--yueli-page-heading-leading,1.75rem)] sm:text-[length:var(--yueli-page-heading-size,1.5rem)] sm:leading-[var(--yueli-page-heading-leading,2rem)]'
+              : 'text-[length:var(--yueli-page-heading-size,1.5rem)] leading-[var(--yueli-page-heading-leading,2rem)] sm:text-[length:var(--yueli-page-heading-size,1.875rem)] sm:leading-[var(--yueli-page-heading-leading,2.25rem)]'
           "
         >
           {{ title }}
