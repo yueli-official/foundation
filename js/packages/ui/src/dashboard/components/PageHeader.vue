@@ -15,6 +15,8 @@ withDefaults(
   <header
     class="flex flex-wrap items-start justify-between gap-4 sm:items-center sm:gap-6"
     data-manage-page-header
+    :data-has-tools="!!$slots.tools"
+    :data-has-actions="!!$slots.actions"
   >
     <div class="flex min-w-0 items-center gap-3.5">
       <span
@@ -48,6 +50,7 @@ withDefaults(
         </p>
       </div>
     </div>
+    <div v-if="$slots.tools" class="min-w-0" data-manage-page-tools><slot name="tools" /></div>
     <div
       v-if="$slots.actions"
       class="flex shrink-0 flex-wrap items-center gap-2"
@@ -57,3 +60,16 @@ withDefaults(
     </div>
   </header>
 </template>
+
+<style scoped>
+[data-has-tools="true"] { display: grid; grid-template-columns: minmax(0,1fr); align-items: center; }
+[data-has-tools="true"][data-has-actions="true"] { grid-template-columns: minmax(0,1fr) auto; }
+[data-has-tools="true"] > [data-manage-page-actions] { grid-column: 2; grid-row: 1; justify-self: end; }
+[data-manage-page-tools] { grid-column: 1 / -1; grid-row: 2; }
+@media (min-width: 1280px) {
+  [data-has-tools="true"] { grid-template-columns: auto minmax(0,1fr); }
+  [data-has-tools="true"][data-has-actions="true"] { grid-template-columns: auto minmax(0,1fr) auto; }
+  [data-manage-page-tools] { grid-column: 2; grid-row: 1; justify-self: end; width: min(100%, 42rem); }
+  [data-has-tools="true"] > [data-manage-page-actions] { grid-column: 3; }
+}
+</style>

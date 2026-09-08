@@ -29,6 +29,7 @@ const headingId = computed(() => `${props.id}-title`);
       <template v-if="slots.subtitle" #subtitle
         ><slot name="subtitle"
       /></template>
+      <template v-if="slots.tools" #tools><slot name="tools" /></template>
       <template v-if="slots.actions" #actions><slot name="actions" /></template>
     </PageHeader>
 
