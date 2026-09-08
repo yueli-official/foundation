@@ -9,6 +9,7 @@ const props = withDefaults(
       | readonly (readonly AdminRowActionItem[])[];
     label: string;
     presentation?: "inline" | "overflow";
+    overflowIcon?: string;
   }>(),
   { presentation: "inline" },
 );
@@ -108,7 +109,7 @@ function activate(item: AdminRowActionItem, event: MouseEvent) {
         data-admin-row-action-overflow
       >
         <UIcon
-          name="i-tabler-dots-vertical"
+          :name="overflowIcon || 'i-tabler-dots-vertical'"
           class="block size-4 shrink-0"
           aria-hidden="true"
         />

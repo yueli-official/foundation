@@ -18,6 +18,7 @@ export interface CommentModerationStatus {
 }
 
 export interface CommentModerationSource {
+  readonly thumbnailUrl?: string;
   readonly label: string;
   readonly to?: RouteLocationRaw;
   readonly icon: string;
@@ -32,6 +33,7 @@ export interface CommentModerationItem {
   readonly authorEmail?: string;
   readonly anonymous?: boolean;
   readonly reply?: boolean;
+  readonly replyTo?: { readonly authorName: string; readonly content: string };
   readonly approve?: boolean;
   readonly approving?: boolean;
   readonly actions?:

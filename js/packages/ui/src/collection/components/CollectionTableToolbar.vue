@@ -9,6 +9,8 @@ const props = withDefaults(
     filterLabel: string;
     filterCount?: number;
     selectionCount?: number;
+    presentation?: "default" | "header";
+    externalControls?: boolean;
   }>(),
   {
     filterCount: 0,
@@ -61,7 +63,7 @@ function submitSearch() {
 </script>
 
 <template>
-  <section data-collection-table-toolbar :aria-label="props.label">
+  <section data-collection-table-toolbar :data-presentation="presentation" :aria-label="props.label">
     <div
       v-if="props.selectionCount > 0"
       data-collection-table-selection
@@ -73,7 +75,7 @@ function submitSearch() {
     </div>
 
     <div
-      v-else
+      v-else-if="!externalControls"
       data-collection-table-default
       class="grid min-h-24 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4"
     >
@@ -91,6 +93,7 @@ function submitSearch() {
           icon="i-tabler-search"
           size="sm"
           :placeholder="props.searchPlaceholder"
+          :ui="presentation === 'header' ? { base: 'h-9 min-h-9' } : undefined"
           class="w-full min-w-0"
           @update:model-value="updateSearchDraft"
           @compositionstart="startComposition"
@@ -160,6 +163,19 @@ function submitSearch() {
 </template>
 
 <style scoped>
+[data-presentation="header"] [data-collection-table-default] {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 0;
+  border: 0;
+  padding: 0;
+}
+[data-presentation="header"] [data-collection-table-search] {
+  flex: 1 1 16rem;
+}
+[data-presentation="header"] [data-collection-table-controls] {
+  flex: 0 1 auto;
+}
 [data-collection-table-toolbar] {
   container-type: inline-size;
 }

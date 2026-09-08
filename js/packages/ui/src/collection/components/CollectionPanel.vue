@@ -40,6 +40,8 @@ const props = withDefaults(
     canSelectAllResults?: boolean;
     isSelected?: (key: TKey) => boolean;
     layout?: CollectionPanelLayout;
+    externalControls?: boolean;
+    compactPagination?: boolean;
   }>(),
   {
     controls: () => [],
@@ -148,6 +150,7 @@ function toggle(item: TItem, key: TKey) {
     </template>
     <template #toolbar>
       <CollectionTableToolbar
+        :external-controls="externalControls"
         v-model:search="search"
         v-model:filters-open="filtersOpen"
         :label="`${label || messages.searchPlaceholder} 工具栏`"
@@ -459,12 +462,14 @@ function toggle(item: TItem, key: TKey) {
     <template #footer>
       <div
         class="flex flex-col gap-3 text-xs sm:flex-row sm:items-center sm:justify-between"
+        :data-compact-pagination="compactPagination || undefined"
       >
         <p class="text-muted">
           {{ messages.showing(firstVisible, lastVisible, total) }}
         </p>
         <div
           class="flex flex-col items-start gap-2 sm:flex-row sm:items-center"
+          data-pagination-controls
         >
           <UPagination
             :page="page"
@@ -472,11 +477,12 @@ function toggle(item: TItem, key: TKey) {
             :items-per-page="pageSize"
             :aria-label="messages.pagination || messages.pageSize"
             :show-edges="false"
-            :sibling-count="1"
+            :sibling-count="compactPagination ? 0 : 1"
             size="xs"
+            data-pagination-pages
             @update:page="emit('pageChange', $event)"
           />
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2" data-pagination-size>
             <span class="text-muted">{{ messages.pageSize }}</span>
             <USelect
               :model-value="pageSize"
@@ -493,3 +499,37 @@ function toggle(item: TItem, key: TKey) {
     </template>
   </CollectionFrame>
 </template>
+
+<style scoped>
+@media (max-width: 639px) {
+  [data-compact-pagination] {
+    gap: 0.5rem;
+  }
+  [data-compact-pagination] [data-pagination-controls] {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  [data-compact-pagination] :deep([data-pagination-pages] button) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    padding: 0;
+  }
+  [data-compact-pagination] [data-pagination-size] {
+    gap: 0.25rem;
+  }
+  [data-compact-pagination] [data-pagination-size] :deep(button) {
+    width: 4.5rem;
+    height: 1.75rem;
+    min-height: 1.75rem;
+  }
+}
+</style>
