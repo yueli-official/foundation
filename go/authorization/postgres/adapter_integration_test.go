@@ -183,8 +183,11 @@ func TestPostgresInitialAdministratorClaimIsAtomicAcrossAdapters(t *testing.T) {
 		result authorization.ClaimInitialAdministratorResult
 		err    error
 	}
-	outcomes := make(chan outcome, 2)
-	for index, adapter := range []*authorizationpostgres.Adapter{first, second} {
+	const claimants = 20
+	outcomes := make(chan outcome, claimants)
+	claimAdapters := []*authorizationpostgres.Adapter{first, second}
+	for index := range claimants {
+		adapter := claimAdapters[index%len(claimAdapters)]
 		actor := authorization.SubjectRef{Kind: authorization.SubjectUser, ID: fmt.Sprintf("owner-%d", index+1)}
 		go func(adapter *authorizationpostgres.Adapter, actor authorization.SubjectRef) {
 			result, err := adapter.ClaimInitialAdministrator(ctx, authorization.ClaimInitialAdministratorCommand{Actor: actor})
@@ -193,7 +196,7 @@ func TestPostgresInitialAdministratorClaimIsAtomicAcrossAdapters(t *testing.T) {
 	}
 	var winner authorization.SubjectRef
 	success, conflicts := 0, 0
-	for range 2 {
+	for range claimants {
 		outcome := <-outcomes
 		switch {
 		case outcome.err == nil:
@@ -208,7 +211,7 @@ func TestPostgresInitialAdministratorClaimIsAtomicAcrossAdapters(t *testing.T) {
 			t.Fatalf("claim error = %v", outcome.err)
 		}
 	}
-	if success != 1 || conflicts != 1 {
+	if success != 1 || conflicts != claimants-1 {
 		t.Fatalf("success=%d conflicts=%d", success, conflicts)
 	}
 	restarted, err := authorizationpostgres.New(ctx, catalog, options)

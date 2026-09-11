@@ -1,0 +1,26 @@
+{
+  "results": [
+    {
+      "site": "www",
+      "chunks": [
+        "C6egfKM2.js"
+      ],
+      "status": 200
+    },
+    {
+      "site": "blog",
+      "chunks": [
+        "BmQFH0EE.js"
+      ],
+      "status": 200
+    },
+    {
+      "site": "docs",
+      "chunks": [
+        "B0Eg2NPf.js"
+      ],
+      "status": 200
+    }
+  ],
+  "errors": []
+}

@@ -2,6 +2,8 @@
 
 Experimental public UI foundation for Nuxt UI consumers.
 
+Authorization user lists use `AuthorizationGrantBadge` from `@yueli/ui/admin`: pass the product role display name as `role` and the grant source as `source`. The badge shows only the role; its hover/focus tooltip localizes the source, including `initial_claim`. See [grant badge conventions](../../../flightdeck/knowledge/frontend/authorization-grant-badges.md).
+
 The package intentionally has no root export. Import a documented explicit subpath so experimental modules can mature independently:
 
 ```ts
@@ -62,8 +64,8 @@ catalog immediately, then lazy-loads the complete Tabler catalog only when the
 picker is mounted. Search therefore includes names such as `fish` without
 adding the full collection to the application entry bundle. Persisted choices
 remain available after reload through the same-origin server provider. Products
-may replace the catalog through `options` when a domain intentionally needs a
-smaller controlled set.
+may supply preferred icons through `options` without disabling full-catalog
+search. Set `fullCatalog: false` explicitly when a domain needs a restricted set.
 
 ### Upgrading to 0.2.0
 
@@ -431,3 +433,18 @@ product-owned navigation CSS. The public dependency URL remains on the published
 release until 0.4.0 is authorized and published; local validation uses the explicit
 Workspace source overlay and an independent tarball consumer. Existing consumers
 without MobileBottomNav retain their previous spacing and Toast placement.
+
+
+### 权限申请与用户资料（本地候选）
+
+`@yueli/ui/admin` 导出 `AuthorizationUser` 与 `AuthorizationApplication`。前者接收 subject/name/handle/avatarUrl/profileUrl/loading；后者接收 user、role、reason、createdAt、busy，并发出 review(approve|reject)。组件不请求身份或权限接口，不自行授权。消费者提供公开资料、Asset SDK URL、Account 主页及审批 Adapter。时间按 Asia/Shanghai 展示。新增导出将随下一版本发布，现有导出保持不变。
+
+## 紧凑后台集合
+
+`CollectionPanel` 默认紧凑网格与分页；`PageHeader` / `ManagePage` tools 插槽承载 `CollectionHeaderTools`。独立列表复用 `CollectionPaginationBar`，不复制页码计算。详见[规则与验收](../../../flightdeck/knowledge/frontend/compact-admin-collections.md)。
+
+`CommentModerationCollection` 推荐显式启用 `layout="columns"`：作者、时间和正文为主列，来源、状态和横向更多菜单在桌面独立对齐；窄屏将后三项移到正文下方。该布局不展示来源缩略图，通过审核进入更多菜单，保留回复上下文、用户详情与批量操作。产品应传入完整状态（包括已通过）。Gallery 验收后已接入 Blog、Docs、BVideo；现有 `compact` / `table` 显式调用不变。部署使用固定候选包，不能把本地源码接入当成已发布正式 Release。
+
+## 内容编辑工作台
+
+`@yueli/ui/admin` 导出 `EditorCommandBar`，使用 `immersive`、`settingsOpen` 两个 model，以及 title/status/preview/lifecycle/actions 插槽。产品拥有保存、发布和权限；设置面板复用 `EditorInspector`。`CollectionPanel` 的 `editItem` 事件支持双击非交互区域进入完整编辑，独立表格可复用 `isCollectionEditGesture`。详见[交互与发布规则](../../../flightdeck/knowledge/frontend/editor-workbench.md)。

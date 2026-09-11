@@ -5,6 +5,7 @@ export { default as CollectionDock } from "./components/CollectionDock.vue";
 export { default as CollectionFooter } from "./components/CollectionFooter.vue";
 export { default as CollectionLifecycleTabs } from "./components/CollectionLifecycleTabs.vue";
 export { default as CollectionPagination } from "./components/CollectionPagination.vue";
+export { default as CollectionPaginationBar } from "./components/CollectionPaginationBar.vue";
 export { default as CollectionPageSelection } from "./components/CollectionPageSelection.vue";
 export { default as CollectionRowShell } from "./components/CollectionRowShell.vue";
 export { default as CollectionSortDirectionButton } from "./components/CollectionSortDirectionButton.vue";
@@ -23,3 +24,6 @@ export type {
   CollectionPanelState,
   CollectionSelectControl,
 } from "./panel";
+
+export { default as CollectionHeaderTools } from "./components/CollectionHeaderTools.vue";
+export { isCollectionEditGesture } from "./edit-interaction";

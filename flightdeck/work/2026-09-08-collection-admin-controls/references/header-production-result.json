@@ -1,0 +1,57 @@
+[
+  {
+    "site": "blog",
+    "width": 390,
+    "status": 200,
+    "url": "https://cg.yuelili.com/"
+  },
+  {
+    "site": "blog",
+    "width": 1440,
+    "status": 200,
+    "url": "https://cg.yuelili.com/"
+  },
+  {
+    "site": "docs",
+    "width": 390,
+    "status": 200,
+    "url": "https://docs.yuelili.com/"
+  },
+  {
+    "site": "docs",
+    "width": 1440,
+    "status": 200,
+    "url": "https://docs.yuelili.com/"
+  },
+  {
+    "site": "www",
+    "width": 390,
+    "status": 200,
+    "url": "https://www.yuelili.com/"
+  },
+  {
+    "site": "www",
+    "width": 1440,
+    "status": 200,
+    "url": "https://www.yuelili.com/"
+  },
+  {
+    "site": "account",
+    "width": 390,
+    "status": 200,
+    "url": "https://account.yuelili.com/"
+  },
+  {
+    "site": "account",
+    "width": 1440,
+    "status": 200,
+    "url": "https://account.yuelili.com/"
+  },
+  {
+    "blogHeader": {
+      "hasActions": "false",
+      "columns": "116.5px 967.5px",
+      "rightGap": 0
+    }
+  }
+]

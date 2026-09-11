@@ -5,6 +5,8 @@ const props = withDefaults(
   defineProps<{
     label: string;
     searchPlaceholder: string;
+    searchId?: string;
+    searchable?: boolean;
     searchAction?: string;
     filterLabel: string;
     filterCount?: number;
@@ -15,6 +17,7 @@ const props = withDefaults(
   {
     filterCount: 0,
     selectionCount: 0,
+    searchable: true,
   },
 );
 
@@ -80,6 +83,7 @@ function submitSearch() {
       class="grid min-h-24 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-default p-3 sm:p-4"
     >
       <form
+        v-if="searchable !== false"
         data-collection-table-search
         :class="[
           props.searchAction ? 'grid grid-cols-[minmax(0,1fr)_auto]' : 'block',
@@ -88,7 +92,7 @@ function submitSearch() {
         role="search"
         @submit.prevent="submitSearch"
       >
-        <UInput
+        <UInput :id="searchId"
           :model-value="searchDraft"
           icon="i-tabler-search"
           size="sm"

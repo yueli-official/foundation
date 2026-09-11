@@ -1,0 +1,22 @@
+{
+  "blog": {
+    "uiHeaderSha256": "9d58dfc5182058f7de5e8a12a61353ac29f02ca766f83a2e7180eb505e0b80fe",
+    "lockSha256": "a91aa56f587e1f023a24034faed2de8aced0bb5f38bdc58ed3509ea6fa246b51",
+    "ui": "file:vendor/yueli-ui-0.4.1-server.20260909.header.editor.2.tgz"
+  },
+  "docs": {
+    "uiHeaderSha256": "9d58dfc5182058f7de5e8a12a61353ac29f02ca766f83a2e7180eb505e0b80fe",
+    "lockSha256": "4a260a884f81ce2c52af8e159cf797752d7cb9e08514a8ed412025313e7c1f89",
+    "ui": "file:vendor/yueli-ui-0.4.1-server.20260909.header.editor.2.tgz"
+  },
+  "www": {
+    "uiHeaderSha256": "9d58dfc5182058f7de5e8a12a61353ac29f02ca766f83a2e7180eb505e0b80fe",
+    "lockSha256": "c0d55f3d184a241892667f2b57738e4954d1b981f950aeedef1a9ee2b1efc990",
+    "ui": "file:vendor/yueli-ui-0.4.1-server.20260909.header.editor.2.tgz"
+  },
+  "account": {
+    "uiHeaderSha256": "9d58dfc5182058f7de5e8a12a61353ac29f02ca766f83a2e7180eb505e0b80fe",
+    "lockSha256": "d91a9c056d012bff3e2a81901c6106809451d9aad5549745a66401a3ed494e33",
+    "ui": "file:vendor/yueli-ui-0.4.1-server.20260909.header.account.2.tgz"
+  }
+}

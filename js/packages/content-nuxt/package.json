@@ -31,8 +31,11 @@
     "@tiptap/pm": "^3.30.4",
     "@tiptap/suggestion": "^3.30.4",
     "@tiptap/vue-3": "^3.30.4",
+    "dompurify": "3.3.3",
+    "fflate": "0.8.3",
     "highlight.js": "11.11.1",
     "katex": "0.16.45",
+    "mammoth": "1.12.2",
     "marked": "17.0.6",
     "marked-alert": "2.1.2",
     "mermaid": "11.16.1"

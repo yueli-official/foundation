@@ -18,16 +18,17 @@ const (
 // Scopes and Roles are always non-nil. Framework adapters may store a Principal
 // in request context, but this core package does not own that transport policy.
 type Principal struct {
-	Subject     string
-	SubjectKind SubjectKind
-	ClientID    string
-	Issuer      string
-	Audience    []string
-	Scopes      []string
-	Roles       []string
-	IssuedAt    time.Time
-	ExpiresAt   time.Time
-	claims      map[string]any
+	Subject       string
+	SubjectKind   SubjectKind
+	ClientID      string
+	Issuer        string
+	Audience      []string
+	Scopes        []string
+	Roles         []string
+	IssuedAt      time.Time
+	ExpiresAt     time.Time
+	claims        map[string]any
+	personalToken bool
 }
 
 func (principal *Principal) IsUser() bool {

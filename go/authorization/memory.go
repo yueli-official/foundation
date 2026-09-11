@@ -1895,6 +1895,25 @@ func (module *Memory) EffectiveAccess(_ context.Context, query EffectiveAccessQu
 	now := module.clock()
 	result := EffectiveAccess{Subject: query.Subject, ScopeID: query.ScopeID}
 	capabilities := make(map[CapabilityKey]struct{})
+	allowedAt := func(capability CapabilityDefinition, root ScopeType) bool {
+		pending := []ScopeType{root}
+		seen := map[ScopeType]bool{}
+		for len(pending) > 0 {
+			current := pending[0]
+			pending = pending[1:]
+			if seen[current] {
+				continue
+			}
+			seen[current] = true
+			if capabilityAllowedAtScope(capability, current) {
+				return true
+			}
+			if query.IncludeDescendants {
+				pending = append(pending, module.catalog.scopeTypes[current].Children...)
+			}
+		}
+		return false
+	}
 	layerKey := AccessLayerAuthenticated
 	if query.Subject.Kind == SubjectAnonymous {
 		layerKey = AccessLayerVisitor
@@ -1903,15 +1922,21 @@ func (module *Memory) EffectiveAccess(_ context.Context, query EffectiveAccessQu
 		for _, capabilityKey := range module.accessLayerCapabilitiesLocked(layerKey) {
 			capability := module.catalog.capabilities[capabilityKey]
 			if subjectEligible(capability.EligibleSubjects, query.Subject.Kind) &&
-				capabilityAllowedAtScope(capability, scope.Type) {
+				allowedAt(capability, scope.Type) {
 				capabilities[capabilityKey] = struct{}{}
 			}
 		}
 	}
 	for _, grant := range module.grants {
 		_, targetMatches := module.grantAppliesToSubjectLocked(grant, query.Subject)
-		if !targetMatches || !grantActive(grant, now) || !module.scopeContainsLocked(grant.ScopeID, query.ScopeID) {
+		coversQuery := module.scopeContainsLocked(grant.ScopeID, query.ScopeID)
+		insideQuery := query.IncludeDescendants && module.scopeContainsLocked(query.ScopeID, grant.ScopeID)
+		if !targetMatches || !grantActive(grant, now) || !(coversQuery || insideQuery) {
 			continue
+		}
+		grantScopeType := scope.Type
+		if !coversQuery {
+			grantScopeType = module.scopes[grant.ScopeID].Type
 		}
 		result.Grants = append(result.Grants, grant)
 		role, exists := module.activeRoleLocked(grant.Role)
@@ -1921,7 +1946,7 @@ func (module *Memory) EffectiveAccess(_ context.Context, query EffectiveAccessQu
 		if role.Protected {
 			for capabilityKey, capability := range module.catalog.capabilities {
 				if subjectEligible(capability.EligibleSubjects, query.Subject.Kind) &&
-					capabilityAllowedAtScope(capability, scope.Type) {
+					allowedAt(capability, grantScopeType) {
 					capabilities[capabilityKey] = struct{}{}
 				}
 			}
@@ -1930,7 +1955,7 @@ func (module *Memory) EffectiveAccess(_ context.Context, query EffectiveAccessQu
 		for _, capabilityKey := range module.roleCapabilitiesLocked(grant.Role) {
 			capability := module.catalog.capabilities[capabilityKey]
 			if subjectEligible(capability.EligibleSubjects, query.Subject.Kind) &&
-				capabilityAllowedAtScope(capability, scope.Type) {
+				allowedAt(capability, grantScopeType) {
 				capabilities[capabilityKey] = struct{}{}
 			}
 		}

@@ -20,3 +20,4 @@ go/coverage.out
 Thumbs.db
 .idea/
 .vscode/
+/workspace/.doctor/

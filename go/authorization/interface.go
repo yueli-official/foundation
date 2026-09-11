@@ -88,6 +88,9 @@ type Decision struct {
 type EffectiveAccessQuery struct {
 	Subject SubjectRef
 	ScopeID ScopeID
+	// IncludeDescendants lists potential capabilities within the scope subtree
+	// for delegation/UI discovery. It is never a resource authorization decision.
+	IncludeDescendants bool
 }
 
 type EffectiveAccess struct {

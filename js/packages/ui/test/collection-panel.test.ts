@@ -106,8 +106,10 @@ describe("CollectionPanel", () => {
         page: 1,
         pageSize: 10,
         layout: "grid",
+        selectable: true,
       },
       slots: {
+        columns: "List-only column sorting",
         item: ({ item }: { item: unknown }) =>
           (item as (typeof items)[number]).title,
       },
@@ -135,6 +137,8 @@ describe("CollectionPanel", () => {
     expect(
       wrapper.get("[data-collection-table-toolbar]").attributes("aria-label"),
     ).toBe("Records 工具栏");
+    expect(wrapper.text()).not.toContain("List-only column sorting");
+    expect(wrapper.get("[data-collection-columns]").text()).toContain(messages.selectPage);
   });
 
   it("owns search, item selection and result anatomy through one Interface", async () => {
@@ -193,7 +197,8 @@ describe("CollectionPanel", () => {
 
     await wrapper.get('input[aria-label="Select First"]').setValue(true);
     expect(wrapper.emitted("toggleItem")).toEqual([["one", true]]);
-    expect(wrapper.text()).toContain("1-2/2");
+    expect(wrapper.text()).not.toContain("1-2/2");
+    expect(wrapper.find("[data-collection-pagination-bar]").exists()).toBe(true);
   });
 
   it("keeps columns visible and replaces the toolbar in selection mode", async () => {

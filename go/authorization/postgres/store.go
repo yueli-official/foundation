@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -484,6 +485,25 @@ func (store stateStore) saveTx(
 }
 
 func (store stateStore) rebuildProjection(ctx context.Context, snapshot repository.Snapshot) error {
+	// Independent adapters can refresh the same claimed state concurrently.
+	// Retry only PostgreSQL transaction conflicts; each attempt replaces the whole projection atomically.
+	for attempt := 0; ; attempt++ {
+		err := store.rebuildProjectionAttempt(ctx, snapshot)
+		var state interface{ SQLState() string }
+		if err == nil || attempt >= 5 || !errors.As(err, &state) || (state.SQLState() != "40001" && state.SQLState() != "40P01") {
+			return err
+		}
+		timer := time.NewTimer(time.Duration(1<<attempt) * 10 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
+}
+
+func (store stateStore) rebuildProjectionAttempt(ctx context.Context, snapshot repository.Snapshot) error {
 	transaction, err := store.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return fmt.Errorf("authorization/postgres: begin projection transaction: %w", err)

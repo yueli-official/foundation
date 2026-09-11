@@ -21,7 +21,11 @@ export function contentAssetRenditionURL(
   }
   if (!MEDIA_PATH.test(parsed.pathname)) return "";
   parsed.searchParams.set("format", format);
-  parsed.searchParams.set("name", rendition);
+  const version = parsed.searchParams.get("v");
+  parsed.searchParams.delete("preset");
+  parsed.searchParams.delete("v");
+  parsed.searchParams.set("preset", rendition);
+  if (version !== null) parsed.searchParams.set("v", version);
   return relative
     ? `${parsed.pathname}${parsed.search}${parsed.hash}`
     : parsed.toString();

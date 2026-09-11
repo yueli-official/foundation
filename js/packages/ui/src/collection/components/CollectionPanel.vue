@@ -4,6 +4,7 @@
   generic="TItem, TKey extends CollectionKey = CollectionKey"
 >
 import { computed } from "vue";
+import { isCollectionEditGesture } from "../edit-interaction";
 import type {
   CollectionControl,
   CollectionControlValue,
@@ -12,6 +13,7 @@ import type {
   CollectionPanelState,
 } from "../panel";
 import type { CollectionKey } from "../workflow";
+import CollectionPaginationBar from "./CollectionPaginationBar.vue";
 import CollectionFrame from "./CollectionFrame.vue";
 import CollectionTableToolbar from "./CollectionTableToolbar.vue";
 
@@ -42,6 +44,7 @@ const props = withDefaults(
     layout?: CollectionPanelLayout;
     externalControls?: boolean;
     compactPagination?: boolean;
+    compactGrid?: boolean;
   }>(),
   {
     controls: () => [],
@@ -56,6 +59,8 @@ const props = withDefaults(
     pageIndeterminate: false,
     canSelectAllResults: false,
     layout: "rows",
+    compactPagination: true,
+    compactGrid: true,
   },
 );
 
@@ -72,6 +77,7 @@ const emit = defineEmits<{
   clearSelection: [];
   pageChange: [page: number];
   pageSizeChange: [pageSize: number];
+  editItem: [item: TItem];
 }>();
 
 const firstVisible = computed(() =>
@@ -304,7 +310,7 @@ function toggle(item: TItem, key: TKey) {
       </CollectionTableToolbar>
     </template>
 
-    <template v-if="selectable || $slots.columns" #columns>
+    <template v-if="selectable || (layout !== 'grid' && $slots.columns)" #columns>
       <div
         class="flex w-full min-w-0 items-center gap-0 text-xs font-medium leading-5 text-muted"
       >
@@ -316,7 +322,8 @@ function toggle(item: TItem, key: TKey) {
           />
         </div>
         <div class="min-w-0 flex-1">
-          <slot name="columns" />
+          <span v-if="layout === 'grid'">{{ messages.selectPage }}</span>
+          <slot v-else name="columns" />
         </div>
       </div>
     </template>
@@ -392,11 +399,13 @@ function toggle(item: TItem, key: TKey) {
     <div
       v-else-if="layout === 'grid'"
       class="grid gap-3 p-3 sm:p-4 @sm/collection:grid-cols-2 @3xl/collection:grid-cols-3"
+      :data-compact-grid="compactGrid"
       data-collection-grid
     >
       <article
         v-for="item in items"
         :key="itemKey(item)"
+        @dblclick="isCollectionEditGesture($event) && emit('editItem', item)"
         class="relative min-w-0 rounded-lg border bg-default p-4 transition-colors"
         :class="[
           selected(item, itemKey(item))
@@ -409,7 +418,7 @@ function toggle(item: TItem, key: TKey) {
           :model-value="selected(item, itemKey(item))"
           :disabled="!selectableItem(item)"
           :aria-label="messages.selectItem(itemLabel(item))"
-          class="absolute left-4 top-4 z-10 rounded-md bg-default/90 p-1 shadow-sm backdrop-blur"
+          :class="compactGrid ? 'absolute left-2 top-2 z-10' : 'absolute left-4 top-4 z-10 rounded-md bg-default/90 p-1 shadow-sm backdrop-blur'"
           @update:model-value="
             setSelected(item, itemKey(item), $event === true)
           "
@@ -429,6 +438,7 @@ function toggle(item: TItem, key: TKey) {
       <article
         v-for="item in items"
         :key="itemKey(item)"
+        @dblclick="isCollectionEditGesture($event) && emit('editItem', item)"
         class="flex min-w-0 items-center px-3 py-3 transition-colors sm:px-4"
         :class="
           selected(item, itemKey(item))
@@ -460,9 +470,9 @@ function toggle(item: TItem, key: TKey) {
     </div>
 
     <template #footer>
-      <div
+      <CollectionPaginationBar v-if="compactPagination" :page="page" :page-size="pageSize" :total="total" :page-sizes="pageSizes" :page-size-label="messages.pageSize" :page-size-control="messages.pageSizeControl" :page-size-option="messages.pageSizeOption" :label="messages.pagination" @page-change="emit('pageChange', $event)" @page-size-change="emit('pageSizeChange', $event)" />
+      <div v-else
         class="flex flex-col gap-3 text-xs sm:flex-row sm:items-center sm:justify-between"
-        :data-compact-pagination="compactPagination || undefined"
       >
         <p class="text-muted">
           {{ messages.showing(firstVisible, lastVisible, total) }}
@@ -477,7 +487,7 @@ function toggle(item: TItem, key: TKey) {
             :items-per-page="pageSize"
             :aria-label="messages.pagination || messages.pageSize"
             :show-edges="false"
-            :sibling-count="compactPagination ? 0 : 1"
+            :sibling-count="1"
             size="xs"
             data-pagination-pages
             @update:page="emit('pageChange', $event)"
@@ -501,35 +511,8 @@ function toggle(item: TItem, key: TKey) {
 </template>
 
 <style scoped>
-@media (max-width: 639px) {
-  [data-compact-pagination] {
-    gap: 0.5rem;
-  }
-  [data-compact-pagination] [data-pagination-controls] {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 0.5rem;
-  }
-  [data-compact-pagination] :deep([data-pagination-pages] button) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    min-width: 1.75rem;
-    min-height: 1.75rem;
-    padding: 0;
-  }
-  [data-compact-pagination] [data-pagination-size] {
-    gap: 0.25rem;
-  }
-  [data-compact-pagination] [data-pagination-size] :deep(button) {
-    width: 4.5rem;
-    height: 1.75rem;
-    min-height: 1.75rem;
-  }
+[data-compact-grid="true"] { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+@container collection (max-width: 30rem) {
+  [data-compact-grid="true"] { grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
 }
 </style>

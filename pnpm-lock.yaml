@@ -194,6 +194,15 @@ importers:
 
   js/packages/content-nuxt:
     dependencies:
+      dompurify:
+        specifier: 3.3.3
+        version: 3.3.3
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
+      mammoth:
+        specifier: 1.12.2
+        version: 1.12.2
       "@tiptap/core":
         specifier: ^3.30.4
         version: 3.31.2(@tiptap/pm@3.31.2)
@@ -9529,6 +9538,73 @@ packages:
       }
     engines: { node: ">= 14" }
 
+  dompurify@3.3.3:
+    resolution:
+      integrity: sha512-Oj6pzI2+RqBfFG+qOaOLbFXLQ90ARpcGG6UePL82bJLtdsa6CYJD7nmiU8MW9nQNOtCHV3lZ/Bzq1X0QYbBZCA==
+  fflate@0.8.3:
+    resolution:
+      integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==
+  mammoth@1.12.2:
+    resolution:
+      integrity: sha512-MH2vkgafD/2MYUaEOtoXLKrHQZ7yLYTHGQgyLNtYZHiUxU1K1QQ+8qMFquDAfhBm06wSGSws3J+Q9QTsKtR44g==
+    engines:
+      node: ">=12.0.0"
+    hasBin: true
+  "@xmldom/xmldom@0.8.15":
+    resolution:
+      integrity: sha512-/5NV/vDALVFDXgLmfsy9TRCBlKwO2LNBFzpzvb9iIj+jR+eSc6DLYYvVOdivT/jm7MtU6TebYuRmzEOI7w40UA==
+    engines:
+      node: ">=10.0.0"
+  argparse@1.0.10:
+    resolution:
+      integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==
+  sprintf-js@1.0.3:
+    resolution:
+      integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
+  bluebird@3.4.7:
+    resolution:
+      integrity: sha512-iD3898SR7sWVRHbiQv+sHUtHnMvC1o3nW5rAcqnq3uOn07DSAppZYUkIGslDz6gXC7HfunPe7YVBgoEJASPcHA==
+  dingbat-to-unicode@1.0.1:
+    resolution:
+      integrity: sha512-98l0sW87ZT58pU4i61wa2OHwxbiYSbuxsCBozaVnYX2iCnr3bLM3fIes1/ej7h1YdOKuKt/MLs706TVnALA65w==
+  jszip@3.10.1:
+    resolution:
+      integrity: sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==
+  lie@3.3.0:
+    resolution:
+      integrity: sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==
+  immediate@3.0.6:
+    resolution:
+      integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==
+  pako@1.0.11:
+    resolution:
+      integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
+  setimmediate@1.0.5:
+    resolution:
+      integrity: sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==
+  lop@0.4.2:
+    resolution:
+      integrity: sha512-RefILVDQ4DKoRZsJ4Pj22TxE3omDO47yFpkIBoDKzkqPRISs5U1cnAdg/5583YPkWPaLIYHOKRMQSvjFsO26cw==
+  duck@0.1.12:
+    resolution:
+      integrity: sha512-wkctla1O6VfP89gQ+J/yDesM0S7B7XLXjKGzXxMDVFg7uEn706niAtyYovKbyq1oT9YwDcly721/iUWoc8MVRg==
+  underscore@1.13.8:
+    resolution:
+      integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==
+  option@0.2.4:
+    resolution:
+      integrity: sha512-pkEqbDyl8ou5cpq+VsnQbe/WlEy5qS7xPzMS1U55OCG9KPvwFD46zDbxQIj3egJSFc3D+XhYOPUzz49zQAVy7A==
+  path-is-absolute@1.0.1:
+    resolution:
+      integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==
+    engines:
+      node: ">=0.10.0"
+  xmlbuilder@10.1.1:
+    resolution:
+      integrity: sha512-OyzrcFLL/nb6fMGHbiRDuPup9ljBycsdCypwuyg5AAHvyWzGfChJpCXMG88AGTIMFhGZ9RccFN1e6lhg3hkwKg==
+    engines:
+      node: ">=4.0"
+
 snapshots:
   "@alloc/quick-lru@5.2.0": {}
 
@@ -16673,3 +16749,51 @@ snapshots:
       archiver-utils: 5.0.2
       compress-commons: 6.0.2
       readable-stream: 4.7.0
+
+  dompurify@3.3.3:
+    optionalDependencies:
+      "@types/trusted-types": 2.0.7
+  fflate@0.8.3: {}
+  mammoth@1.12.2:
+    dependencies:
+      "@xmldom/xmldom": 0.8.15
+      argparse: 1.0.10
+      base64-js: 1.5.1
+      bluebird: 3.4.7
+      dingbat-to-unicode: 1.0.1
+      jszip: 3.10.1
+      lop: 0.4.2
+      path-is-absolute: 1.0.1
+      underscore: 1.13.8
+      xmlbuilder: 10.1.1
+  "@xmldom/xmldom@0.8.15": {}
+  argparse@1.0.10:
+    dependencies:
+      sprintf-js: 1.0.3
+  sprintf-js@1.0.3: {}
+  bluebird@3.4.7: {}
+  dingbat-to-unicode@1.0.1: {}
+  jszip@3.10.1:
+    dependencies:
+      lie: 3.3.0
+      pako: 1.0.11
+      readable-stream: 2.3.8
+      setimmediate: 1.0.5
+  lie@3.3.0:
+    dependencies:
+      immediate: 3.0.6
+  immediate@3.0.6: {}
+  pako@1.0.11: {}
+  setimmediate@1.0.5: {}
+  lop@0.4.2:
+    dependencies:
+      duck: 0.1.12
+      option: 0.2.4
+      underscore: 1.13.8
+  duck@0.1.12:
+    dependencies:
+      underscore: 1.13.8
+  underscore@1.13.8: {}
+  option@0.2.4: {}
+  path-is-absolute@1.0.1: {}
+  xmlbuilder@10.1.1: {}

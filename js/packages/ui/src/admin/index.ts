@@ -23,3 +23,8 @@ export type {
   AdminShellUi,
 } from "./types";
 export type { AdminNavigationSearchOptions } from "./navigation";
+
+export { default as AuthorizationUser } from "./components/AuthorizationUser.vue";
+export { default as AuthorizationGrantBadge } from "./components/AuthorizationGrantBadge.vue";
+export { default as AuthorizationApplication } from "./components/AuthorizationApplication.vue";
+export { default as EditorCommandBar } from "./components/EditorCommandBar.vue";

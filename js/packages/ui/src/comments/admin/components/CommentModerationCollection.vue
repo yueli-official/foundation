@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import CommentModerationCompactRow from "./CommentModerationCompactRow.vue";
+import CommentModerationColumnsRow from "./CommentModerationColumnsRow.vue";
 import AdminRowActions from "../../../admin/components/AdminRowActions.vue";
 import type { CollectionPanelMessages } from "../../../collection/panel";
 import {
@@ -15,7 +16,7 @@ import type {
 } from "../types";
 
 const props = defineProps<{
-  layout?: "table" | "compact";
+  layout?: "table" | "compact" | "columns";
   externalControls?: boolean;
   model: CommentModerationCollectionModel;
   actions: CommentModerationCollectionActions;
@@ -84,7 +85,7 @@ function toggleItem(id: string | number, selected: boolean) {
 <template>
   <div data-comment-moderation-surface>
     <CollectionPanel
-      :compact-pagination="layout === 'compact'"
+      :compact-pagination="layout === 'compact' || layout === 'columns'"
       :external-controls="externalControls"
       v-model:search="search"
       :items="model.items"
@@ -140,7 +141,16 @@ function toggleItem(id: string | number, selected: boolean) {
       </template>
 
       <template #columns>
-        <div v-if="layout === 'compact'" class="flex items-center justify-between gap-3">
+        <div v-if="layout === 'columns'" class="comment-columns">
+          <div class="col-span-3 flex items-center gap-3 lg:col-span-1">
+            <span>评论</span>
+            <UButton v-if="model.lifecycle === 'trash' && actions.emptyTrash" label="清空回收站" icon="i-tabler-trash-x" color="error" variant="ghost" size="xs" :disabled="model.total === 0" :loading="model.emptyingTrash" @click="openEmptyTrash" />
+          </div>
+          <span class="hidden lg:block">来源</span>
+          <span class="hidden lg:block">状态</span>
+          <span class="hidden text-right lg:block">操作</span>
+        </div>
+        <div v-else-if="layout === 'compact'" class="flex items-center justify-between gap-3">
           <span>选择本页</span>
           <div v-if="externalControls" class="flex items-center gap-3">
             <span class="font-normal text-dimmed">{{ model.total }} 条评论</span>
@@ -170,7 +180,8 @@ function toggleItem(id: string | number, selected: boolean) {
       </template>
 
       <template #item="{ item: comment }">
-        <CommentModerationCompactRow v-if="layout === 'compact'" :comment="comment" :format-date="formatDate" @approve="actions.approve?.($event)" />
+        <CommentModerationColumnsRow v-if="layout === 'columns'" :comment="comment" :format-date="formatDate" @approve="actions.approve?.($event)" />
+        <CommentModerationCompactRow v-else-if="layout === 'compact'" :comment="comment" :format-date="formatDate" @approve="actions.approve?.($event)" />
         <div v-else
           class="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] items-start gap-3 lg:grid-cols-[minmax(16rem,1.4fr)_minmax(10rem,0.8fr)_10rem_8.5rem_7rem] lg:items-center"
           data-manage-comment-row
@@ -316,3 +327,18 @@ function toggleItem(id: string | number, selected: boolean) {
     </UModal>
   </div>
 </template>
+
+<style scoped>
+:deep(.comment-columns) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 2rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+@media (min-width: 1024px) {
+  :deep(.comment-columns) {
+    grid-template-columns: minmax(0, 1fr) minmax(8rem, 18%) 5.5rem 2rem;
+    column-gap: 1.5rem;
+  }
+}
+</style>

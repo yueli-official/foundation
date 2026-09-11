@@ -21,6 +21,13 @@ export default defineNuxtConfig({
   // copies of prosemirror-state and the editor throws "Adding different instances
   // of a keyed plugin (plugin$)". Forcing both into one optimized chunk fixes it.
   vite: {
+    resolve: {
+      dedupe: [
+        "@tiptap/core", "@tiptap/pm", "@tiptap/vue-3",
+        "prosemirror-state", "prosemirror-model", "prosemirror-view",
+        "prosemirror-transform", "prosemirror-keymap", "prosemirror-commands",
+      ],
+    },
     server: {
       // A local Dependency Overlay resolves KaTeX from the Foundation checkout,
       // which is outside the consumer root. The layer owns this exact dependency

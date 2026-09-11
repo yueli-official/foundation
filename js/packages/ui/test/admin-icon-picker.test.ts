@@ -93,4 +93,28 @@ describe("AdminIconPicker", () => {
       { timeout: 5_000 },
     );
   });
+  it("searches the full catalog when a product supplies preferred icons", async () => {
+    const wrapper = mount(AdminIconPicker, {
+      props: { options: [{ label: "应用", value: "i-tabler-apps" }] },
+      global,
+    });
+    await flushPromises();
+    await wrapper.get('[aria-label="搜索图标"]').setValue("fish");
+    await vi.waitFor(() => expect(wrapper.find('[aria-label="选择fish"]').exists()).toBe(true), { timeout: 1500 });
+    await wrapper.get('[aria-label="选择fish"]').trigger("click");
+    expect(wrapper.emitted("update:modelValue")).toEqual([["i-tabler-fish"]]);
+    wrapper.unmount();
+  });
+
+  it("keeps an explicitly restricted catalog limited to supplied options", async () => {
+    const wrapper = mount(AdminIconPicker, {
+      props: { fullCatalog: false, options: [{ label: "应用", value: "i-tabler-apps" }] },
+      global,
+    });
+    await flushPromises();
+    await wrapper.get('[aria-label="搜索图标"]').setValue("fish");
+    expect(wrapper.find('[aria-label="选择fish"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
 });

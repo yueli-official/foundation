@@ -84,10 +84,17 @@ test("article media can switch from thumbnail to a named preview rendition", asy
     await import("../app/utils/contentMedia.ts");
   assert.equal(
     contentAssetRenditionURL(
-      "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=thumbnail&v=1",
+      "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&preset=inline&v=2",
       "content",
     ),
-    "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&name=content&v=1",
+    "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&preset=content&v=2",
+  );
+  assert.equal(
+    contentAssetRenditionURL(
+      "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&preset=thumbnail&v=1",
+      "content",
+    ),
+    "/media/31Pj0mXv7cfR5fdZIUvra?format=webp&preset=content&v=1",
   );
   assert.equal(
     contentAssetRenditionURL("https://external.example/image.png", "content"),

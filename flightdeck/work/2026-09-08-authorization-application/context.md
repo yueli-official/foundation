@@ -1,0 +1,1 @@
+用户明确 Gallery 申请体验不足，要求统一申请组件。组件拥有用户信息、角色、时间、理由和审批按钮展示；产品保留审批动作及权限判断，Identity 拥有公开用户批量协议。复用 Nuxt UI UUser，Foundation 不依赖 Identity/Asset；消费者提供头像 URL 与主页 URL。新增导出属于增量公共能力，Gallery 通过已有 Workspace local overlay 接入；发布时需随下一 UI/Identity 包候选及消费者版本一起交付。现有 Blog/Docs 暂不修改或重新部署。首位认领按用户要求保留待办。

@@ -87,75 +87,14 @@ const {
 } = useEditorToolbar({ allowHeadingOne: props.allowHeadingOne });
 
 // 图片入口供工具栏和建议菜单共用。
-const editorRef = ref<{ editor?: Editor } | null>(null);
-const fileInput = ref<HTMLInputElement>();
-const uploading = ref(false);
-
-function pickImage() {
-  if (!props.imageUploader) return;
-  fileInput.value?.click();
-}
-
-async function onFile(e: Event) {
-  const input = e.target as HTMLInputElement;
-  const file = input.files?.[0];
-  input.value = "";
-  if (file) await insertImageFile(file);
-}
-
-async function insertImageFile(file: File, position?: number) {
-  // 始终从 UEditor 暴露值读取实例，保证工具栏、粘贴和拖放共用同一上传 seam。
-  const editor = editorRef.value?.editor;
-  if (!editor || !props.imageUploader || uploading.value) return;
-  uploading.value = true;
-  try {
-    if (position !== undefined) {
-      editor.chain().focus().setTextSelection(position).run();
-    }
-    const url = await props.imageUploader(file);
-    editor.chain().focus().setImage({ src: url, alt: file.name }).run();
-  } catch (error: unknown) {
-    toast.add({
-      title: "图片上传失败",
-      description: error instanceof Error ? error.message : "请重试",
-      color: "error",
-    });
-  } finally {
-    uploading.value = false;
-  }
-}
-
-function firstImage(files: FileList | null | undefined) {
-  return Array.from(files || []).find((file) => file.type.startsWith("image/"));
-}
-
-function onPaste(event: ClipboardEvent) {
-  const file = firstImage(event.clipboardData?.files);
-  if (!file || !props.imageUploader) return;
-  event.preventDefault();
-  void insertImageFile(file);
-}
-
-function onDrop(event: DragEvent) {
-  const file = firstImage(event.dataTransfer?.files);
-  const editor = editorRef.value?.editor;
-  if (!file || !editor || !props.imageUploader) return;
-  event.preventDefault();
-  const position = editor.view.posAtCoords({
-    left: event.clientX,
-    top: event.clientY,
-  })?.pos;
-  void insertImageFile(file, position);
-}
-
-function onDragOver(event: DragEvent) {
-  if (
-    props.imageUploader &&
-    Array.from(event.dataTransfer?.types || []).includes("Files")
-  ) {
-    event.preventDefault();
-  }
-}
+const editorRef = shallowRef<{ editor?: Editor } | null>(null);
+const {
+  imageOpen, importOpen, uploading, progress, uploadImages, importDocument,
+  paste: onPaste, drop: onDrop, dragOver: onDragOver,
+} = useEditorInput(editorRef, () => props.imageUploader, description => {
+  toast.add({ title: "图片上传失败", description, color: "error" });
+});
+function pickImage() { if (props.imageUploader) imageOpen.value = true; }
 
 // 工具栏、气泡菜单和建议菜单共用命令处理器。
 const calloutHandler = (type: CalloutType) => ({
@@ -302,6 +241,9 @@ defineExpose({
     @dragover.capture="onDragOver"
     @drop.capture="onDrop"
   >
+    <ContentImportDialog v-model:open="imageOpen" mode="images" :submit="uploadImages" :progress="progress" />
+    <ContentImportDialog v-model:open="importOpen" mode="document" :submit="importDocument" :progress="progress" />
+    <p v-if="uploading" role="status" class="mb-2 text-sm text-muted">{{ progress || '正在处理图片…' }}</p>
     <!-- draft restore prompt -->
     <UAlert
       v-if="showDraftRestore"
@@ -373,6 +315,9 @@ defineExpose({
             layout="fixed"
             class="min-w-max flex-none [&_[role=group]_button]:min-h-11 [&_[role=group]_button]:min-w-11 sm:[&_[role=group]_button]:min-h-8 sm:[&_[role=group]_button]:min-w-8"
           />
+          <UTooltip text="导入文档">
+            <UButton icon="i-tabler-file-import" aria-label="导入文档" color="neutral" variant="ghost" size="sm" class="shrink-0" :disabled="uploading" @click="() => { importOpen = true; }" />
+          </UTooltip>
           <UIcon
             v-if="uploading"
             name="i-tabler-loader-2"
@@ -482,13 +427,7 @@ defineExpose({
         </ClientOnly>
       </div>
 
-      <input
-        ref="fileInput"
-        type="file"
-        accept="image/*"
-        class="hidden"
-        @change="onFile"
-      />
+
     </div>
   </div>
 </template>

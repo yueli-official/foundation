@@ -1,0 +1,13 @@
+{
+  "results": [
+    "image dialog multiple files",
+    "direct clipboard image",
+    "direct drop image",
+    "markdown with local image",
+    "missing image keeps original document",
+    "zip relative paths repeated reference",
+    "html embedded image and sanitization",
+    "save reload preserves original and imported content"
+  ],
+  "errors": []
+}

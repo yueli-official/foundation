@@ -68,3 +68,12 @@ pnpm --filter @yueli/content-nuxt test
 pnpm --filter @yueli/content-nuxt typecheck
 pnpm --filter @yueli/content-nuxt pack --dry-run
 ```
+
+
+## Images and document import
+
+ContentEditor uses the existing imageUploader(File) adapter for its multi-image dialog and direct editor paste/drop. The dialog supports file selection, drag/drop, clipboard input, progress and retryable errors.
+
+The import action accepts Markdown, HTML, DOCX, or one document plus its images in a ZIP; rich HTML can also be pasted into the dialog. Imported HTML is sanitized and image references are resolved/uploaded before the content is inserted at the cursor. Existing content is preserved. Missing files or unreadable cross-origin images keep the dialog open for correction. Remote image reads use browser CORS; there is no server-side fetch proxy. DOCX imports semantic content supported by the editor rather than page-layout fidelity.
+
+外链图片导入会尝试下载；读取或上传失败后保留带原图链接的文字占位，并继续导入正文与其他图片。
