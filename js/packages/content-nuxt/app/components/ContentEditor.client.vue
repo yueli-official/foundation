@@ -313,7 +313,7 @@ defineExpose({
             :editor="editor"
             :items="toolbarItems"
             layout="fixed"
-            class="min-w-max flex-none [&_[role=group]_button]:min-h-11 [&_[role=group]_button]:min-w-11 sm:[&_[role=group]_button]:min-h-8 sm:[&_[role=group]_button]:min-w-8"
+            class="min-w-max flex-none [&_[role=group]_button]:justify-center [&_[role=group]_button]:min-h-11 [&_[role=group]_button]:min-w-11 sm:[&_[role=group]_button]:min-h-8 sm:[&_[role=group]_button]:min-w-8"
           />
           <UTooltip text="导入文档">
             <UButton icon="i-tabler-file-import" aria-label="导入文档" color="neutral" variant="ghost" size="sm" class="shrink-0" :disabled="uploading" @click="() => { importOpen = true; }" />

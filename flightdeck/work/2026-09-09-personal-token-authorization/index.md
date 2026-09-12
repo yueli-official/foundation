@@ -6,6 +6,8 @@ Status: Open
 提供可复用的个人令牌认证与有限授权，Identity 管理凭证，消费站点保留角色和资源权限真值。首个消费者为 Blog，本地验收通过后再推进部署。
 
 ## Current
+2026-09-12 用户授权的本轮生产更新已完成：所属服务使用 `server-20260912-1`，九个相关服务均 healthy。独立构建、线上桌面/手机、登录刷新及普通账户 PAT 边界检查通过；Docs robots.txt 仍有已定位的历史 500。使用固定私有源码/包候选，未发布正式 SDK 或推送 Git。见 [本轮部署与限制](deployment-20260912.md)。
+
 2026-09-09 已按用户授权部署相关 Provider、Blog 与 Docs；Identity sync-2、Account/Asset/Blog/Docs sync-1，生产目录/令牌生命周期验证通过，0035 已迁移。依赖使用固定私有候选包及独立 Foundation 快照，GitHub 正式 Release 尚未发布。证据见 acceptance.md 最后一节。
 创建成功直接关闭表单回列表，不再自动弹出原文确认框。分类详情使用 Nuxt UI UPopover hover 模式卡片，含标题、数量和逐项权限，鼠标进入卡片后保持打开；用户进一步要求删除查看：现仅保留复制与撤销，原文弹窗及复制失败时弹出原文的分支全部移除。类型检查与真实 Playwright 创建/悬停/复制/撤销及无查看按钮、无原文弹窗验证通过。
 
