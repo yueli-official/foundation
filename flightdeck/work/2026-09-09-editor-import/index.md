@@ -44,3 +44,7 @@ HTTP(S) 图片仍先尝试下载；读取或上传失败时插入“图片未导
 旧 AE 文章包含 Markdown 表格及图片链接时，公开页可正常渲染，但共享富文本编辑器会在解析后丢失表格、图片和 `[图片](链接)` 结构。`content-nuxt` 已增加表格扩展与 linked-image 节点，真实旧文档往返保留表格、普通图片及图片跳转链接；`@yueli/content-nuxt` 候选版本升至 0.2.3。
 
 发布候选门禁已通过 `pnpm verify:js`、`validate-js-release`、全部公共包 pack、UI tarball 独立消费者、HTTP Runtime Playwright 3/3 与 UI Playwright 12 passed / 2 skipped / 0 failed。门禁过程中同步修复了既有格式/发布测试清单，以及紧凑分页重复拼接 `/ 页` 的显示问题。建议下一 bundle 为 `js-v0.7.3`；远端 tag 与 GitHub Release 仍按发布策略等待用户明确确认目标 tag。
+
+### js-v0.7.3 失败标签与后续候选（2026-09-13）
+
+用户明确授权发布 js-v0.7.3 后，远端 verify 的 OSV Scanner 因 2026-09-08 后新增公告拦截 DOMPurify 3.3.3、Vitest 4.1.10 / @vitest/mocker 与 SVGO 4.0.2；publish 未执行，Release tarball 未生成。保留该不可变失败 tag，不移动或覆盖。依赖已升级到 DOMPurify 3.4.13、Vitest 4.1.11、SVGO 4.1.0；npm audit 为 0，OSV Scanner v2.5.0 同 CI 参数扫描 pnpm-lock.yaml 为 No issues found。因失败 tag 后 package 内容变化，content-nuxt 推进为 0.2.4，下一 bundle 候选为 js-v0.7.4。

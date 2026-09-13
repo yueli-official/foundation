@@ -1,6 +1,6 @@
 {
   "name": "@yueli/content-nuxt",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
     "@tiptap/pm": "^3.30.4",
     "@tiptap/suggestion": "^3.30.4",
     "@tiptap/vue-3": "^3.30.4",
-    "dompurify": "3.3.3",
+    "dompurify": "3.4.13",
     "fflate": "0.8.3",
     "highlight.js": "11.11.1",
     "katex": "0.16.45",
