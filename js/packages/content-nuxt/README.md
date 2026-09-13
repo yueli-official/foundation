@@ -69,7 +69,6 @@ pnpm --filter @yueli/content-nuxt typecheck
 pnpm --filter @yueli/content-nuxt pack --dry-run
 ```
 
-
 ## Images and document import
 
 ContentEditor uses the existing imageUploader(File) adapter for its multi-image dialog and direct editor paste/drop. The dialog supports file selection, drag/drop, clipboard input, progress and retryable errors.

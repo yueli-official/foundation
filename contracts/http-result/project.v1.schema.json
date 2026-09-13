@@ -4,48 +4,81 @@
   "title": "Yueli HTTP Contract Project v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "namespace", "openapi", "errorCatalog", "operations", "generate"],
+  "required": [
+    "schemaVersion",
+    "namespace",
+    "openapi",
+    "errorCatalog",
+    "operations",
+    "generate"
+  ],
   "properties": {
     "schemaVersion": { "const": "http.yueli.dev/project/v1" },
     "namespace": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{1,63}$" },
     "openapi": {
-      "type": "object", "additionalProperties": false, "required": ["output", "producer"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output", "producer"],
       "properties": {
         "output": { "$ref": "#/$defs/path" },
         "producer": {
-          "type": "object", "additionalProperties": false, "required": ["command", "outputEnv"],
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["command", "outputEnv"],
           "properties": {
-            "command": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+            "command": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
             "outputEnv": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
-            "env": { "type": "object", "propertyNames": { "pattern": "^[A-Z][A-Z0-9_]+$" }, "additionalProperties": { "type": "string" } }
+            "env": {
+              "type": "object",
+              "propertyNames": { "pattern": "^[A-Z][A-Z0-9_]+$" },
+              "additionalProperties": { "type": "string" }
+            }
           }
         }
       }
     },
     "errorCatalog": { "$ref": "#/$defs/path" },
     "operations": {
-      "type": "object", "additionalProperties": false, "required": ["output", "errorsFile"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output", "errorsFile"],
       "properties": {
         "output": { "$ref": "#/$defs/path" },
         "errorsFile": { "$ref": "#/$defs/path" }
       }
     },
     "generate": {
-      "type": "object", "additionalProperties": false,
+      "type": "object",
+      "additionalProperties": false,
       "required": ["goOutput", "goPackage", "tsOutput", "tsType", "i18nOutput"],
       "properties": {
-        "goOutput": { "$ref": "#/$defs/path" }, "goPackage": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-        "tsOutput": { "$ref": "#/$defs/path" }, "tsType": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9]*$" },
+        "goOutput": { "$ref": "#/$defs/path" },
+        "goPackage": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "tsOutput": { "$ref": "#/$defs/path" },
+        "tsType": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9]*$" },
         "i18nOutput": { "$ref": "#/$defs/path" }
       }
     },
     "legacyCatalog": {
-      "type": "object", "additionalProperties": false, "required": ["output", "schemaVersion"],
-      "properties": { "output": { "$ref": "#/$defs/path" }, "schemaVersion": { "type": "string", "minLength": 1 } }
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output", "schemaVersion"],
+      "properties": {
+        "output": { "$ref": "#/$defs/path" },
+        "schemaVersion": { "type": "string", "minLength": 1 }
+      }
     },
     "allowUnusedErrors": {
-      "type": "array", "uniqueItems": true,
-      "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$" }
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$"
+      }
     }
   },
   "$defs": { "path": { "type": "string", "minLength": 1, "maxLength": 2048 } }

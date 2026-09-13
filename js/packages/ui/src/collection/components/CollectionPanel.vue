@@ -310,7 +310,10 @@ function toggle(item: TItem, key: TKey) {
       </CollectionTableToolbar>
     </template>
 
-    <template v-if="selectable || (layout !== 'grid' && $slots.columns)" #columns>
+    <template
+      v-if="selectable || (layout !== 'grid' && $slots.columns)"
+      #columns
+    >
       <div
         class="flex w-full min-w-0 items-center gap-0 text-xs font-medium leading-5 text-muted"
       >
@@ -418,7 +421,11 @@ function toggle(item: TItem, key: TKey) {
           :model-value="selected(item, itemKey(item))"
           :disabled="!selectableItem(item)"
           :aria-label="messages.selectItem(itemLabel(item))"
-          :class="compactGrid ? 'absolute left-2 top-2 z-10' : 'absolute left-4 top-4 z-10 rounded-md bg-default/90 p-1 shadow-sm backdrop-blur'"
+          :class="
+            compactGrid
+              ? 'absolute left-2 top-2 z-10'
+              : 'absolute left-4 top-4 z-10 rounded-md bg-default/90 p-1 shadow-sm backdrop-blur'
+          "
           @update:model-value="
             setSelected(item, itemKey(item), $event === true)
           "
@@ -470,8 +477,21 @@ function toggle(item: TItem, key: TKey) {
     </div>
 
     <template #footer>
-      <CollectionPaginationBar v-if="compactPagination" :page="page" :page-size="pageSize" :total="total" :page-sizes="pageSizes" :page-size-label="messages.pageSize" :page-size-control="messages.pageSizeControl" :page-size-option="messages.pageSizeOption" :label="messages.pagination" @page-change="emit('pageChange', $event)" @page-size-change="emit('pageSizeChange', $event)" />
-      <div v-else
+      <CollectionPaginationBar
+        v-if="compactPagination"
+        :page="page"
+        :page-size="pageSize"
+        :total="total"
+        :page-sizes="pageSizes"
+        :page-size-label="messages.pageSize"
+        :page-size-control="messages.pageSizeControl"
+        :page-size-option="messages.pageSizeOption"
+        :label="messages.pagination"
+        @page-change="emit('pageChange', $event)"
+        @page-size-change="emit('pageSizeChange', $event)"
+      />
+      <div
+        v-else
         class="flex flex-col gap-3 text-xs sm:flex-row sm:items-center sm:justify-between"
       >
         <p class="text-muted">
@@ -511,8 +531,12 @@ function toggle(item: TItem, key: TKey) {
 </template>
 
 <style scoped>
-[data-compact-grid="true"] { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+[data-compact-grid="true"] {
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+}
 @container collection (max-width: 30rem) {
-  [data-compact-grid="true"] { grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
+  [data-compact-grid="true"] {
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  }
 }
 </style>

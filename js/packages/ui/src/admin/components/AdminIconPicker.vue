@@ -67,8 +67,9 @@ async function loadFullCatalog() {
       .sort((left, right) => left.localeCompare(right))
       .map((name) => {
         const value = `i-tabler-${name}`;
-        const curated = props.options.find((item) => item.value === value)
-          ?? ADMIN_TABLER_ICON_OPTIONS.find((item) => item.value === value);
+        const curated =
+          props.options.find((item) => item.value === value) ??
+          ADMIN_TABLER_ICON_OPTIONS.find((item) => item.value === value);
         return {
           label: curated?.label || name,
           value,

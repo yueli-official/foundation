@@ -14,11 +14,21 @@ const sources: Record<string, string> = {
   recovery: "管理员恢复",
   initial_claim: "首次管理员认领",
 };
-const sourceLabel = computed(() => props.source ? sources[props.source] || "其他授权方式" : "来源未记录");
+const sourceLabel = computed(() =>
+  props.source ? sources[props.source] || "其他授权方式" : "来源未记录",
+);
 </script>
 
 <template>
   <UTooltip :text="`授权来源：${sourceLabel}`">
-    <UBadge :label="role" color="neutral" variant="soft" size="sm" tabindex="0" :aria-label="`${role}，授权来源：${sourceLabel}`" data-authorization-grant-badge />
+    <UBadge
+      :label="role"
+      color="neutral"
+      variant="soft"
+      size="sm"
+      tabindex="0"
+      :aria-label="`${role}，授权来源：${sourceLabel}`"
+      data-authorization-grant-badge
+    />
   </UTooltip>
 </template>

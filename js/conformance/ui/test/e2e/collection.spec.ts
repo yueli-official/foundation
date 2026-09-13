@@ -46,15 +46,10 @@ test("mobile search remains one row and filters update the controlled URL", asyn
     "设计",
   );
   await expectNoHorizontalOverflow(page);
-  const pageSizeLabel = await page
-    .getByText("每页", { exact: true })
-    .boundingBox();
-  const pageSizeSelect = await page
-    .getByRole("combobox", { name: "每页数量" })
-    .boundingBox();
-  expect(pageSizeLabel).not.toBeNull();
-  expect(pageSizeSelect).not.toBeNull();
-  expect(Math.abs(pageSizeLabel!.y - pageSizeSelect!.y)).toBeLessThanOrEqual(6);
+  await expect(page.getByText("每页", { exact: true })).toHaveCount(0);
+  const pageSizeSelect = page.getByRole("combobox", { name: "每页数量" });
+  await expect(pageSizeSelect).toBeVisible();
+  await expect(pageSizeSelect).toContainText("10/页");
   await page.screenshot({
     path: testInfo.outputPath("collection-mobile.png"),
     fullPage: true,

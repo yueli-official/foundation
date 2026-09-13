@@ -2,9 +2,11 @@
 import type { Editor } from "@tiptap/vue-3";
 import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji";
 import { TextAlign } from "@tiptap/extension-text-align";
+import { TableKit } from "@tiptap/extension-table";
 import Blockquote from "@tiptap/extension-blockquote";
 import { Callout, type CalloutType } from "../extensions/Callout";
 import { CodeBlockWithLang } from "../extensions/CodeBlockWithLang";
+import { LinkedImage } from "../extensions/LinkedImage";
 import { EditableInlineMath } from "../extensions/EditableInlineMath";
 import { MathBlock } from "../extensions/MathBlock";
 import { MermaidBlock } from "../extensions/MermaidBlock";
@@ -61,6 +63,8 @@ const toast = useToast();
 const editorExtensions = [
   Emoji,
   TextAlign.configure({ types: ["heading", "paragraph"] }),
+  TableKit,
+  LinkedImage,
   // Callout 接管 blockquote token。Tiptap 运行时以 null 覆盖继承的解析器，
   // 但类型声明尚未暴露这个哨兵值，因此在此收窄为 never。
   Blockquote.extend({ parseMarkdown: null as never }),
@@ -89,12 +93,25 @@ const {
 // 图片入口供工具栏和建议菜单共用。
 const editorRef = shallowRef<{ editor?: Editor } | null>(null);
 const {
-  imageOpen, importOpen, uploading, progress, uploadImages, importDocument,
-  paste: onPaste, drop: onDrop, dragOver: onDragOver,
-} = useEditorInput(editorRef, () => props.imageUploader, description => {
-  toast.add({ title: "图片上传失败", description, color: "error" });
-});
-function pickImage() { if (props.imageUploader) imageOpen.value = true; }
+  imageOpen,
+  importOpen,
+  uploading,
+  progress,
+  uploadImages,
+  importDocument,
+  paste: onPaste,
+  drop: onDrop,
+  dragOver: onDragOver,
+} = useEditorInput(
+  editorRef,
+  () => props.imageUploader,
+  (description) => {
+    toast.add({ title: "图片上传失败", description, color: "error" });
+  },
+);
+function pickImage() {
+  if (props.imageUploader) imageOpen.value = true;
+}
 
 // 工具栏、气泡菜单和建议菜单共用命令处理器。
 const calloutHandler = (type: CalloutType) => ({
@@ -241,9 +258,21 @@ defineExpose({
     @dragover.capture="onDragOver"
     @drop.capture="onDrop"
   >
-    <ContentImportDialog v-model:open="imageOpen" mode="images" :submit="uploadImages" :progress="progress" />
-    <ContentImportDialog v-model:open="importOpen" mode="document" :submit="importDocument" :progress="progress" />
-    <p v-if="uploading" role="status" class="mb-2 text-sm text-muted">{{ progress || '正在处理图片…' }}</p>
+    <ContentImportDialog
+      v-model:open="imageOpen"
+      mode="images"
+      :submit="uploadImages"
+      :progress="progress"
+    />
+    <ContentImportDialog
+      v-model:open="importOpen"
+      mode="document"
+      :submit="importDocument"
+      :progress="progress"
+    />
+    <p v-if="uploading" role="status" class="mb-2 text-sm text-muted">
+      {{ progress || "正在处理图片…" }}
+    </p>
     <!-- draft restore prompt -->
     <UAlert
       v-if="showDraftRestore"
@@ -316,7 +345,20 @@ defineExpose({
             class="min-w-max flex-none [&_[role=group]_button]:justify-center [&_[role=group]_button]:min-h-11 [&_[role=group]_button]:min-w-11 sm:[&_[role=group]_button]:min-h-8 sm:[&_[role=group]_button]:min-w-8"
           />
           <UTooltip text="导入文档">
-            <UButton icon="i-tabler-file-import" aria-label="导入文档" color="neutral" variant="ghost" size="sm" class="shrink-0" :disabled="uploading" @click="() => { importOpen = true; }" />
+            <UButton
+              icon="i-tabler-file-import"
+              aria-label="导入文档"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              class="shrink-0"
+              :disabled="uploading"
+              @click="
+                () => {
+                  importOpen = true;
+                }
+              "
+            />
           </UTooltip>
           <UIcon
             v-if="uploading"
@@ -426,8 +468,6 @@ defineExpose({
           </span>
         </ClientOnly>
       </div>
-
-
     </div>
   </div>
 </template>

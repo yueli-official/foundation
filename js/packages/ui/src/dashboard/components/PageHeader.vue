@@ -50,7 +50,9 @@ withDefaults(
         </p>
       </div>
     </div>
-    <div v-if="$slots.tools" class="min-w-0" data-manage-page-tools><slot name="tools" /></div>
+    <div v-if="$slots.tools" class="min-w-0" data-manage-page-tools>
+      <slot name="tools" />
+    </div>
     <div
       v-if="$slots.actions"
       class="flex shrink-0 flex-wrap items-center gap-2"
@@ -62,15 +64,41 @@ withDefaults(
 </template>
 
 <style scoped>
-[data-manage-page-actions]:empty { display: none; }
-[data-has-tools="true"] { display: grid; grid-template-columns: minmax(0,1fr); align-items: center; }
-[data-has-tools="true"]:has(> [data-manage-page-actions] > *) { grid-template-columns: minmax(0,1fr) auto; }
-[data-has-tools="true"] > [data-manage-page-actions] { grid-column: 2; grid-row: 1; justify-self: end; }
-[data-manage-page-tools] { grid-column: 1 / -1; grid-row: 2; }
+[data-manage-page-actions]:empty {
+  display: none;
+}
+[data-has-tools="true"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+[data-has-tools="true"]:has(> [data-manage-page-actions] > *) {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+[data-has-tools="true"] > [data-manage-page-actions] {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+}
+[data-manage-page-tools] {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
 @media (min-width: 1280px) {
-  [data-has-tools="true"] { grid-template-columns: auto minmax(0,1fr); }
-  [data-has-tools="true"]:has(> [data-manage-page-actions] > *) { grid-template-columns: auto minmax(0,1fr) auto; }
-  [data-manage-page-tools] { grid-column: 2; grid-row: 1; justify-self: end; width: min(100%, 42rem); }
-  [data-has-tools="true"] > [data-manage-page-actions] { grid-column: 3; }
+  [data-has-tools="true"] {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  [data-has-tools="true"]:has(> [data-manage-page-actions] > *) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  [data-manage-page-tools] {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    width: min(100%, 42rem);
+  }
+  [data-has-tools="true"] > [data-manage-page-actions] {
+    grid-column: 3;
+  }
 }
 </style>

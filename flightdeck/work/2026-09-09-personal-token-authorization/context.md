@@ -7,6 +7,7 @@
 消费者只公开显式可委托能力；创建 UI 只展示当前用户可授权能力，提交由后端再次校验。Identity 不存消费站点角色或资源 ACL。原业务接口和函数复用。
 
 官方依据：
+
 - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
 - https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens
 - https://docs.gitlab.com/security/tokens/access_token_scopes/

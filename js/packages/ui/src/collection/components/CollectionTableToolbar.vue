@@ -66,7 +66,11 @@ function submitSearch() {
 </script>
 
 <template>
-  <section data-collection-table-toolbar :data-presentation="presentation" :aria-label="props.label">
+  <section
+    data-collection-table-toolbar
+    :data-presentation="presentation"
+    :aria-label="props.label"
+  >
     <div
       v-if="props.selectionCount > 0"
       data-collection-table-selection
@@ -92,7 +96,8 @@ function submitSearch() {
         role="search"
         @submit.prevent="submitSearch"
       >
-        <UInput :id="searchId"
+        <UInput
+          :id="searchId"
           :model-value="searchDraft"
           icon="i-tabler-search"
           size="sm"

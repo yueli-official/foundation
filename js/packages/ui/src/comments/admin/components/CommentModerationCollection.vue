@@ -144,21 +144,53 @@ function toggleItem(id: string | number, selected: boolean) {
         <div v-if="layout === 'columns'" class="comment-columns">
           <div class="col-span-3 flex items-center gap-3 lg:col-span-1">
             <span>评论</span>
-            <UButton v-if="model.lifecycle === 'trash' && actions.emptyTrash" label="清空回收站" icon="i-tabler-trash-x" color="error" variant="ghost" size="xs" :disabled="model.total === 0" :loading="model.emptyingTrash" @click="openEmptyTrash" />
+            <UButton
+              v-if="model.lifecycle === 'trash' && actions.emptyTrash"
+              label="清空回收站"
+              icon="i-tabler-trash-x"
+              color="error"
+              variant="ghost"
+              size="xs"
+              :disabled="model.total === 0"
+              :loading="model.emptyingTrash"
+              @click="openEmptyTrash"
+            />
           </div>
           <span class="hidden lg:block">来源</span>
           <span class="hidden lg:block">状态</span>
           <span class="hidden text-right lg:block">操作</span>
         </div>
-        <div v-else-if="layout === 'compact'" class="flex items-center justify-between gap-3">
+        <div
+          v-else-if="layout === 'compact'"
+          class="flex items-center justify-between gap-3"
+        >
           <span>选择本页</span>
           <div v-if="externalControls" class="flex items-center gap-3">
-            <span class="font-normal text-dimmed">{{ model.total }} 条评论</span>
-            <UButton v-if="model.lifecycle === 'trash' && actions.emptyTrash" label="清空回收站" icon="i-tabler-trash-x" color="error" variant="ghost" size="xs" :disabled="model.total === 0" :loading="model.emptyingTrash" @click="openEmptyTrash" />
+            <span class="font-normal text-dimmed"
+              >{{ model.total }} 条评论</span
+            >
+            <UButton
+              v-if="model.lifecycle === 'trash' && actions.emptyTrash"
+              label="清空回收站"
+              icon="i-tabler-trash-x"
+              color="error"
+              variant="ghost"
+              size="xs"
+              :disabled="model.total === 0"
+              :loading="model.emptyingTrash"
+              @click="openEmptyTrash"
+            />
           </div>
-          <CollectionSortHeader v-else label="评论时间" :active="true" :sort-order="model.sortOrder" @sort="actions.sort" />
+          <CollectionSortHeader
+            v-else
+            label="评论时间"
+            :active="true"
+            :sort-order="model.sortOrder"
+            @sort="actions.sort"
+          />
         </div>
-        <div v-else
+        <div
+          v-else
           class="grid grid-cols-[minmax(0,1fr)_7rem] items-center gap-3 lg:grid-cols-[minmax(16rem,1.4fr)_minmax(10rem,0.8fr)_10rem_8.5rem_7rem]"
         >
           <span>评论</span>
@@ -180,9 +212,20 @@ function toggleItem(id: string | number, selected: boolean) {
       </template>
 
       <template #item="{ item: comment }">
-        <CommentModerationColumnsRow v-if="layout === 'columns'" :comment="comment" :format-date="formatDate" @approve="actions.approve?.($event)" />
-        <CommentModerationCompactRow v-else-if="layout === 'compact'" :comment="comment" :format-date="formatDate" @approve="actions.approve?.($event)" />
-        <div v-else
+        <CommentModerationColumnsRow
+          v-if="layout === 'columns'"
+          :comment="comment"
+          :format-date="formatDate"
+          @approve="actions.approve?.($event)"
+        />
+        <CommentModerationCompactRow
+          v-else-if="layout === 'compact'"
+          :comment="comment"
+          :format-date="formatDate"
+          @approve="actions.approve?.($event)"
+        />
+        <div
+          v-else
           class="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] items-start gap-3 lg:grid-cols-[minmax(16rem,1.4fr)_minmax(10rem,0.8fr)_10rem_8.5rem_7rem] lg:items-center"
           data-manage-comment-row
           data-comment-moderation-row

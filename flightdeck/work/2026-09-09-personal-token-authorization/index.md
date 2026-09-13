@@ -3,9 +3,11 @@
 Status: Open
 
 ## Goal
+
 提供可复用的个人令牌认证与有限授权，Identity 管理凭证，消费站点保留角色和资源权限真值。首个消费者为 Blog，本地验收通过后再推进部署。
 
 ## Current
+
 2026-09-12 用户授权的本轮生产更新已完成：所属服务使用 `server-20260912-1`，九个相关服务均 healthy。独立构建、线上桌面/手机、登录刷新及普通账户 PAT 边界检查通过；Docs robots.txt 仍有已定位的历史 500。使用固定私有源码/包候选，未发布正式 SDK 或推送 Git。见 [本轮部署与限制](deployment-20260912.md)。
 
 2026-09-09 已按用户授权部署相关 Provider、Blog 与 Docs；Identity sync-2、Account/Asset/Blog/Docs sync-1，生产目录/令牌生命周期验证通过，0035 已迁移。依赖使用固定私有候选包及独立 Foundation 快照，GitHub 正式 Release 尚未发布。证据见 acceptance.md 最后一节。
@@ -20,10 +22,12 @@ Status: Open
 Go 相关测试、Account typecheck、BFF 4 项测试、Identity 83 / Blog 70 项 HTTP 合同检查通过。CLI Playwright 八组屏幕/主题（模拟 API）和真实 Account 创建撤销通过。真实 API 26 项通过，包含上传完成、发布/下架、越权和撤销拒绝；真实 PostgreSQL 管理员撤权后同一 Token 编辑他人文章 200→403，再申请旧权限 400。
 
 ## Next
+
 正式验收入口：https://account.yuelili.com/developer-tokens 。固定私有候选构建与生产更新已完成；后续按正式依赖发布 Work 发布 GitHub 制品。本地入口仍为 http://account-blog.dev.yuelili.test:3600/developer-tokens 。
 
 当前隔离组合 20260909T062744Z-48004 正在运行，Blog http://blog.dev.yuelili.test:3002 。原 shared Blog 已停止，其他共享服务未停。隔离 Asset 原合同缺少 blog backend，本次用进程环境 GF_ASSET_BACKENDS 声明 local/blog 两个本地 Backend；未修改 Workspace 合同或生成文件。重启参数见 [验收记录](acceptance.md)。
 
 ## References
+
 - [上下文](context.md)
 - [Foundation 授权模块](../../../go/authorization/README.md)

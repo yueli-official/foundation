@@ -23,9 +23,15 @@ export default defineNuxtConfig({
   vite: {
     resolve: {
       dedupe: [
-        "@tiptap/core", "@tiptap/pm", "@tiptap/vue-3",
-        "prosemirror-state", "prosemirror-model", "prosemirror-view",
-        "prosemirror-transform", "prosemirror-keymap", "prosemirror-commands",
+        "@tiptap/core",
+        "@tiptap/pm",
+        "@tiptap/vue-3",
+        "prosemirror-state",
+        "prosemirror-model",
+        "prosemirror-view",
+        "prosemirror-transform",
+        "prosemirror-keymap",
+        "prosemirror-commands",
       ],
     },
     server: {
@@ -46,6 +52,7 @@ export default defineNuxtConfig({
         "@yueli/content-nuxt > @tiptap/extension-emoji",
         "@yueli/content-nuxt > @tiptap/extension-text-align",
         "@yueli/content-nuxt > @tiptap/extension-mathematics",
+        "@yueli/content-nuxt > @tiptap/extension-table",
         "@yueli/content-nuxt > @tiptap/extension-blockquote",
         "@yueli/content-nuxt > highlight.js",
         "@yueli/content-nuxt > katex",

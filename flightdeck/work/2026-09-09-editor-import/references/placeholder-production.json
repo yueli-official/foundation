@@ -2,23 +2,17 @@
   "results": [
     {
       "site": "www",
-      "chunks": [
-        "C6egfKM2.js"
-      ],
+      "chunks": ["C6egfKM2.js"],
       "status": 200
     },
     {
       "site": "blog",
-      "chunks": [
-        "BmQFH0EE.js"
-      ],
+      "chunks": ["BmQFH0EE.js"],
       "status": 200
     },
     {
       "site": "docs",
-      "chunks": [
-        "B0Eg2NPf.js"
-      ],
+      "chunks": ["B0Eg2NPf.js"],
       "status": 200
     }
   ],

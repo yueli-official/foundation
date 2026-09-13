@@ -434,7 +434,6 @@ release until 0.4.0 is authorized and published; local validation uses the expli
 Workspace source overlay and an independent tarball consumer. Existing consumers
 without MobileBottomNav retain their previous spacing and Toast placement.
 
-
 ### 权限申请与用户资料（本地候选）
 
 `@yueli/ui/admin` 导出 `AuthorizationUser` 与 `AuthorizationApplication`。前者接收 subject/name/handle/avatarUrl/profileUrl/loading；后者接收 user、role、reason、createdAt、busy，并发出 review(approve|reject)。组件不请求身份或权限接口，不自行授权。消费者提供公开资料、Asset SDK URL、Account 主页及审批 Adapter。时间按 Asia/Shanghai 展示。新增导出将随下一版本发布，现有导出保持不变。

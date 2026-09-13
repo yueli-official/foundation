@@ -12,17 +12,25 @@
     "ids": {
       "type": "object",
       "propertyNames": { "pattern": "^(GET|POST|PUT|PATCH|DELETE) /" },
-      "additionalProperties": { "type": "string", "pattern": "^[a-z][A-Za-z0-9._-]{1,127}$" }
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-z][A-Za-z0-9._-]{1,127}$"
+      }
     },
     "overrides": {
       "type": "object",
       "propertyNames": { "pattern": "^(GET|POST|PUT|PATCH|DELETE) /" },
       "additionalProperties": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
         "properties": {
           "success": { "$ref": "operations.v1.schema.json#/$defs/success" },
           "failureProtocol": { "enum": ["problem", "oauth"] },
-          "additionalSuccesses": { "type": "array", "minItems": 1, "items": { "$ref": "operations.v1.schema.json#/$defs/success" } }
+          "additionalSuccesses": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "operations.v1.schema.json#/$defs/success" }
+          }
         }
       }
     }
@@ -32,8 +40,12 @@
       "type": "object",
       "propertyNames": { "pattern": "^(GET|POST|PUT|PATCH|DELETE) /" },
       "additionalProperties": {
-        "type": "array", "uniqueItems": true,
-        "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$" }
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$"
+        }
       }
     }
   }

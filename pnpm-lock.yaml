@@ -215,6 +215,9 @@ importers:
       "@tiptap/extension-mathematics":
         specifier: ^3.30.4
         version: 3.30.4(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))(@tiptap/pm@3.31.2)(katex@0.16.45)
+      "@tiptap/extension-table":
+        specifier: 3.31.2
+        version: 3.31.2(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))(@tiptap/pm@3.31.2)
       "@tiptap/extension-text-align":
         specifier: ^3.30.4
         version: 3.30.4(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))
@@ -246,6 +249,15 @@ importers:
       "@nuxt/ui":
         specifier: 4.11.0
         version: 4.11.0(483cc091ef2df84dc2f32548fa14a383)
+      "@tiptap/extension-image":
+        specifier: 3.28.0
+        version: 3.28.0(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))
+      "@tiptap/markdown":
+        specifier: 3.28.0
+        version: 3.28.0(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))(@tiptap/pm@3.31.2)
+      "@tiptap/starter-kit":
+        specifier: 3.28.0
+        version: 3.28.0
       nuxt:
         specifier: "catalog:"
         version: 4.5.1(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.140.0)(@types/node@24.13.3)(@vue/compiler-sfc@3.5.41)(cac@6.7.14)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.7.0(jiti@2.7.0))(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(optionator@0.9.4)(oxc-parser@0.140.0)(rollup-plugin-visualizer@7.0.1(rolldown@1.2.0)(rollup@4.62.2))(rollup@4.62.2)(terser@5.49.0)(typescript@6.0.3)(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(yaml@2.9.0)
@@ -2921,6 +2933,15 @@ packages:
       }
     peerDependencies:
       "@tiptap/core": 3.31.2
+
+  "@tiptap/extension-table@3.31.2":
+    resolution:
+      {
+        integrity: sha512-0LfcQG2YK2Q3q5BjvJqs8Zks1PuSdiNGYf2lnyC7ixtItuKXTL2xB5yzj53gMIdRfteqcUfbxIJjmU57W3F+Yg==,
+      }
+    peerDependencies:
+      "@tiptap/core": 3.31.2
+      "@tiptap/pm": 3.31.2
 
   "@tiptap/extension-text-align@3.30.4":
     resolution:
@@ -12034,6 +12055,11 @@ snapshots:
   "@tiptap/extension-strike@3.31.2(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))":
     dependencies:
       "@tiptap/core": 3.31.2(@tiptap/pm@3.31.2)
+
+  "@tiptap/extension-table@3.31.2(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))(@tiptap/pm@3.31.2)":
+    dependencies:
+      "@tiptap/core": 3.31.2(@tiptap/pm@3.31.2)
+      "@tiptap/pm": 3.31.2
 
   "@tiptap/extension-text-align@3.30.4(@tiptap/core@3.31.2(@tiptap/pm@3.31.2))":
     dependencies:

@@ -1,20 +1,25 @@
 # 统一权限申请组件
 
 ## Goal
+
 共享权限申请条目与用户资料展示，配合 Identity 公开资料读取，先在 Gallery 本地接入验证。
 
 ## Status
+
 Finished
 
 ## Current
+
 2026-09-09 来源标签统一：新增 AuthorizationGrantBadge，移除 Blog/Docs/Gallery 分散来源字典，Resource/Shop 不再直接输出原始 source。角色名使用中性 UBadge，中文来源进入 hover/focus 提示，包含 Foundation 全部 10 种来源。知识已写入 authorization-grant-badges.md。共享类型检查通过；Blog/Docs 固定 grants.1 包独立安装、typecheck/build 通过，Web 已上线 server-20260909-grants-1；正式组件 chunk SHA256 匹配、公开页 Playwright 通过。真实本地 Blog（initial_claim）、Docs、Gallery、Resource 的桌面/手机、hover/focus 验证通过。Shop 构建通过，首次两次隔离启动在 OAuth readiness 400 失败，继续用显式基础 OIDC scopes 验证；未修改授权规则。
 
 Foundation UI 新增 AuthorizationUser 和 AuthorizationApplication，从现有 admin 导出；Identity Nuxt 新增批量公开资料目录；Gallery 申请列表及已授权用户接入。无权限规则、API 或数据库变更。
 
 ## Next
+
 角色标签实现与 Blog/Docs 部署已完成，正式 Foundation Release 未执行。Shop 本地 OAuth readiness 400 阻断真实页面验收，基础 scopes 覆盖仍失败，保持构建通过与页面未验证的边界；失败组合已自动停止。
 
 ## References
+
 - [上下文](context.md)
 
 ## Verification

@@ -76,6 +76,9 @@ test("editor toolbar controls expose names and stay in one mobile row", () => {
   }
   assert.match(editor, /flex-nowrap[^"\n]*overflow-x-auto/u);
   assert.match(editor, /slot name="toolbar-actions"/u);
+  assert.match(editor, /TableKit/u);
+  assert.match(editor, /LinkedImage/u);
+  assert.match(read("nuxt.config.ts"), /@tiptap\/extension-table/u);
   assert.doesNotMatch(editor, /flex-wrap items-center/u);
 });
 

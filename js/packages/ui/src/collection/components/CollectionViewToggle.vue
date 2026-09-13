@@ -5,7 +5,14 @@ export interface CollectionViewOption {
   label: string;
   icon: string;
 }
-withDefaults(defineProps<{ items: readonly CollectionViewOption[]; label?: string; appearance?: "default" | "surface" }>(), { appearance: "surface" });
+withDefaults(
+  defineProps<{
+    items: readonly CollectionViewOption[];
+    label?: string;
+    appearance?: "default" | "surface";
+  }>(),
+  { appearance: "surface" },
+);
 const model = defineModel<CollectionViewMode>({ required: true });
 function select(key: CollectionViewMode) {
   model.value = key;
@@ -21,7 +28,9 @@ function select(key: CollectionViewMode) {
   >
     <UTooltip v-for="item in items" :key="item.key" :text="item.label"
       ><UButton
-        :color="appearance === 'surface' && model === item.key ? 'primary' : 'neutral'"
+        :color="
+          appearance === 'surface' && model === item.key ? 'primary' : 'neutral'
+        "
         :variant="model === item.key ? 'soft' : 'ghost'"
         size="xs"
         :icon="item.icon"
@@ -47,6 +56,7 @@ function select(key: CollectionViewMode) {
 [data-view-appearance="surface"] :deep(button[aria-pressed="true"]) {
   color: var(--ui-primary);
   background-color: color-mix(in srgb, var(--ui-primary) 12%, var(--ui-bg));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-primary) 22%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--ui-primary) 22%, transparent);
 }
 </style>
