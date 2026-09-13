@@ -116,6 +116,7 @@ export async function readImportDocument(
   if (/\.docx$/i.test(document.path)) {
     // DOCX is also a ZIP: validate expanded sizes before the converter opens it.
     await archiveFiles(document.file);
+    // @ts-expect-error Mammoth's browser bundle does not publish a declaration file.
     const { default: mammoth } = await import("mammoth/mammoth.browser.js");
     const result = await mammoth.convertToHtml({
       arrayBuffer: await document.file.arrayBuffer(),

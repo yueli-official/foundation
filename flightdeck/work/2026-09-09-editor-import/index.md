@@ -48,3 +48,9 @@ HTTP(S) 图片仍先尝试下载；读取或上传失败时插入“图片未导
 ### js-v0.7.3 失败标签与后续候选（2026-09-13）
 
 用户明确授权发布 js-v0.7.3 后，远端 verify 的 OSV Scanner 因 2026-09-08 后新增公告拦截 DOMPurify 3.3.3、Vitest 4.1.10 / @vitest/mocker 与 SVGO 4.0.2；publish 未执行，Release tarball 未生成。保留该不可变失败 tag，不移动或覆盖。依赖已升级到 DOMPurify 3.4.13、Vitest 4.1.11、SVGO 4.1.0；npm audit 为 0，OSV Scanner v2.5.0 同 CI 参数扫描 pnpm-lock.yaml 为 No issues found。因失败 tag 后 package 内容变化，content-nuxt 推进为 0.2.4，下一 bundle 候选为 js-v0.7.4。
+
+### js-v0.7.4 消费者类型缺口与补丁候选（2026-09-13）
+
+`js-v0.7.4` 已发布并生成 `@yueli/content-nuxt 0.2.4` tarball；随后用正式 tarball 做消费者 typecheck 时发现 `mammoth/mammoth.browser.js` 不发布声明文件。包内已有 ambient 声明不会被消费者自动纳入编译，因此运行时可用但消费者 TypeScript 报 TS7016。
+
+补丁保留 Mammoth browser bundle 的 DOCX 行为，在动态 import 处对该缺失声明做精确 `@ts-expect-error`，并将 `content-nuxt` 推进为 0.2.5。共享层 17/17 测试、全量 `pnpm verify:js` 以及真实打包后的 WWW 消费者 typecheck 均通过；WWW 生产构建也已用 0.2.5 tarball 验证通过。`js-v0.7.4` 保持不可变，后续正式 bundle 候选为 `js-v0.7.5`。
