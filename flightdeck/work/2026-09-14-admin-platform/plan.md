@@ -1,0 +1,20 @@
+# 实施计划
+
+- [x] 盘点现有站点类型、后台页面与 Foundation 已有公共能力，确定重复面和产品特例。
+- [x] 写明 Admin Platform 分层、模块接口、HTTP 合同、品牌/措辞、扩展点与演进规则。
+- [x] 在 `@yueli/ui` 实现 typed Product Definition / Module Projection，并完成单元、类型与打包验证。
+- [x] 创建并验证公共 Codex skill，固化“先盘点、再选公共模块、最后写产品 Adapter”的工作方法。
+- [x] Yotta Hub 接入 Product Definition，验证权限过滤、活动路由、导航搜索、品牌/措辞和现有页面不回归。
+- [x] 从 Yotta 分类/标签页面提取首层 Classification admin behavior，并保持 Registry HTTP 为产品 Adapter。
+- [x] 让第二个真实站点接入 Classification projection：BVideo 以多 Facet、递归 FacetValue 矩阵验证共享树与父级防环接口。
+- [x] 以 Yotta `filter-dimensions` 验证已共享的 Facet/FacetValue 与产品 binding 扩展的模块边界。
+- [x] 将稳定后的产品 taxonomy HTTP 直接收敛到 canonical Classification contract，不增加未发布旧格式兼容层。
+- [x] 让 Yotta 作品管理接入 Foundation Collection，验证共享集合壳与产品动态筛选、审核动作可以并存。
+- [x] 对照 Yotta、Gallery 与 BVideo 的投稿/审核流程；确认当前只共享 Collection/Feedback/编辑器原语，不提取万能 Submission Review。
+- [x] 盘点 Foundation Settings 与 Yotta/其他产品设置页，并让 Yotta 站点设置完整接入 SettingsLayout/SaveDock/dirty/leave protection。
+- [x] 盘点 Yotta 剩余后台页与 Foundation 已有 Comments、Authorization、Asset、Collection 模块；Comments、users、reports、authorization applications 已完成真实消费验证，audit/asset 确认已经在公共 seam 上，Authorization 中不可到达的旧用户状态已删除。
+- [x] 以 Blog 作为第二个 Authorization 消费者：申请审核迁到 `CollectionPanel + AuthorizationApplication`，授权用户迁到 `CollectionPanel + AuthorizationUser + AuthorizationGrantBadge`；对照 Hub 后确认角色 draft、assignment source 与 automatic rule 生命周期不同，因此不提取万能 Authorization Console。
+- [x] Windows 更新后恢复源码与 Blog 本地组合，补齐 Blog 权限真实浏览器验收；完成 UI 0.5.0 升版、格式修复、Go/JS 发布门禁、独立制品消费、完整候选包和发布说明。
+- [ ] 经明确发布授权后发布 Foundation Go 0.5.0 与 JS bundle 0.8.0，验证正式制品可下载。
+- [ ] Foundation Go 正式 release 后，将 Yotta Registry 临时 `internal/classificationwire` 切换为 `classification/adminapi` release import，并删除内部镜像；保持无本地 `replace`、无跨仓源码依赖、无未发布兼容层。
+- [ ] Hub/BVideo/Blog 切换正式 UI 0.5.0 制品并完成消费者门禁。

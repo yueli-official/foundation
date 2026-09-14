@@ -12,7 +12,10 @@ import type {
 
 const collectionPanelStub = defineComponent({
   name: "CollectionPanel",
-  props: { items: { type: Array, default: () => [] } },
+  props: {
+    items: { type: Array, default: () => [] },
+    isItemSelectable: Function,
+  },
   setup:
     (props, { slots }) =>
     () =>
@@ -82,6 +85,14 @@ describe("CommentModerationCollection", () => {
       pageSize: 20,
       sortOrder: "desc",
       lifecycle: "trash",
+      selection: {
+        enabled: true,
+        count: 0,
+        pageSelected: false,
+        pageIndeterminate: false,
+        isSelected: () => false,
+        isSelectable: (id) => id !== "comment-1",
+      },
     };
     const actions: CommentModerationCollectionActions = {
       updateSearch: vi.fn(),
@@ -167,6 +178,12 @@ describe("CommentModerationCollection", () => {
     expect(wrapper.text()).toContain("匿名用户");
     expect(wrapper.find('[data-icon="i-tabler-photo"]').exists()).toBe(true);
     expect(wrapper.find("[data-row-actions]").exists()).toBe(true);
+    const panel = wrapper.getComponent(collectionPanelStub);
+    expect(
+      (panel.props("isItemSelectable") as (item: { id: string }) => boolean)(
+        model.items[0]!,
+      ),
+    ).toBe(false);
     const approveButton = wrapper
       .findAll("button")
       .find((button) => button.text() === "通过");

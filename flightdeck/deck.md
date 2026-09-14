@@ -2,9 +2,11 @@
 
 ## Focus
 
-- [个人令牌授权基础能力](work/2026-09-09-personal-token-authorization/index.md)
+- [统一管理后台平台](work/2026-09-14-admin-platform/index.md)
 
 ## Open Work
+
+- [统一管理后台平台](work/2026-09-14-admin-platform/index.md)：站群后台模块组合、公共合同与 Yotta 首个消费者验证。
 
 - [个人令牌授权基础能力](work/2026-09-09-personal-token-authorization/index.md)：Identity 与共享授权接入，Blog 为首个消费者。
 

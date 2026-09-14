@@ -48,6 +48,7 @@ export interface CommentModerationSelection {
   readonly pageSelected: boolean;
   readonly pageIndeterminate: boolean;
   readonly isSelected: (id: string) => boolean;
+  readonly isSelectable?: (id: string) => boolean;
 }
 
 export interface CommentModerationCollectionModel {

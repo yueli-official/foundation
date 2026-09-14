@@ -1,6 +1,6 @@
 {
   "name": "@yueli/ui",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -44,7 +44,8 @@
     "./collection/vue": "./src/collection/vue.ts",
     "./collection/vue-router": "./src/collection/vue-router.ts",
     "./comments": "./src/comments/index.ts",
-    "./comments/admin": "./src/comments/admin/index.ts"
+    "./comments/admin": "./src/comments/admin/index.ts",
+    "./admin-platform": "./src/admin-platform/index.ts"
   },
   "scripts": {
     "test:pack": "node scripts/test-pack.mjs",

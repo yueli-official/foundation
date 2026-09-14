@@ -4,7 +4,9 @@
 framework-neutral rules module for Category, Facet, Facet Value and Tag
 classification. It compiles a consumer-owned Snapshot into an immutable
 Catalog and evaluates classification, discovery and governance without owning a
-database, transaction, HTTP API or background process.
+database, transaction, HTTP server or background process. The sibling
+`classification/adminapi` package defines the canonical admin HTTP/JSON wire
+projection while leaving routing and request handling to each product.
 
 Each product instance owns its Catalog rows, assignments, tag lookup registry,
 contextual counts, governance transactions and public presentation. The module

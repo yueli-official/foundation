@@ -80,6 +80,9 @@ const authorInitial = (name: string) => (name || "?").charAt(0).toUpperCase();
 function toggleItem(id: string | number, selected: boolean) {
   props.actions.toggleItem?.(String(id), selected);
 }
+function isItemSelectable(comment: CommentModerationItem) {
+  return props.model.selection?.isSelectable?.(comment.id) ?? true;
+}
 </script>
 
 <template>
@@ -105,6 +108,7 @@ function toggleItem(id: string | number, selected: boolean) {
       :page-selected="model.selection?.pageSelected || false"
       :page-indeterminate="model.selection?.pageIndeterminate || false"
       :is-selected="model.selection?.isSelected"
+      :is-item-selectable="isItemSelectable"
       label="评论列表"
       data-manage-comments
       data-comment-moderation-collection

@@ -84,6 +84,10 @@ try {
     "package/package.json",
     "package/src/account-menu/components/AccountMenu.vue",
     "package/src/account-menu/pattern.ts",
+    "package/src/admin-platform/classification.ts",
+    "package/src/admin-platform/index.ts",
+    "package/src/admin-platform/projection.ts",
+    "package/src/admin-platform/types.ts",
     "package/src/admin/components/AdminConsoleLayout.vue",
     "package/src/admin/components/AdminIconPicker.vue",
     "package/src/admin/components/AdminPage.vue",
@@ -245,6 +249,7 @@ import { CommentModerationCollection } from "@yueli/ui/comments/admin";
 import type { CommentModerationCollectionActions, CommentModerationCollectionModel } from "@yueli/ui/comments/admin";
 import type { AccountMenuAppearance, AccountMenuMessages } from "@yueli/ui/account-menu/pattern";
 import { AdminRowActions, createAdminNavigationSearchItems, normalizeAdminNavigation } from "@yueli/ui/admin";
+import { defineAdminProduct, projectAdminCategoryCollection, projectAdminProduct } from "@yueli/ui/admin-platform";
 import type { AdminNavigationItem, AdminSearchGroup, AdminShellMessages } from "@yueli/ui/admin";
 import { useVueCollectionWorkflow } from "@yueli/ui/collection/vue";
 import { createVueRouterCollectionQuerySync } from "@yueli/ui/collection/vue-router";
@@ -259,6 +264,12 @@ import type { DashboardMessages } from "@yueli/ui/dashboard/pattern";
 import type { RemoteSelectLoader, RemoteSelectMessages, RemoteSelectValue } from "@yueli/ui/remote-select";
 import { publicUiManifest } from "@yueli/ui/manifest";
 import { useVueSettingsWorkflow } from "@yueli/ui/settings/vue";
+
+const packedProduct = defineAdminProduct({ id: "packed", brand: { label: "Packed", icon: "i-tabler-box", to: "/" }, modules: [{ id: "home", label: "Home", icon: "i-tabler-home", to: "/admin", match: "exact" }] });
+const packedAdmin = projectAdminProduct(packedProduct, { path: "/admin", can: () => true });
+const packedCategories = projectAdminCategoryCollection([{ id: "root", parentId: "", slug: "root", name: "Root", status: "active" }]);
+void packedAdmin;
+void packedCategories;
 
 interface Query { q: string }
 interface Item { id: string }
@@ -449,6 +460,7 @@ void optimizeImageFile;
     !packedPackage.exports?.["."] ||
     !packedPackage.exports?.["./account-menu/pattern"] ||
     !packedPackage.exports?.["./admin"] ||
+    !packedPackage.exports?.["./admin-platform"] ||
     !packedPackage.exports?.["./tailwind.css"] ||
     !packedPackage.exports?.["./theme"] ||
     !packedPackage.exports?.["./theme.css"] ||
