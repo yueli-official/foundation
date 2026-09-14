@@ -8,6 +8,8 @@
 
 ## Current
 
+2026-09-14 23:07（北京时间）：Foundation Go `go/v0.5.0` / JS `js-v0.8.0` 已正式发布，CI 与 JS Release 均成功；Yotta Registry 与 Hub 已切换正式依赖、完成 review/测试并部署 https://yotta.yuelili.com 。完整结果见 [发布验收](release-result.md)。下方候选及等待状态是历史记录。BVideo/Blog 正式依赖切换与新产品生成器不属于本次 Yotta 服务器交付，仍待后续处理。
+
 2026-09-14 后续用户已授权 review/测试通过后提交并发布服务器。规范与需求双路 review 已完成；Foundation 子导航 search:false 投影遗漏已通过红绿测试修复，其他发布前修复由 Yotta 产品仓承担。正在发布 Go 0.5.0 / JS bundle 0.8.0 并切换正式依赖。以下为已验证候选事实。
 
 2026-09-14 Windows 更新后恢复完成。后台组合、Classification wire、Yotta/BVideo/Blog 消费者改动均保留；本地发布候选已收口，尚未提交或发布。
@@ -20,7 +22,7 @@ Blog 已通过 Workspace Isolated 正式流程恢复，Session `20260914T141923Z
 
 ## Next
 
-按[发布候选](release-candidate.md)完成明确发布授权后的 Foundation Go/JS 发布，再让 Registry 从 `internal/classificationwire` 切到正式 `classification/adminapi` import，并让 Hub/BVideo/Blog 锁定 Release tarball、验收最终制品。本轮已获得提交和发布授权；实际远端结果以本 Work 后续记录为准。
+Yotta 本次服务器交付已完成。后续在相应产品任务中让 BVideo/Blog 锁定正式 Release tarball 并验收，不重复发布已存在的 Foundation tags。
 
 新产品创建的后续旅程已在候选文档列清：独立仓库 → 能力接入 → 本地组合 → 首位管理员/首个业务对象 → 交付；现有 Workspace bootstrap 仅物化锁定仓库，尚未实现新产品生成器。Authorization/Submission Review 保持已验证的共享原语与产品状态机边界。
 

@@ -15,6 +15,7 @@
 - [x] 盘点 Yotta 剩余后台页与 Foundation 已有 Comments、Authorization、Asset、Collection 模块；Comments、users、reports、authorization applications 已完成真实消费验证，audit/asset 确认已经在公共 seam 上，Authorization 中不可到达的旧用户状态已删除。
 - [x] 以 Blog 作为第二个 Authorization 消费者：申请审核迁到 `CollectionPanel + AuthorizationApplication`，授权用户迁到 `CollectionPanel + AuthorizationUser + AuthorizationGrantBadge`；对照 Hub 后确认角色 draft、assignment source 与 automatic rule 生命周期不同，因此不提取万能 Authorization Console。
 - [x] Windows 更新后恢复源码与 Blog 本地组合，补齐 Blog 权限真实浏览器验收；完成 UI 0.5.0 升版、格式修复、Go/JS 发布门禁、独立制品消费、完整候选包和发布说明。
-- [ ] 经明确发布授权后发布 Foundation Go 0.5.0 与 JS bundle 0.8.0，验证正式制品可下载。
-- [ ] Foundation Go 正式 release 后，将 Yotta Registry 临时 `internal/classificationwire` 切换为 `classification/adminapi` release import，并删除内部镜像；保持无本地 `replace`、无跨仓源码依赖、无未发布兼容层。
-- [ ] Hub/BVideo/Blog 切换正式 UI 0.5.0 制品并完成消费者门禁。
+- [x] 经明确发布授权后发布 Foundation Go 0.5.0 与 JS bundle 0.8.0，验证正式制品可下载。
+- [x] Foundation Go 正式 release 后，将 Yotta Registry 临时 `internal/classificationwire` 切换为 `classification/adminapi` release import，并删除内部镜像；保持无本地 `replace`、无跨仓源码依赖、无未发布兼容层。
+- [x] Hub 切换正式 UI 0.5.0 制品，消费者门禁与线上部署验收通过。
+- [ ] BVideo/Blog 在各自产品任务中切换正式 UI 0.5.0 制品并完成消费者门禁。
